@@ -34,6 +34,7 @@ impl DataGovernanceChannel for XVPPrivacyChannel {
                             DataGovernanceRequestType::SetOptOut(s) => {
                                 let mut r = self.opt_out.write().unwrap();
                                 let _ = r.insert(s);
+                                let _ = callback.send(DataGovernanceResponsePayload::Bool(true));
                             }
                         }
                     },
@@ -129,5 +130,48 @@ impl RippleExtnMeta for XvpPrivacyExtn {
     
     fn cap(&self) -> RippleCap {
         RippleCap::get_extn(ripple_sdk::plugin::RippleExtnClass::Jsonrpsee, "privacy".into(), Some("xvp".into()))
+    }
+}
+
+
+
+#[cfg(test)]
+mod tests {
+
+    mod channel_tests {
+        use ripple_sdk::extn::dist::governance::{DataGovernanceChannel, mock::mock_governance_channel, DataGovernanceRequest, DataGovernanceRequestPayload, DataGovernanceResponsePayload, };
+        use tokio::sync::oneshot;
+
+        use crate::governance::xvp_privacy::XVPPrivacyChannel;
+
+        #[tokio::test]
+        async fn test_channel() {
+            let c = Box::new(XVPPrivacyChannel::default());
+            let s = mock_governance_channel(c).await;
+            let (tx,tr) = oneshot::channel::<DataGovernanceResponsePayload>();
+            let req = DataGovernanceRequest{
+                payload: DataGovernanceRequestPayload::Call(ripple_sdk::extn::dist::governance::DataGovernanceRequestType::SetOptOut("someValue".into())),
+                callback: tx
+            };
+            let _ = s.send(req).await;
+            if let Err(e) = tr.await {
+                panic!("set failure")
+            }
+            
+            let (tx,tr) = oneshot::channel::<DataGovernanceResponsePayload>();
+            let req = DataGovernanceRequest{
+                payload: DataGovernanceRequestPayload::Call(ripple_sdk::extn::dist::governance::DataGovernanceRequestType::GetOptOut),
+                callback: tx
+            };
+            let _ = s.send(req).await;
+            if let Ok(r) = tr.await {
+                match r {
+                    DataGovernanceResponsePayload::String(s) => assert_eq!(s,String::from("someValue")),
+                    _ => panic!("get failure")
+                }
+            }
+
+        }
+        
     }
 }
