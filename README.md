@@ -24,4 +24,5 @@ Below is a good example
    | - ripple_extn_xvp
 ```
 
-### Running extension tests locally
+### Developing extension using unit tests for Standalone
+Currently Ripple Extensions can be developed using unit tests. In near future there will be a visual plugin executor available from SDK to help developers build faster. 
