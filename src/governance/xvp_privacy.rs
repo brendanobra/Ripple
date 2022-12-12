@@ -94,7 +94,6 @@ impl XvpPrivacyServer for XvpPrivacyRpcImpl<Box<dyn Extensionhelper >> {
     }
 
     async fn set_opt_out(&self, ctx: CallContext, value:SetProperty ) -> RpcResult<String> {
-        println!("{:?}",ctx);
         let request = ExtnRequest::DataGovernance(DataGovernanceRequestPayload::Call(DataGovernanceRequestType::SetOptOut(value.value)));
         if let Ok(response) = self.extn_helper.handle(request).await {
             match response {

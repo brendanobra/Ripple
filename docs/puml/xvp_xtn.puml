@@ -7,7 +7,8 @@ end box
 
 box "Ripple" #Yellow
     participant m as "Main"
-    participant pm as "Plugin\nManager"
+    participant pm as "Plugin\nLoader"
+    participant ph as "Plugin\nHelper"
     participant rpc as "RPC\nGateway"
 end box
 
@@ -19,18 +20,31 @@ end box
 
 group "init phase"
     m -> pm : load plugins
-    pm -> pm : initialize helper
     pm -> x : get extensions
-    x <-> c : get channel extn
-    note right of x: "privacy.getOptOut"
-    x <-> r : get rpc extn(helper)
-    pm -> m : Loaded Extensions
+    m <-> ph : initialize helper
+    m -> pm: get governance channel (helper)
+    pm <-> x: get xvp channel(helper)
+    x -> m: Governance channel
+    m -> ph: start governance channel
+    ph -> c: start(state_manager, \nconfig, \ntx<DataGovernanceRequest>)
+    note right of x: "Governance channel\nlistening for\nrequests"
+    m -> ph: get rpc methods(helper)
+    ph <-> r : get rpc extn(helper)
+    note right of x: "privacy.getOptOut"\n"privacy.setOptOut"
+    r -> m : Methods
     m -> rpc : Merge extension rpc's
 end
 
-group "call phase"
+group "set phase"
+    a -> r : privacy.setOptOut
+    r -> pm: helper.handle(DataGovernanceRequest::Set(optout))
+    pm <-> c: set value
+    r -> a : {jsonrpc:"1.0",result:{}}
+end
+
+group "get phase"
     a -> r : privacy.getOptOut
-    r -> pm: helper.get("ripple:channel:data-governance",optout)
+    r -> pm:  helper.handle(DataGovernanceRequest::Get())
     pm <-> c: get value
     pm -> r: opt_out value
     r -> a : {jsonrpc:"1.0",result:{"value": "opt_out_value"}}
