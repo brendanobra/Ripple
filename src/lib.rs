@@ -1,7 +1,7 @@
 use ripple_sdk::{plugin::{RipplePlugin, RippleExtension}, export_ripple_plugin};
 
 pub mod governance {
-    pub mod privacy;
+    pub mod xvp_privacy;
 }
 
 struct XVPPlugin;
@@ -9,8 +9,8 @@ impl RipplePlugin for XVPPlugin {
 
     fn get_extensions(&self) -> Vec<RippleExtension> {
         vec![
-            RippleExtension::DataGovernanceChannel(Box::new(crate::governance::privacy::XVPPrivacyChannel)),
-            RippleExtension::JsonRpseeExtension(Box::new(crate::governance::privacy::XvpPrivacyExtn))
+            RippleExtension::DataGovernanceChannel(Box::new(crate::governance::xvp_privacy::XVPPrivacyChannel::default())),
+            RippleExtension::JsonRpseeExtension(Box::new(crate::governance::xvp_privacy::XvpPrivacyExtn))
             ]
     }
 
