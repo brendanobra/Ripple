@@ -2,6 +2,8 @@
 name = "ripple_extn_xvp"
 version = "0.1.0"
 edition = "2021"
+repository = "https://github.comcast.com/ottx/ripple_extn_xvp"
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
