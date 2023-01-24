@@ -7,7 +7,8 @@ pub mod governance {
     pub mod xvp_privacy;
 }
 
-struct XVPPlugin;
+#[derive(Debug, Default)]
+pub struct XVPPlugin;
 impl RipplePlugin for XVPPlugin {
     fn get_extensions(&self) -> Vec<RippleExtension> {
         vec![
@@ -37,4 +38,4 @@ fn init() -> Box<dyn RipplePlugin> {
     Box::new(XVPPlugin {})
 }
 
-export_ripple_plugin!(init);
+export_ripple_plugin!(XVPPlugin, XVPPlugin::default);
