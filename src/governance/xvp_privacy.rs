@@ -19,42 +19,45 @@ use ripple_sdk::{
     service::{state::ServiceStateMessage, CallContext},
 };
 use serde::Deserialize;
-use tokio::sync::mpsc::{Receiver, Sender};
+use tokio::{sync::mpsc::{Receiver, Sender}, runtime::Runtime};
 
 #[derive(Clone, Default)]
 pub struct XVPPrivacyChannel {
     opt_out: Arc<RwLock<Option<String>>>,
 }
 
-#[async_trait]
 impl DataGovernanceChannel for XVPPrivacyChannel {
-    async fn start(
+    fn start(
         &self,
-        state_tx: Sender<ServiceStateMessage>,
+        state_tx: Box<Sender<ServiceStateMessage>>,
         cm: Box<ConfigManager>,
-        mut gov_rx: Receiver<DataGovernanceRequest>,
+        mut gov_rx: Box<Receiver<DataGovernanceRequest>>,
         helper: Box<dyn Extensionhelper>,
     ) {
-        loop {
-            if let Some(r) = gov_rx.recv().await {
-                let callback = r.callback;
-                match r.payload {
-                    DataGovernanceRequestPayload::Call(c) => match c {
-                        DataGovernanceRequestType::GetOptOut => {
-                            let r = self.opt_out.read().unwrap();
-                            let s = r.as_ref().unwrap().clone();
-                            let _ = callback.send(DataGovernanceResponsePayload::String(s));
-                        }
-                        DataGovernanceRequestType::SetOptOut(s) => {
-                            let mut r = self.opt_out.write().unwrap();
-                            let _ = r.insert(s);
-                            let _ = callback.send(DataGovernanceResponsePayload::Bool(true));
-                        }
-                    },
-                    _ => {}
+        let runtime = Runtime::new().unwrap();
+        let opt_out = self.opt_out.clone();
+        runtime.spawn(async move {
+            loop {
+                if let Some(r) = gov_rx.recv().await {
+                    let callback = r.callback;
+                    match r.payload {
+                        DataGovernanceRequestPayload::Call(c) => match c {
+                            DataGovernanceRequestType::GetOptOut => {
+                                let r = opt_out.read().unwrap();
+                                let s = r.as_ref().unwrap().clone();
+                                let _ = callback.send(DataGovernanceResponsePayload::String(s));
+                            }
+                            DataGovernanceRequestType::SetOptOut(s) => {
+                                let mut r = opt_out.write().unwrap();
+                                let _ = r.insert(s);
+                                let _ = callback.send(DataGovernanceResponsePayload::Bool(true));
+                            }
+                        },
+                        _ => {}
+                    }
                 }
             }
-        }
+        });
     }
 }
 
