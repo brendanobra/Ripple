@@ -1,6 +1,6 @@
 use ripple_sdk::{
     export_ripple_plugin,
-    plugin::{RippleExtension, RipplePlugin},
+    plugin::{RippleExtension, RipplePlugin, ExtensionLibrary}, export_extn_library,
 };
 
 pub mod governance {
@@ -33,6 +33,21 @@ impl RipplePlugin for XVPPlugin {
         println!("Unloading xvp plugin")
     }
 }
+
+fn init_library() -> ExtensionLibrary {
+    ExtensionLibrary {
+        name: "xvp".into(),
+        extensions: vec![
+            RippleExtension::DataGovernanceChannel(Box::new(
+                crate::governance::xvp_privacy::XVPPrivacyChannel::default(),
+            )),
+            RippleExtension::JsonRpseeExtension(Box::new(
+                crate::governance::xvp_privacy::XvpPrivacyExtn,
+            ))
+        ]
+    }
+}
+export_extn_library!(ExtensionLibrary, init_library);
 
 fn init() -> Box<dyn RipplePlugin> {
     Box::new(XVPPlugin {})
