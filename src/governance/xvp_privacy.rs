@@ -27,6 +27,11 @@ pub struct XVPPrivacyChannel {
 }
 
 impl DataGovernanceChannel for XVPPrivacyChannel {
+
+    fn test_start_without_params(&self) {
+        println!("Test start without params");
+    }
+
     fn start(
         &self,
         state_tx: Box<Sender<ServiceStateMessage>>,
