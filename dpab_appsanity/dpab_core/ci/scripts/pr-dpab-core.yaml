@@ -1,0 +1,30 @@
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: 879945319661.dkr.ecr.us-east-1.amazonaws.com/ripple/build-tools
+    tag: rust-1.58.1
+    aws_access_key_id: ((eks_aws_access_key))
+    aws_secret_access_key: ((eks_aws_secret_key))
+
+inputs:
+  - name: codebase
+  - name: code-coverage
+
+outputs:
+  - name: comment
+
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      PWD=`pwd`
+      export CODEBASE="${PWD}/codebase"
+      export COVERAGE="${PWD}/code-coverage"
+      export COMMENT_FILE="${PWD}/comment/comment"
+      echo "running with codebase=${CODEBASE}, coverage=${COVERAGE}, comment file=${COMMENT_FILE}"
+      echo "rust version: "
+      rustc -V
+      codebase/ci/scripts/pr-dpab-core.sh

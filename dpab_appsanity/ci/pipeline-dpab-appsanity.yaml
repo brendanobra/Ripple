@@ -1,0 +1,134 @@
+groups:
+- name: pr
+  jobs:
+  - pr-dpab-appsanity
+  - calculate-dpab-appsanity-main-coverage-job
+
+jobs:
+- name: pr-dpab-appsanity
+  plan:
+  - get: code-coverage-branch
+  - get: dpab-appsanity
+    resource: dpab-appsanity-pull-request
+    trigger: true
+  - params:
+      path: dpab-appsanity
+      status: pending
+    put: dpab-appsanity-pull-request
+  - file: dpab-appsanity/ci/scripts/pr-dpab-appsanity.yaml
+    task: check-pr
+    input_mapping:
+      code-coverage: code-coverage-branch
+      codebase: dpab-appsanity
+    on_failure:
+      do:
+      - put: dpab-appsanity-pull-request
+        params:
+          comment_file: comment/comment
+          delete_previous_comments: true
+          path: dpab-appsanity
+          status: failure
+    on_success:
+      do:
+      - put: dpab-appsanity-pull-request 
+        params:
+          comment_file: comment/comment
+          delete_previous_comments: true
+          path: dpab-appsanity
+          description: Sanity checks passed.
+          status: success        
+    params:
+      RELEASE_VERSION: pr
+      GIT_USER_EMAIL: ((svc-email))
+      GIT_USER_NAME: ((svc-name))
+      REPO_PRIVATE_KEY: ((github-enterprise.private-key))
+      DPAB_CORE_REPO_URI: ((git-dpab-core-repo-uri))
+
+- name: calculate-dpab-appsanity-main-coverage-job
+  plan:
+  - get: dpab-appsanity-main-branch
+    trigger: true
+  - get: code-coverage-branch
+  - task: calculate-dpab-appsanity-main-coverage-task
+    input_mapping:
+      code-coverage: code-coverage-branch
+      codebase: dpab-appsanity-main-branch
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: 879945319661.dkr.ecr.us-east-1.amazonaws.com/ripple/build-tools
+          tag: rust-1.58.1
+          aws_access_key_id: ((eks_aws_access_key))
+          aws_secret_access_key: ((eks_aws_secret_key))
+      inputs:
+        - name: codebase
+        - name: code-coverage
+      outputs:
+        - name: code-coverage-branch
+      run:
+        path: sh
+        args:
+        - -exc
+        - |
+          PWD=`pwd`
+          export CODEBASE="${PWD}/codebase"
+          export COVERAGE="${PWD}/code-coverage"
+          echo "running with codebase=${CODEBASE}, coverage=${COVERAGE}"
+          echo "rust version: "
+          rustc -V
+          codebase/ci/scripts/get-coverage-from-main.sh
+          cp -a code-coverage/. code-coverage-branch/
+    params:
+      GIT_USER_EMAIL: ((svc-email))
+      GIT_USER_NAME: ((svc-name))
+      REPO_PRIVATE_KEY: ((github-enterprise.private-key))
+      DPAB_CORE_REPO_URI: ((git-dpab-core-repo-uri))
+      DPAB_APPSANITY_REPO_URI: ((git-dpab-appsanity-repo-uri))
+
+  - put: code-coverage-branch
+    params:
+      repository: code-coverage-branch
+      branch: code-coverage
+
+resource_types:
+
+- name: pull-request
+  source:
+    repository: teliaoss/github-pr-resource
+  type: docker-image
+
+- name: s3-resource-simple
+  type: docker-image
+  source:
+    repository: 18fgsa/s3-resource-simple
+
+resources:
+
+- check_every: 24h
+  name: dpab-appsanity-pull-request
+  source:
+    access_token: ((github-enterprise.access-token))
+    repository: ottx/dpab_appsanity
+    v3_endpoint: https://github.comcast.com/api/v3/
+    v4_endpoint: https://github.comcast.com/api/graphql
+  type: pull-request
+  webhook_token: ((github-enterprise.webhook-token))
+
+- name: code-coverage-branch
+  type: git
+  webhook_token: ((github-enterprise.webhook-token))
+  source:
+    uri: git@github.comcast.com:ottx/dpab_appsanity.git
+    private_key: ((github-enterprise.private-key))
+    branch: code-coverage
+
+- name: dpab-appsanity-main-branch
+  type: git
+  check_every: 5m
+  webhook_token: ((github-enterprise.webhook-token))
+  source:
+    uri: git@github.comcast.com:ottx/dpab_appsanity.git
+    private_key: ((github-enterprise.private-key))
+    branch: OTTX-29031

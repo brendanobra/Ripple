@@ -1,0 +1,7 @@
+[registries.artifactory]
+index = "https://artifactory.comcast.com/artifactory/git/ripple-cargo.git"
+
+# For sending credentials in git requests.
+# Not required if anonymous access is enabled
+[net]
+git-fetch-with-cli = true

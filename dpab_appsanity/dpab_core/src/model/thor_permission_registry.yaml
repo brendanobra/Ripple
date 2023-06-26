@@ -1,0 +1,742 @@
+- id: DATA_zipCode
+  description: "Grants access to a user's zip code"
+  displayName: Zipcode
+  badgerDataFields: ["info.zipCode"]
+  fireboltApis: ["Localization.postalCode"]
+  fireboltCapability: ["xrn:firebolt:capability:localization:postal-code"]
+
+- id: DATA_timeZone
+  description: "Grants access to a user's timeZone"
+  displayName: TimeZone
+  badgerDataFields: ["info.timeZone", "info.timezone"]
+  fireboltCapability: ["xrn:firebolt:capability:localization:timezone"]
+
+- id: DATA_hashed_ids
+  description: "Grants access hashed form of accountId (householdId), hashed form of deviceId (deviceHash), hashed form of receiverId (receiverId, clientId)"
+  displayName: HashedIds
+  badgerDataFields: ["info.deviceHash", "info.receiverId", "info.householdId"]
+  fireboltApis: ["Device.uid", "Account.uid"]
+  fireboltCapability: ["xrn:firebolt:capability:device:info", "xrn:firebolt:capability:account:uid", "xrn:firebolt:capability:device:uid"]
+
+- id: DATA_householdId
+  description: "Grants access to a hashed form of XBO accountId. Hash is unique based on the application's domain"
+  displayName: Household ID
+  badgerDataFields: ["info.householdId"]
+  fireboltApis: ["Account.uid"]
+  fireboltCapability: ["xrn:firebolt:capability:account:uid"]
+
+- id: DATA_deviceHash
+  description: "Grants access to a hashed form of XBO deviceId. Hash is unique based on the application's domain"
+  displayName: Device Hash
+  badgerDataFields: ["info.deviceHash"]
+  fireboltApis: ["Device.uid"]
+  fireboltCapability: ["xrn:firebolt:capability:device:info", "xrn:firebolt:capability:device:uid"]
+
+- id: DATA_receiverId_hashed
+  description: "Grants access to a hashed form of receiverId. Hash is unique based on the application's domain"
+  displayName: ReceiverId Hash
+  badgerDataFields: ["info.receiverId"]
+  fireboltCapability: ["xrn:firebolt:capability:device:info"]
+
+- id: DATA_receiverId
+  description: "Grants access to a user's receiverId"
+  displayName: ReceiverId
+  badgerDataFields: ["info.receiverId"]
+  fireboltCapability: ["xrn:firebolt:capability:device:info"]
+
+- id: DATA_partnerId
+  description: "Grants access to a user's syndication partnerId (comcast, cox, etc.)"
+  displayName: PartnerId
+  badgerDataFields: ["info.partnerId"]
+  fireboltApis: ["Device.distributor"]
+  fireboltCapability: ["xrn:firebolt:capability:device:distributor"]
+
+- id: DATA_deviceId
+  description: "Grants access to a user's unique XBO deviceId"
+  displayName: DeviceId
+  badgerDataFields: ["info.deviceId"]
+  fireboltApis: ["Device.id"]
+  fireboltCapability: ["xrn:firebolt:capability:device:id"]
+
+- id: DATA_accountId
+  description: "Grants access to a user's unique XBO accountId"
+  displayName: AccountId
+  badgerDataFields: ["info.accountId"]
+  fireboltApis: ["Account.id"]
+  fireboltCapability: ["xrn:firebolt:capability:account:id"]
+
+- id: DATA_default_deviceCapabilities
+  description: "Allows an app to see some default capabilities including: adobePSK, supportsTrueSD, aamp, canMixPCMWithSurround, receiverType, fontFamilies"
+  displayName: Default Device Capabilities
+  badgerDataFields: ["deviceCapabilities.deviceType", "deviceCapabilities.webBrowser", "deviceCapabilities.nativeDimensions", "deviceCapabilities.videoDimensions"]
+  fireboltApis: ["Device.platform", "Device.type", "Device.version", "Device.screenResolution", "Device.videoResolution", "Device.onVideoResolutionChanged", "Device.onScreenResolutionChanged"]
+  fireboltCapability: ["xrn:firebolt:capability:device:info"]
+
+- id: DATA_deviceCapabilities.deviceType
+  description: "Grants access to see what type of device this is running on"
+  displayName: Device Type
+  badgerDataFields: ["deviceCapabilities.deviceType"]
+  fireboltApis: ["Device.type"]
+  fireboltCapability: ["xrn:firebolt:capability:device:info"]
+
+- id: DATA_deviceCapabilities.webBrowser
+  description: "Allows an app to see some capabilities of the web browser such as: userAgent (Default, non-app-customized user agent), browserType, version"
+  displayName: Web Browser capabilities
+  badgerDataFields: ["deviceCapabilities.webBrowser"]
+  fireboltApis: ["Device.platform"]
+  fireboltCapability: ["xrn:firebolt:capability:device:info"]
+
+- id: DATA_deviceCapabilities.hdr
+  description: "Grants access to see if the device has hdr video capability"
+  displayName: HDRVideoCapability
+  badgerDataFields: ["deviceCapabilities.hdr"]
+  fireboltApis: ["Device.hdr", "Device.onHdrChanged"]
+  fireboltCapability: ["xrn:firebolt:capability:device:info"]
+
+- id: DATA_deviceCapabilities.hdcp
+  description: "Grants access to see if the device has hdcp video capability"
+  displayName: HDCPVideoCapability
+  badgerDataFields: ["deviceCapabilities.hdcp"]
+  fireboltApis: ["Device.hdcp", "Device.onHdcpChanged"]
+  fireboltCapability: ["xrn:firebolt:capability:device:info"]
+
+- id: DATA_deviceCapabilities.deviceMakeModel
+  description: "Grants access to a device's make and model (pace_xg1v4)"
+  displayName: DeviceMakeModel
+  badgerDataFields: ["deviceCapabilities.deviceMake", "deviceCapabilities.deviceModel"]
+  fireboltApis: ["Device.make", "Device.model"]
+  fireboltCapability: ["xrn:firebolt:capability:device:model", "xrn:firebolt:capability:device:make"]
+
+- id: DATA_deviceCapabilities.model
+  description: "Grants access to a device's model (AX013ANM)"
+  displayName: Model
+  badgerDataFields: ["deviceCapabilities.model"]
+  fireboltApis: ["Device.sku"]
+  fireboltCapability: ["xrn:firebolt:capability:device:sku"]
+
+- id: DATA_deviceCapabilities.isWifiDevice
+  description: "Grants access to see if a device has wifi capability"
+  displayName: WifiCapability
+  badgerDataFields: ["deviceCapabilities.isWifiDevice"]
+  fireboltCapability: ["xrn:firebolt:capability:device:info"]
+
+- id: DATA_deviceCapabilities.dvrTypes
+  description: "Grants access to see what type of dvr a device has"
+  displayName: DVR Types
+  badgerDataFields: ["deviceCapabilities.dvrTypes"]
+  fireboltCapability: ["xrn:firebolt:capability:device:info"]
+
+- id: DATA_deviceCapabilities.videoDimensions
+  description: "Grants access to the resolution that the device supports for video"
+  displayName: VideoDimensions
+  badgerDataFields: ["deviceCapabilities.videoDimensions"]
+  fireboltApis: ["Device.videoResolution", "Device.onVideoResolutionChanged"]
+  fireboltCapability: ["xrn:firebolt:capability:device:info"]
+
+- id: DATA_deviceCapabilities.nativeDimensions
+  description: "Grants access to the resolution that the device supports for on screen display"
+  displayName: NativeDimensions
+  badgerDataFields: ["deviceCapabilities.nativeDimensions"]
+  fireboltApis: ["Device.screenResolution", "Device.onScreenResolutionChanged"]
+  fireboltCapability: ["xrn:firebolt:capability:device:info"]
+
+- id: DATA_CC_STATE
+  description: "Grants access to user's closed captioning setting (Duplicate of ShowClosedCapture)"
+  displayName: ClosedCaption
+  badgerDataFields: ["settings('CC_STATE')", "settings('CcState')", "settings('ShowClosedCapture')"]
+  fireboltApis: ["Accessibility.closedCaptions", "Accessibility.closedCaptionsSettings", "Accessibility.onClosedCaptionsSettingsChanged"]
+  fireboltCapability: ["xrn:firebolt:capability:accessibility:closedcaptions"]
+
+- id: DATA_CcState
+  description: "Grants access to user's closed captioning setting (Duplicate of ShowClosedCapture)"
+  displayName: ClosedCaption
+  badgerDataFields: ["settings('CC_STATE')", "settings('CcState')", "settings('ShowClosedCapture')"]
+  fireboltApis: ["Accessibility.closedCaptions", "Accessibility.closedCaptionsSettings", "Accessibility.onClosedCaptionsSettingsChanged"]
+  fireboltCapability: ["xrn:firebolt:capability:accessibility:closedcaptions"]
+
+- id: DATA_ShowClosedCapture
+  description: "Grants access to user's closed captioning setting"
+  displayName: ClosedCaption
+  badgerDataFields: ["settings('CC_STATE')", "settings('CcState')", "settings('ShowClosedCapture')"]
+  fireboltApis: ["Accessibility.closedCaptions", "Accessibility.closedCaptionsSettings", "Accessibility.onClosedCaptionsSettingsChanged"]
+  fireboltCapability: ["xrn:firebolt:capability:accessibility:closedcaptions"]
+
+- id: DATA_TextToSpeechEnabled2
+  description: "Grants access to user's text to speech setting"
+  displayName: TextToSpeech
+  badgerDataFields: ["settings('TextToSpeechEnabled2')", "settings('VOICE_GUIDANCE_STATE')"]
+  fireboltApis: ["Accessibility.voiceGuidance", "Accessibility.voiceGuidanceSettings", "Accessibility.onVoiceGuidanceSettingsChanged"]
+  fireboltCapability: ["xrn:firebolt:capability:accessibility:voiceguidance"]
+
+- id: DATA_VOICE_GUIDANCE_STATE
+  description: "Grants access to user's text to speech setting (Duplicate of TextToSpeechEnabled2)"
+  displayName: TextToSpeech
+  badgerDataFields: ["settings('TextToSpeechEnabled2')", "settings('VOICE_GUIDANCE_STATE')"]
+  fireboltApis: ["Accessibility.voiceGuidance", "Accessibility.voiceGuidanceSettings", "Accessibility.onVoiceGuidanceSettingsChanged"]
+  fireboltCapability: ["xrn:firebolt:capability:accessibility:voiceguidance"]
+
+- id: DATA_DisplayPersonalizedRecommendations
+  description: "Grants access to user's personal recommendation setting"
+  displayName: PersonalRecommendation
+  badgerDataFields: ["settings('DisplayPersonalizedRecommendations')"]
+  fireboltApis: ["Discovery.policy", "Discovery.onPolicyChanged"]
+  fireboltCapability: ["xrn:firebolt:capability:discovery:policy"]
+
+- id: DATA_RememberWatchedPrograms
+  description: "Grants access to user's watch history setting"
+  displayName: WatchHistory
+  badgerDataFields: ["settings('RememberWatchedPrograms')"]
+  fireboltApis: ["Discovery.policy", "Discovery.onPolicyChanged"]
+  fireboltCapability: ["xrn:firebolt:capability:discovery:policy"]
+
+- id: DATA_ShareWatchHistoryStatus
+  description: "Grants access to user's preference for sharing watch history"
+  displayName: Share Watch History
+  badgerDataFields: ["settings('ShareWatchHistoryStatus')"]
+  fireboltApis: ["Discovery.policy", "Discovery.onPolicyChanged"]
+  fireboltCapability: ["xrn:firebolt:capability:discovery:policy"]
+
+- id: DATA_friendly_name
+  description: "Grants access to user's name they have given to their device"
+  displayName: FriendlyName
+  badgerDataFields: ["settings('friendly_name')"]
+  fireboltApis: ["Device.name", "Device.onDeviceNameChanged", "Device.onNameChanged"]
+  fireboltCapability: ["xrn:firebolt:capability:device:name"]
+
+- id: DATA_power_save_status
+  description: "Grants access to user's setting to have power save mode"
+  displayName: PowerSaveStatus
+  badgerDataFields: ["settings('power_save_status')"]
+  fireboltCapability: ["xrn:firebolt:capability:device:powersave"]
+
+- id: DATA_language
+  description: "Grants access to user's language setting"
+  displayName: Language
+  fireboltApis: ["Localization.language", "Localization.onLanguageChanged"]
+  fireboltCapability: ["xrn:firebolt:capability:localization:language"]
+
+- id: DATA_locale
+  description: "Grants access to user's locale setting (US, CA)"
+  displayName: Locale
+  fireboltApis: ["Localization.countryCode", "Localization.locale"]
+  fireboltCapability: ["xrn:firebolt:capability:localization:locale", "xrn:firebolt:capability:localization:country-code"]
+
+- id: API_UserData_deviceinfo
+  description: "Allows app to call $badger.info(). (Fields returned are gated by DATA_* fields)"
+  displayName: DeviceInfo
+  badgerApis: ["info"]
+  fireboltCapability: ["xrn:firebolt:capability:device:info"]
+
+- id: API_UserData_promptEmail
+  description: "Allows app to launch email prefill prompt"
+  displayName: EmailPrefillPrompt
+  badgerApis: ["promptEmail"]
+  fireboltApis: ["Keyboard.email", "Keyboard.password", "Keyboard.standard"]
+  fireboltCapability: ["xrn:firebolt:capability:input:keyboard"]
+
+- id: API_UserData_settings
+  description: "Allows app to get user's settings. (Settings returned are gated by DATA_* fields)"
+  displayName: UserSettings
+  badgerApis: ["settings"]
+  fireboltCapability: ["xrn:firebolt:capability:device:settings"]
+
+- id: API_UserData_setSettings
+  description: "Allows app to modify a user's settings"
+  displayName: SetUserSettings
+  badgerApis: ["setSettings"]
+  fireboltCapability: ["xrn:firebolt:capability:device:settings"]
+
+- id: API_UserData_subscribeToSettings
+  description: "Allows app to subscribe to events when a user's setting changes"
+  displayName: SubscribeToSettings
+  badgerApis: ["subscribeToSettings"]
+  fireboltCapability: ["xrn:firebolt:capability:device:settings"]
+
+- id: API_UserData_getOat
+  description: "Allows app to get an obfuscated account token, used in the billing SDK"
+  displayName: Obfuscated Account Token
+
+- id: API_DeviceCapabilities_deviceCapabilities
+  description: "Allows app to request a device's capabilities (capabilities returned are gated by DATA_* fields)"
+  displayName: DeviceCapabilities
+  badgerApis: ["deviceCapabilities"]
+  fireboltCapability: ["xrn:firebolt:capability:device:info"]
+
+- id: API_DeviceCapabilities_onDeviceCapabilitiesChanged
+  description: "Allows app to receive events when a devices capabilities change (capabilities returned are gated by DATA_* fields)"
+  displayName: DeviceCapabilitiesChange
+  badgerApis: ["onDeviceCapabilitiesChanged"]
+  fireboltCapability: ["xrn:firebolt:capability:device:info"]
+
+- id: API_Navigation_deeplink
+  description: "Allows app to issue any deeplink that performs in action in the platform (app launches, entity page launches, etc.)"
+  displayName: NavigationDeeplink
+  badgerApis: ["deeplink"]
+  fireboltApis: ["discovery.launch"]
+  fireboltCapability: ["xrn:firebolt:capability:navigation:deeplink","xrn:firebolt:capability:lifecycle:launch"]
+
+- id: API_Navigation_companyPage
+  description: "Allows app to issue a deeplink that closes the app and navigate to the company's network page associated with the app"
+  displayName: NavigationDeeplinkToCompanyPage
+  badgerApis: ["companyPage"]
+  fireboltCapability: ["xrn:firebolt:capability:discovery:companypage"]
+
+- id: API_Navigation_entityPage
+  description: "Allows app to issue a deeplink that closes the app and navigate to an entity page"
+  displayName: NavigationDeeplinkToEntityPage
+  badgerApis: ["entityPage"]
+  fireboltCapability: ["xrn:firebolt:capability:discovery:entity-info"]
+
+- id: API_Navigation_fullScreenVideo
+  description: "Allows app to issue a deeplink that closes the app and play a FullScreen Video"
+  displayName: NavigationDeeplinkToFullScreenVideo
+  badgerApis: ["fullScreenVideo"]
+  fireboltCapability: ["xrn:firebolt:capability:navigation:full-screen"]
+
+- id: API_Navigation_shutdown
+  description: "Allows app to shut itself down"
+  displayName: AppShutdown
+  badgerApis: ["shutdown"]
+  fireboltApis: ["Lifecycle.close", "Lifecycle.onInactive", "Lifecycle.ready", "Lifecycle.onForeground", "Lifecycle.onSuspended", "Lifecycle.onUnloading", "Lifecycle.finished", "Lifecycle.onBackground", "Lifecycle.state"]
+  fireboltCapability: ["xrn:firebolt:capability:lifecycle:ready","xrn:firebolt:capability:lifecycle:state",]
+
+- id: API_Navigation_dismissLoadingScreen
+  description: "Allows app to dismiss the loading screen"
+  displayName: DismissLoadingScreen
+  badgerApis: ["dismissLoadingScreen"]
+  fireboltCapability: ["xrn:firebolt:capability:loading-screen:dismiss"]
+
+- id: API_Auth_refreshPlatformAuthToken
+  description: "Allows app to get a token scoped a device, account, app (thor token)"
+  displayName: RefreshPlatformAuthToken
+  badgerApis: ["refreshPlatformAuthToken"]
+  fireboltApis: ["Authentication.token(type=platform)"]
+  fireboltCapability: ["xrn:firebolt:capability:token:platform"]
+
+- id: API_Auth_OAuthBearerToken
+  description: "Allows app to get a CIMA token"
+  displayName: OAuthBearerToken
+  fireboltApis: ["Authentication.token(type=distributor)"]
+  fireboltCapability: ["xrn:firebolt:capability:token:session"]
+
+- id: API_Auth_getXact
+  description: "Allows an app to get an XACT token"
+  displayName: Get XACT
+  fireboltApis: ["Authentication.token(type=device)"]
+  fireboltCapability: ["xrn:firebolt:capability:token:device", "xrn:firebolt:capability:token:root"]
+
+- id: API_Auth_xscd
+  description: "Allows app to get XSCD token with encrypted user data"
+  displayName: XSCD
+  badgerApis: ["xscd"]
+  fireboltCapability: []
+
+- id: API_Auth_wallet
+  description: "Allows app to pass us user tokens so we can store them in our platform and use them in personalization of their discovery UI"
+  displayName: Auth Wallet
+  badgerApis: ["appAuth"]
+  fireboltCapability: ["xrn:firebolt:capability:auth:wallet"]
+
+- id: API_MetricsService_metricsHandler
+  description: "Allows app to ingest any metric into our system"
+  displayName: MetricsHandler
+  badgerApis: ["metricsHandler"]
+  fireboltApis: ["Metrics.ready", "Metrics.signIn", "Metrics.signOut", "Metrics.startContent", "Metrics.stopContent", "Metrics.page", "Metrics.action", "Metrics.error", "Metrics.mediaLoadStart", "Metrics.mediaPlay", "Metrics.mediaPlaying", "Metrics.mediaPause", "Metrics.mediaWaiting", "Metrics.mediaProgress", "Metrics.mediaSeeking", "Metrics.mediaSeeked", "Metrics.mediaRateChange", "Metrics.mediaRenditionChange", "Metrics.mediaEnded"]
+  fireboltCapability: ["xrn:firebolt:capability:metrics:general", "xrn:firebolt:capability:metrics:media", "xrn:firebolt:capability:data:app-usage"]
+
+- id: API_MetricsService_logMoneyBadgerLoaded
+  description: "Allows app to log when money badger is loaded"
+  displayName: LogMoneyBadgerLoaded
+  badgerApis: ["logMoneyBadgerLoaded"]
+  fireboltCapability: ["xrn:firebolt:capability:badger:loaded"]
+
+- id: API_MetricsService_BI
+  description: "Allows app to send business intelligence metrics"
+  displayName: BusinessIntelligenceMetrics
+  badgerApis: ["metricsSdkEventHandler"]
+  fireboltCapability: ["xrn:firebolt:capability:metrics:general", "xrn:firebolt:capability:data:app-usage"]
+
+- id: API_AccountLinkService_entitlementsAccountLink
+  description: "Allows app to link their own app entitlements into our system"
+  displayName: EntitlementsAccountLink
+  fireboltApis: ["Discovery.entitlements", "Discovery.signIn", "Discovery.signOut"]
+  badgerApis: ["entitlementsAccountLink"]
+  fireboltCapability: ["xrn:firebolt:capability:discovery:entitlements","xrn:firebolt:capability:discovery:sign-in-status", "xrn:firebolt:capability:discovery:content-access"]
+
+- id: API_AccountLinkService_mediaEventAccountLink
+  description: "Allows app to send watch history events into our system"
+  displayName: MediaEventAccountLink
+  fireboltApis: ["Discovery.watched"]
+  badgerApis: ["mediaEventAccountLink"]
+  fireboltCapability: ["xrn:firebolt:capability:discovery:watched", "xrn:firebolt:capability:data:app-usage"]
+
+- id: API_AccountLinkService_launchpad
+  description: "Allows app to add items to the launchpad in the discovery UI"
+  displayName: Launchpad
+  fireboltApis: ["Discovery.watchNext"]
+  badgerApis: ["launchpad"]
+  fireboltCapability: ["xrn:firebolt:capability:discovery:watch-next", "xrn:firebolt:capability:data:app-usage"]
+
+- id: API_AccountLinkService_compareSettings
+  description: "Allows app to send us their settings so we can compare and log the differences of things like parental control levels"
+  displayName: Compare Settings
+  badgerApis: ["compareSettings"]
+  fireboltCapability: ["xrn:firebolt:capability:discovery:compare-settings"]
+
+- id: API_Notification_showToaster
+  description: "Allows app display a toaster overlay"
+  displayName: ShowToaster
+  badgerApis: ["showToaster"]
+  fireboltCapability: ["xrn:firebolt:capability:navigation:show-toaster"]
+
+- id: API_PinPrompt_showPinOverlay
+  description: "Allows app to prompt the user for a purchase or parental pin overlay"
+  displayName: ShowPinOverlay
+  fireboltApis: ["Profile.approveContentRating", "Profile.approvePurchase"]
+  badgerApis: ["showPinOverlay"]
+  fireboltCapability: ["xrn:firebolt:capability:approve:content","xrn:firebolt:capability:approve:purchase"]
+
+- id: API_Network_networkConnectivity
+  description: "Allows app to see the network signal strength and what interfaces are connected"
+  displayName: NetworkConnectivity
+  fireboltApis: ["Device.network", "Device.onNetworkChanged"]
+  badgerApis: ["networkConnectivity"]
+  fireboltCapability: ["xrn:firebolt:capability:network:status"]
+
+- id: API_Player_resizeVideo
+  description: "Allows app to resize the player"
+  displayName: ResizeVideo
+  badgerApis: ["resizeVideo"]
+  fireboltCapability: []
+
+- id: API_Player_playerControls
+  description: "Allows app to do the following operations on the player: toggle play/pause, seek, skip, start and stop, get current position in media, get info about media"
+  displayName: Player Controls
+  badgerApis: ["playerControls"]
+  fireboltCapability: ["xrn:firebolt:capability:playback:controls"]
+
+- id: API_Dial_operations
+  description: "Allows app to perform the following dial operations: getDeviceId, getDeviceName, getPayload, get onLaunch event"
+  displayName: Dial Operations
+  fireboltApis: ["SecondScreen.friendlyName", "SecondScreen.device", "SecondScreen.protocols", "SecondScreen.onLaunchRequest", "SecondScreen.onCloseRequest", "SecondScreen.onFriendlyNameChanged"]
+  badgerApis: ["getDeviceName", "getDeviceId", "getPayload", "onLaunch"]
+  fireboltCapability: ["xrn:firebolt:capability:device:info","xrn:firebolt:capability:protocol:dial"]
+
+- id: API_System_info
+  description: "Allows app to get system info like the last time the device was rebooted"
+  displayName: System Info
+  badgerApis: ["getSystemInfo"]
+  fireboltCapability: ["xrn:firebolt:capability:device:info"]
+
+- id: API_AdPlatform_operations
+  description: "Allows app to perform operations to the Advertising Platform including getting the following data: initObject, limitAdTracking, deviceAdAttributes, appStoreId"
+  displayName: "Advertising Platform"
+  fireboltApis: ["Advertising.config", "Advertising.policy", "Advertising.onPolicyChanged", "Advertising.deviceAttributes", "Advertising.appBundleId"]
+  badgerApis: ["initObject", "limitAdTracking", "deviceAdAttributes", "appStoreId"]
+  fireboltCapability: ["xrn:firebolt:capability:advertising:configuration","xrn:firebolt:capability:privacy:advertising" ]
+
+- id: API_Advertising_advertisingId
+  description: "Allows app to get an advertisingId for the customer"
+  displayName: "Advertising Id"
+  fireboltApis: ["Advertising.advertisingId"]
+  badgerApis: ["xifa"]
+  fireboltCapability: ["xrn:firebolt:capability:advertising:identifier"]
+
+- id: DATA_mac
+  description: "Grants access to device's mac"
+  displayName: Mac
+  urlTemplates: ["{CHARIOT:mac}"]
+
+- id: DATA_appId
+  description: "Allow app to get app id"
+  displayName: AppId
+  urlTemplates: ["{CHARIOT:appId}"]
+
+- id: DATA_sessionId
+  description: "Allow app to get session information"
+  displayName: SesssionId
+  urlTemplates: ["{CHARIOT:sessionId}"]
+
+- id: DATA_serviceAccessToken
+  description: "Allow app to get sat token"
+  displayName: ServiceAccessToken
+  urlTemplates: ["{CHARIOT:serviceAccessToken}"]
+
+- id: DATA_deviceCapabilities.receiverPlatform
+  description: "Grant access to a receiver platform"
+  displayName: ReceiverPlatform
+  badgerDataFields: ["deviceCapabilities.receiverPlatform"]
+  urlTemplates: ["{CHARIOT:deviceCapabilities.receiverPlatform}"]
+
+- id: DATA_deviceCapabilities.receiverVersion
+  description: "Grant access to a receiver version"
+  displayName: ReceiverVersion
+  badgerDataFields: ["deviceCapabilities.receiverVersion"]
+  urlTemplates: ["{CHARIOT:deviceCapabilities.receiverVersion}"]
+
+- id: DATA_deviceCapabilities.deviceMake
+  description: "Grant access to a device's make"
+  displayName: DeviceMake
+  badgerDataFields: ["deviceCapabilities.deviceMake"]
+  urlTemplates: ["{CHARIOT:deviceCapabilities.deviceMake}"]
+
+- id: DATA_deviceCapabilities.deviceVersion
+  description: "Grant access to a device's version"
+  displayName: DeviceVersion
+  badgerDataFields: ["deviceCapabilities.deviceVersion"]
+  urlTemplates: ["{CHARIOT:deviceCapabilities.deviceVersion}"]
+
+- id: DATA_movieRestrictionLevel
+  description: "Allow app to get account's movie restriction level"
+  displayName: MovieRestrictionLevel
+  urlTemplates: ["{CHARIOT:movieRestrictionLevel}"]
+
+- id: DATA_tvRestrictionLevel
+  description: "Allow app to get account's tv restriction level"
+  displayName: TvRestrictionLevel
+  urlTemplates: ["{CHARIOT:tvRestrictionLevel}"]
+
+- id: DATA_thortoken
+  description: "Grant access to thor token"
+  displayName: ThorToken
+  urlTemplates: ["{CHARIOT:thortoken}"]
+
+- id: DATA_appAuthData
+  description: "Grant access to app auth data"
+  displayName: AppAuthData
+  urlTemplates: ["{CHARIOT:appAuthData}"]
+
+- id: DATA_encryptedAccountId
+  description: "Permission to encrypt account id"
+  displayName: EncryptedAccountId
+  fireboltCapability: ["xrn:firebolt:capability:encrypt:account-id"]
+
+- id: DATA_encryptedDeviceId
+  description: "Permission to encrypt device id"
+  displayName: EncryptedDeviceId
+  fireboltCapability: ["xrn:firebolt:capability:encrypt:device-id"]
+
+- id: DATA_encryptedPartnerId
+  description: "Permission to encrypt partner id"
+  displayName: EncryptedPartnerId
+  fireboltCapability: ["xrn:firebolt:capability:encrypt:distributor"]
+
+- id: DATA_CcAttrFontStyle
+  description: "User's preference for Closed Caption Font Style"
+  displayName: Closed Captions Font Style
+  badgerDataFields: ["settings('CcAttrFontStyle')"]
+  fireboltCapability: ["xrn:firebolt:capability:accessibility:closedcaptions"]
+
+- id: DATA_CcAttrTextBackgroundOpacity
+  description: "User's preference for Closed Caption Background Opacity"
+  displayName: Closed Captions Text Background Opacity
+  badgerDataFields: ["settings('CcAttrTextBackgroundOpacity')"]
+  fireboltCapability: ["xrn:firebolt:capability:accessibility:closedcaptions"]
+
+- id: DATA_CcAttrTextBackgroundColor
+  description: "User's preference for Closed Caption Background Color"
+  displayName: Closed Captions Text Background Color
+  badgerDataFields: ["settings('CcAttrTextBackgroundColor')"]
+  fireboltCapability: ["xrn:firebolt:capability:accessibility:closedcaptions"]
+
+- id: DATA_CcAttrTextEdgeColor
+  description: "User's preference for Closed Caption Text Edge Color"
+  displayName: Closed Captions Text Edge Color
+  badgerDataFields: ["settings('CcAttrTextEdgeColor')"]
+  fireboltCapability: ["xrn:firebolt:capability:accessibility:closedcaptions"]
+
+- id: DATA_CcAttrTextEdgeStyle
+  description: "User's preference for Closed Caption Text Edge Style"
+  displayName: Closed Captions Text Edge Style
+  badgerDataFields: ["settings('CcAttrTextEdgeStyle')"]
+  fireboltCapability: ["xrn:firebolt:capability:accessibility:closedcaptions"]
+
+- id: DATA_CcAttrTextForegroundColor
+  description: "User's preference for Closed Caption Text Foreground Color"
+  displayName: Closed Captions Text Foreground Color
+  badgerDataFields: ["settings('CcAttrTextForegroundColor')"]
+  fireboltCapability: ["xrn:firebolt:capability:accessibility:closedcaptions"]
+
+- id: DATA_CcAttrTextForegroundOpacity
+  description: "User's preference for Closed Caption Text Foreground Opacity"
+  displayName: Closed Captions Text Foreground Opacity
+  badgerDataFields: ["settings('CcAttrTextForegroundOpacity')"]
+  fireboltCapability: ["xrn:firebolt:capability:accessibility:closedcaptions"]
+
+- id: DATA_CcAttrTextSize
+  description: "User's preference for Closed Caption Text Size"
+  displayName: Closed Captions Text Size
+  badgerDataFields: ["settings('CcAttrTextSize')"]
+  fireboltCapability: ["xrn:firebolt:capability:accessibility:closedcaptions"]
+
+- id: DATA_LastAudioTrack
+  description: "User's preference last track of audio that was set"
+  displayName: Last Audio Track
+  badgerDataFields: ["settings('LastAudioTrack')"]
+  fireboltCapability: ["xrn:firebolt:capability:settings:last-audio"]
+
+- id: DATA_VideoDescription
+  description: "User's preference reading out the description of the video for accesibility"
+  displayName: Video Description Readout
+  badgerDataFields: ["settings('VideoDescription')"]
+  fireboltCapability: ["xrn:firebolt:capability:accessibility:video-description"]
+
+- id: CONFIG_url
+  description: "Grant access to config url"
+  displayName: ConfigUrl
+  fireboltCapability: ["xrn:firebolt:capability:discovery:config-url"]
+
+- id: DATA_userExperience
+  description: "Grants access to application platform details. Value can be '1000' for Managed Video customers (on X1 for Comcast and partners, SkyQ) and '1001' for OTT Guide customers (on Flex for Comcast and partners, xclassTV) so that 3rd party apps could determine the right experience for customers"
+  displayName: User Experience
+  badgerDataFields: ["info.userExperience"]
+  fireboltApis: ["Profile.flags"]
+  fireboltCapability: ["xrn:firebolt:capability:profile:flags"]
+
+- id: API_RemoteControl_pressKey
+  description: "Allows app to send a key press"
+  displayName: Remote Control Press Key
+  hammerApis: ["RemoteControl.pressKey"]
+
+- id: API_Navigation_launchApp
+  description: "Allows app to launch another app"
+  displayName: Launch App
+  hammerApis: ["Navigation.launchApp"]
+  fireboltApis: ["discovery.launch"]
+  fireboltCapability: ["xrn:firebolt:capability:lifecycle:launch"]
+
+
+- id: API_Audio_getVolumeLevel
+  description: "Allows app to get volume level"
+  displayName: Get Audio Volume Level
+  hammerApis: ["Audio.getVolumeLevel"]
+
+- id: API_Audio_setVolumeLevel
+  description: "Allows app to adjust volume level"
+  displayName: Set Audio Volume Level
+  hammerApis: ["Audio.setVolumeLevel"]
+
+- id: API_UserData_refreshSettings
+  description: "Allows app to tell the device to refresh user settings from the cloud"
+  displayName: Refresh User Settings
+  hammerApis: ["UserData.refreshSettings"]
+
+- id: API_Session_forceRefresh
+  description: "Allows app to force refresh a session"
+  displayName: Force Session Refresh
+  hammerApis: ["Session.forceRefresh"]
+
+- id: API_DeviceSettings_restartDevice
+  description: "Allows app to restart the device as if power cycling"
+  displayName: Restart Device
+  hammerApis: ["DeviceSettings.restartDevice"]
+
+- id: API_Health_healthCheck
+  description: "Grants access to health check method"
+  displayName: Health Check
+  hammerApis: ["Health.healthCheck"]
+
+- id: API_discovery_onNavigateTo
+  description: "Grants access for a firebolt app to receive navigateTo events"
+  displayName: Navigate To Event
+  fireboltApis: ["Discovery.onNavigateTo"]
+  fireboltCapability: ["xrn:firebolt:capability:discovery:navigate-to"]
+
+- id: API_discovery_onPullPurchasedContent
+  description: "Grants access for a firebolt app to receive pullPurchasedContent events"
+  displayName: Pull Purchased Content Event
+  fireboltApis: ["Discovery.onPullPurchasedContent"]
+  fireboltCapability: []
+  fireboltProvideCapability: ["xrn:firebolt:capability:discovery:purchased-content"]
+
+- id: API_discovery_entityInfo
+  description: "Grants access for a firebolt app to receive entityInfo events"
+  displayName: Entity Info Event
+  fireboltApis: ["Discovery.entityInfo"]
+  fireboltCapability: ["xrn:firebolt:capability:discovery:entity-info"]
+  fireboltProvideCapability: ["xrn:firebolt:capability:discovery:entity-info"]
+
+- id: API_discovery_onPullEntityInfo
+  description: "Grants access for a firebolt app to receive pullEntityInfo events"
+  displayName: Pull Entity Info Event
+  fireboltApis: ["Discovery.onPullEntityInfo"]
+  fireboltCapability: []
+  fireboltProvideCapability: ["xrn:firebolt:capability:discovery:entity-info"]
+
+- id: API_discovery_purchasedContent
+  description: "Grants access for a firebolt app to receive purchasedContent events"
+  displayName: Purchased Content Event
+  fireboltApis: ["Discovery.purchasedContent"]
+  fireboltCapability: ["xrn:firebolt:capability:discovery:purchased-content"]
+  fireboltProvideCapability: ["xrn:firebolt:capability:discovery:purchased-content"]
+
+- id: API_localization_locality
+  description: "Grants access for a firebolt app to receive the locality, the city which the device is located"
+  displayName: Locality - XClass
+  fireboltApis: ["Localization.locality"]
+  fireboltCapability: ["xrn:firebolt:capability:localization:locality"]
+
+- id: DATA_cityName
+  description: "Grants access for a firebolt app to receive the locality, the city which the device is located"
+  displayName: Locality - XRE
+  fireboltApis: ["Localization.locality"]
+  fireboltCapability: ["xrn:firebolt:capability:localization:locality"]
+
+- id: DATA_countryCode
+  description: "Grants access for a firebolt app to receive code of the country which the device is located"
+  displayName: Country Code - XRE
+  fireboltApis: ["Localization.countryCode"]
+  fireboltCapability: ["xrn:firebolt:capability:localization:country-code"]
+
+- id: API_localization_latlon
+  description: "Grants access for a firebolt app to receive the latitude and longitude of the device"
+  displayName: Latitude and Longitude - XClass
+  fireboltApis: ["Localization.latlon"]
+  fireboltCapability: ["xrn:firebolt:capability:localization:location"]
+
+- id: DATA_geoLocation
+  description: "Grants access for a firebolt app to receive the latitude and longitude of the device"
+  displayName: Latitude and Longitude - XRE
+  fireboltApis: ["Localization.latlon"]
+  fireboltCapability: ["xrn:firebolt:capability:localization:location"]
+
+- id: API_device_audio
+  description: "Grants access for a firebolt app to receive the supported audio modes of the device"
+  displayName: Device Audio - XClass
+  fireboltApis: ["Device.audio", "Device.onAudioChanged"]
+  fireboltCapability: ["xrn:firebolt:capability:device:info"]
+
+- id: DATA_deviceCapabilities.audioModes
+  description: "Grants access for a firebolt app to receive the supported audio modes of the device"
+  displayName: Device Audio - XRE
+  fireboltApis: ["Device.audio", "Device.onAudioChanged"]
+  fireboltCapability: ["xrn:firebolt:capability:device:info"]
+
+- id: API_localization_additionalInfo
+  description: "Grants access for a firebolt app to receive the additional localization information"
+  displayName: Additional Localization Information - XClass
+  fireboltApis: ["Localization.additionalInfo"]
+  fireboltCapability: ["xrn:firebolt:capability:localization:language"]
+
+- id: DATA_additionalInfo
+  description: "Grants access for a firebolt app to receive the additional localization information"
+  displayName: Additional Localization Information - XRE
+  fireboltApis: ["Localization.additionalInfo"]
+  fireboltCapability: ["xrn:firebolt:capability:localization:language"]
+
+- id: DATA_version
+  description: "Grants access for a firebolt app to see the Firebolt OS version"
+  displayName: Firebolt OS version
+  fireboltApis: ["Device.version"]
+  fireboltCapability: ["xrn:firebolt:capability:device:info"]
+
+- id: API_VoiceText_voiceSessionByText
+  description: "Allows clients to trigger voice commands with the passed text"
+  displayName: Voice text Service
+  hammerApis: ["VoiceText.voiceSessionByText"]
+
+- id: API_SecureStorage
+  description: "Allows clients to store data in their own namespace in the cloud service so it can be accessed by multiple devices"
+  displayName: Secure Storage
+  fireboltApis: ["SecureStorage.get", "SecureStorage.set", "SecureStorage.remove"]
+  fireboltCapability: ["xrn:firebolt:capability:storage:secure"]

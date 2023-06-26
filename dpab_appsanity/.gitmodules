@@ -1,0 +1,6 @@
+[submodule "rust-linchpin-client"]
+	path = rust-linchpin-client
+	url = ssh://git@github.comcast.com/ottx/rust-linchpin-client.git
+[submodule "dpab_core"]
+	path = dpab_core
+	url = git@github.comcast.com:ottx/dpab_core.git

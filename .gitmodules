@@ -4,9 +4,6 @@
 [submodule "ripple_comcast_extns"]
 	path = ripple_comcast_extns
 	url = git@github.comcast.com:ottx/ripple_comcast_extns.git
-[submodule "dpab_appsanity"]
-	path = dpab_appsanity
-	url = git@github.comcast.com:ottx/dpab_appsanity.git
 [submodule "firebolt-devices"]
 	path = firebolt-devices
 	url = git@github.comcast.com:ottx/firebolt-devices.git

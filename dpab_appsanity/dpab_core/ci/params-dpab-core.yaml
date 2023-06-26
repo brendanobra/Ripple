@@ -1,0 +1,4 @@
+git-dev-branch: main
+git-dpab-core-repo-uri: git@github.comcast.com:ottx/dpab_core.git
+svc-email: OTTXAutomation@comcast.com
+svc-name: OTTXAutomation

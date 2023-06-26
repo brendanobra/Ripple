@@ -1,0 +1,70 @@
+[package]
+name = "dpab_appsanity"
+version = "1.0.0"
+edition = "2021"
+
+[lib]
+crate-type = ["lib", "cdylib"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+#default=["gateway"]
+default=["extn"]
+local_dev=["dpab_core/local_dev","local_metrics_logging"]
+gateway=[]
+extn=[]
+full=[]
+local_metrics_logging=[]
+
+
+[dependencies]
+async-trait = "^0.1.57"
+tokio = { version = "1.16.1", features = ["macros", "sync", "rt"] }
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+env_logger = "0.9.0"
+log = { version = "0.4.0", features = ["std"] }
+
+log4rs = { version="=1.2.0", features = ["rolling_file_appender"] }
+
+url = "1.7"
+tracing = "0.1.37"
+tracing-futures = "0.2.5"
+base64 = "0.13.0"
+tonic = { version = "0.7.2", features = ["transport", "tls", "tls-roots"] }
+prost = "0.10.4"
+prost-types = "0.10.1"
+cached = "0.36.0"
+hyper  = {version = "0.14.20"}
+hyper-tls = {version = "0.5.0"}
+tower = { version = "0.4.13", features = ["discover"] }
+tower-http = { version = "0.3.4", features = ["trace","metrics","decompression-full","set-header","auth"] }
+tower-hyper = {version = "0.1.1"}
+# dpab_core = { git = "ssh://git@github.comcast.com/ottx/dpab_core.git" }
+#rust-linchpin-client = { git = "ssh://git@github.comcast.com/ottx/rust-linchpin-client.git", version = "0.1.0" }
+rust-linchpin-client = {path = "./rust-linchpin-client"}
+uuid = { version = "1.1.2",features = [
+    "v4",                # Lets you generate random UUIDs
+    "fast-rng",          # Use a faster (but still sufficiently random) RNG
+    "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
+]}
+queues = {version = "1.0.2"}
+chrono = {version ="0.4"}
+chrono-tz = {version ="0.4"}
+
+
+# for testing on Git remote branch
+# dpab_core = { git = "ssh://git@github.comcast.com/ottx/dpab_core.git", "branch" = "some_branch_name" }
+
+# for local development
+dpab_core = { path= "./dpab_core" }
+ripple_sdk = { path = "../Ripple/core/sdk"}
+
+[build-dependencies]
+tonic-build = "0.7.1"
+[dev-dependencies]
+wiremock = "0.5"
+httpmock = "0.6"
+async-global-executor ="=2.2.0"
+
