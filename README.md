@@ -3,8 +3,11 @@
 This is a workspace repo for building Ripple 2.0 OSS and its extensions
 
 -- Ripple OSS
+
 -- Comcast extns
+
 -- DpabAppSanity
+
 -- firebolt-devices
 
 
@@ -37,3 +40,8 @@ Below instructions are needed as Ripple OSS is still private within Github.com.
 
 3. Open Terminal 
 > ./setup
+
+4. Setup opensource Ripple with correct github creds. Skip this step if you already signed RDK consent with your comcast Github id
+> cd Ripple
+> git config user.name "Your public name"
+> git config user.email "yourpublicemail@github.com"
