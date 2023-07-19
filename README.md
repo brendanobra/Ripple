@@ -43,5 +43,7 @@ Below instructions are needed as Ripple OSS is still private within Github.com.
 
 4. Setup opensource Ripple with correct github creds. Skip this step if you already signed RDK consent with your comcast Github id
 > cd Ripple
+
 > git config user.name "Your public name"
+
 > git config user.email "yourpublicemail@github.com"
