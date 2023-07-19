@@ -35,8 +35,10 @@ Below instructions are needed as Ripple OSS is still private within Github.com.
 1. Clone EOS Ripple Repo
 >git clone git@github.comcast.com:ottx/eos-ripple.git
 
-2. Open it in VSCode
-> code eos-ripple
+2. > cd eos-ripple
+
+3. Open it in VSCode
+> code .
 
 3. Open Terminal 
 > ./setup
