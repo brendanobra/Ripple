@@ -1,6 +1,6 @@
 [submodule "Ripple"]
 	path = Ripple
-	url = git@github.com:rdkcentral/Ripple.git
+	url = https://github.com/rdkcentral/Ripple.git
 [submodule "ripple_comcast_extns"]
 	path = ripple_comcast_extns
 	url = git@github.comcast.com:ottx/ripple_comcast_extns.git

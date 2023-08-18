@@ -5,6 +5,7 @@ git submodule update --init --recursive
 
 # TODO remove this dependency when we have more platforms
 cd Ripple
+git config url."git@github.com:".pushInsteadOf https://github.com/
 echo "Building OSS"
 cargo build
 cd ..
