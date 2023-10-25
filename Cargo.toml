@@ -1,0 +1,23 @@
+[workspace]
+resolver = "2"
+
+members = [
+    "Ripple/core/sdk",
+    "Ripple/core/tdk",
+    "Ripple/device/thunder_ripple_sdk",
+    "Ripple/core/main",
+    "Ripple/core/launcher",
+    "Ripple/device/thunder",
+    "Ripple/distributor/general",
+    "Ripple/examples/rpc_extn",
+    "Ripple/examples/tm_extn",
+    "ripple_comcast_extns/badger",
+    "ripple_comcast_extns/thunder_comcast",
+    "ripple_comcast_extns/dpab_appsanity",
+]
+
+[workspace.package]
+name = "eos-ripple" # the name of the package
+version = "2.0.0"    # the current version, obeying semver
+edition = "2021"     # the edition, will have no effect on a resolver used in the workspace
+rust-version = "1.69.0" #MSRV
