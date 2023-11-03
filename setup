@@ -4,12 +4,12 @@ echo "pull all sub modules"
 git submodule update --init --recursive
 
 # TODO remove this dependency when we have more platforms
-cd Ripple
+cd Ripple || exit
 git config url."git@github.com:".pushInsteadOf https://github.com/
 echo "Building OSS"
 cargo build
 cd ..
-cd ripple_comcast_extns
+cd ripple_comcast_extns || exit
 echo "Building Comcast Extns"
 cargo build
 cd ..
