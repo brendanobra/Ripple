@@ -56,9 +56,9 @@ function get_default_extension() {
 }
 
 cd Ripple ... || exit
-cargo build
+cargo build --features local_dev
 cd ../ripple_comcast_extns ... || exit
-cargo build
+cargo build --features local_dev
 cd ../Ripple ... || exit
 
 echo "Cleaning up manifest folder in target directory"
