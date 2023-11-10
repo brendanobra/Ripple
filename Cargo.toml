@@ -21,3 +21,8 @@ name = "eos-ripple" # the name of the package
 version = "2.0.0"    # the current version, obeying semver
 edition = "2021"     # the edition, will have no effect on a resolver used in the workspace
 rust-version = "1.69.0" #MSRV
+
+[profile.release]
+strip=true
+opt-level="z"
+codegen-units=1
