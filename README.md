@@ -1,5 +1,6 @@
 # EOS Ripple
 
+
 This is a workspace repo for building Ripple 2.0 OSS and its extensions
 
 -- Ripple OSS
@@ -47,3 +48,6 @@ Below instructions are needed as Ripple OSS is still private within Github.com.
 > git config user.name "Your public name"
 
 > git config user.email "yourpublicemail@github.com"
+
+# Knowledgebase 
+Please refer to the [knowledge base](./kb) in the `kb` folder
