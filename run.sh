@@ -55,37 +55,28 @@ function get_default_extension() {
     esac
 }
 
-cd Ripple ... || exit
-cargo build --features local_dev
-cd ../ripple_comcast_extns ... || exit
-cargo build --features local_dev
-cd ../Ripple ... || exit
-
+cargo build --features local_dev || exit
 echo "Cleaning up manifest folder in target directory"
 mkdir -p target/manifests
 rm -rf ./target/manifests/firebolt-extn-manifest.json
 echo "Copying to target directory"
-cp ../firebolt-devices/"$partner_type"/"$device_type"/extn.json target/manifests/firebolt-extn-manifest.json
-cp ../firebolt-devices/"$partner_type"/"$device_type"/manifest.json target/manifests/firebolt-device-manifest.json
-cp ../firebolt-devices/"$partner_type"/"$device_type"/app-library.json target/manifests/firebolt-app-library.json
+cp firebolt-devices/"$partner_type"/"$device_type"/extn.json target/manifests/firebolt-extn-manifest.json
+cp firebolt-devices/"$partner_type"/"$device_type"/manifest.json target/manifests/firebolt-device-manifest.json
+cp firebolt-devices/"$partner_type"/"$device_type"/app-library.json target/manifests/firebolt-app-library.json
 
-sed -i "" "s@\"default_path\": \"/usr/lib/rust/\"@\"default_path\": \"$workspace_dir/ripple_comcast_extns/target/debug/\"@" target/manifests/firebolt-extn-manifest.json
+sed -i "" "s@\"default_path\": \"/usr/lib/rust/\"@\"default_path\": \"$workspace_dir/target/debug/\"@" target/manifests/firebolt-extn-manifest.json
 default_extension=$(get_default_extension)
-if [ "$partner_type" = "cert" ]; then
-    echo "Cert builds need launcher extension to have an absolute path"
-    sed -i "" "s@\"path\": \"liblauncher\"@\"path\": \"$workspace_dir/Ripple/target/debug/liblauncher.$default_extension\"@" target/manifests/firebolt-extn-manifest.json
-fi
-
 sed -i "" "s@\"default_extension\": \"so\"@\"default_extension\": \"$default_extension\"@" target/manifests/firebolt-extn-manifest.json
 
 ## Update firebolt-device-manifest.json
-sed -i "" "s@\"library\": \"/etc/firebolt-app-library.json\"@\"library\": \"$workspace_dir/Ripple/target/manifests/firebolt-app-library.json\"@" target/manifests/firebolt-device-manifest.json
-export EXTN_MANIFEST=${workspace_dir}/Ripple/target/manifests/firebolt-extn-manifest.json
-export DEVICE_MANIFEST=${workspace_dir}/Ripple/target/manifests/firebolt-device-manifest.json
+sed -i "" "s@\"library\": \"/etc/firebolt-app-library.json\"@\"library\": \"$workspace_dir/target/manifests/firebolt-app-library.json\"@" target/manifests/firebolt-device-manifest.json
+export EXTN_MANIFEST=${workspace_dir}/target/manifests/firebolt-extn-manifest.json
+export DEVICE_MANIFEST=${workspace_dir}/target/manifests/firebolt-device-manifest.json
 
 echo ""
 echo "Environment variables for manifests set"
 echo ""
 echo "DEVICE_MANIFEST=${DEVICE_MANIFEST}"
 echo "EXTN_MANIFEST=${EXTN_MANIFEST}"
+cd Ripple ... || exit
 ./ripple run "$device_ip"
