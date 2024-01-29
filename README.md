@@ -51,3 +51,14 @@ Below instructions are needed as Ripple OSS is still private within Github.com.
 
 # Knowledgebase 
 Please refer to the [knowledge base](./kb) in the `kb` folder
+
+
+# Release Mapping 
+
+| EOS Version | Ripple Open Source Version |ripple_comcast_exension Verion | dpab_appsanity | Firebolt Devices | 
+| ----------- | -------------------------- | ----------------------------- | -------------- | ---------------- |
+| 1.15.0 | Ripple 1.0.0 #f744e53 | #ddf7a69 | #0df6bbb | #96f1347 | 
+| 1.15.1 | Ripple 1.0.0 #b3b202b | #99e14d9 | #1a26d72 | #cde30ee |
+| 1.16.0 | Ripple 1.1.0 #adac025 | #bfb2ead | #2a39af7 | #463c39c | 
+| 1.16.1 | Ripple 1.1.0 #24b6f5a | #bfb2ead | #2a39af7 | #463c39c |
+| 1.16.2 | Ripple 1.1.0 #f5c6e0d | #bfb2ead | #2a39af7 | #463c39c |
