@@ -14,6 +14,7 @@ members = [
     "ripple_comcast_extns/badger",
     "ripple_comcast_extns/thunder_comcast",
     "ripple_comcast_extns/dpab_appsanity",
+    "ripple_comcast_extns/ripple-bolt-extn",
 ]
 
 [workspace.package]
