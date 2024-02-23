@@ -15,6 +15,7 @@ members = [
     "ripple_comcast_extns/thunder_comcast",
     "ripple_comcast_extns/dpab_appsanity",
     "ripple_comcast_extns/ripple-bolt-extn",
+    "ripple_comcast_extns/ripple_comcast_observability",
 ]
 
 [workspace.package]
