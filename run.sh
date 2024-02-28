@@ -9,7 +9,7 @@ echo "Current working directory: ${workspace_dir}"
 
 echo ""
 echo "Before we proceed lets setup the manifest"
-
+ 
 if [ -z "$1" ]; then 
     echo "Please enter the type of device you are on. Options: Panel, Puck"
     read -r device_type
