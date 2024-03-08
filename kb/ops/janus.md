@@ -1,10 +1,8 @@
 # Janus
 Janus is a managed kubernetes platform.
 
-
-
 # Tools required
-To interactive with Janus (kubernetes), several tools must be installed:
+To interact with Janus (kubernetes), several tools must be installed:
 - [aadawscli](https://github.com/cloud-cre/AWSAzureADCLI) - Tool that exchanges comcast credentials for aws credentials
 
 - kubectl (see your os install, on mac `brew install kubectl`)
@@ -14,6 +12,7 @@ To interactive with Janus (kubernetes), several tools must be installed:
 
 # Onboarding
 ask bobra200 for onboarding
+
 
 # Using
 login with aadawscli:
@@ -67,6 +66,21 @@ aws --profile saml eks update-kubeconfig  --region us-east-1 --name  eks-janus-t
 ```
 
 # Actually seeing *metrics*
+
+##  Just gimme a dashboard
+For the impatient, the janus development grafana instance is [](https://watchtower.dev.us-east-1.janus.comcast.com/?orgId=1)
+
+To create dashboards, you will need write access. To get wriate acces:
+
+1) Login to https://watchtower.dev.us-east-1.janus.comcast.com/?orgId=1
+
+2) tell `bobra200` you want access
+
+3) logout and login
+
+4) be gentle 
+
+## Comamand line! Lemme have it!
 
 Assuming you have logged in, the quickest/dirtiest way to see metrics as they are repsented in k8s is to port forward the prometheus export endpoint/port
 
@@ -123,11 +137,8 @@ ripple_account_session_milliseconds_sum{app_id="root",job="ripple",status="0",tr
 
 
 
-
-
-
 # Tips
-janus has a development cluster, which is a safe space to do scary things (but be nice, others play there as well)
+janus has a [development cluster] (https://watchtower.dev.us-east-1.janus.comcast.com/?orgId=1), which is a safe space to do scary things (but be nice, others play there as well)
 
 The export from ripple is curently every minute, so it requires some patience to see values updated
 

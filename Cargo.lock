@@ -1216,6 +1216,8 @@ dependencies = [
  "httpmock",
  "hyper",
  "hyper-tls",
+ "lalrpop",
+ "lalrpop-util",
  "log",
  "log4rs",
  "maplit",
