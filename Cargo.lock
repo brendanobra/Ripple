@@ -1238,7 +1238,6 @@ dependencies = [
  "tower",
  "tower-http",
  "tracing",
- "tracing-futures",
  "url",
  "uuid",
  "vergen",
@@ -3862,6 +3861,7 @@ name = "rust-linchpin-client"
 version = "0.1.0"
 dependencies = [
  "futures-util",
+ "ripple_sdk",
  "serde",
  "serde_json",
  "tokio",
