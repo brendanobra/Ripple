@@ -1,0 +1,3 @@
+[registries.partner_artifactory]
+index = "sparse+https://partners.artifactory.comcast.com/artifactory/api/cargo/eos-ripple/index/"
+
