@@ -1198,6 +1198,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "distro_protos"
+version = "0.1.10"
+source = "sparse+https://partners.artifactory.comcast.com/artifactory/api/cargo/eos-ripple/index/"
+checksum = "0aac9608556c4fd11b896e5cab4dd4e3bbe0f6fadff5d35ddba17ed9ca35ca4a"
+dependencies = [
+ "home",
+ "prost 0.10.4",
+ "prost-types 0.10.1",
+ "serde",
+ "serde_json",
+ "tonic 0.7.2",
+ "tonic-build 0.7.1",
+ "vergen",
+]
+
+[[package]]
 name = "dpab_appsanity"
 version = "1.16.0"
 dependencies = [
@@ -1208,6 +1224,7 @@ dependencies = [
  "chrono",
  "chrono-tz 0.4.1",
  "cryptoxide",
+ "distro_protos",
  "dpab_core",
  "env-file-reader",
  "env_logger 0.9.3",
@@ -1221,6 +1238,7 @@ dependencies = [
  "log",
  "log4rs",
  "maplit",
+ "ottx_protos",
  "pact_consumer",
  "prost 0.10.4",
  "prost-types 0.10.1",
@@ -2901,6 +2919,22 @@ dependencies = [
  "log",
  "serde",
  "winapi",
+]
+
+[[package]]
+name = "ottx_protos"
+version = "0.1.6"
+source = "sparse+https://partners.artifactory.comcast.com/artifactory/api/cargo/eos-ripple/index/"
+checksum = "3500dbb8ac1ef1b79490c27fd7ed7e261a5dc62c468809dc8108fc52c989a9cc"
+dependencies = [
+ "home",
+ "prost 0.10.4",
+ "prost-types 0.10.1",
+ "serde",
+ "serde_json",
+ "tonic 0.7.2",
+ "tonic-build 0.7.1",
+ "vergen",
 ]
 
 [[package]]
