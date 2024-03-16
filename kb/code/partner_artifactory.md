@@ -12,7 +12,7 @@ JFrog documentation is [here](https://jfrog.com/help/r/jfrog-artifactory-documen
 https://partners.artifactory.comcast.com/ui/repos/tree/General/eos-ripple
 
 
-JFrog uses SSO, once you logged in click on <Set Me Up> and follow the instructions in <Generate Token and Crate instructions> 
+JFrog uses SSO, once you logged in click on < Set Me Up > and follow the instructions in < Generate Token and Crate instructions > 
 
  
 
@@ -26,33 +26,27 @@ https://partners.artifactory.comcast.com/artifactory/eos-ripple/config.json
 ```
 
 ## Artifactory Local Configuration  
-```
-$ cat ~/.cargo/config.toml  
-# Makes artifactory the default registry and saves passing --registry parameter 
-[registry] 
-default = "partner_artifactory" 
 
- 
-[registries.partner_artifactory] 
-index = "sparse+https://partners.artifactory.comcast.com/artifactory/api/cargo/eos-ripple/index/" 
-```
-
-Above is not necessary, added the necesary change in
-https://github.comcast.com/ottx/eos-ripple/blob/RPPL-1468/.cargo/config.toml
+Necesary changes for the local configuration are in
+https://github.comcast.com/ottx/eos-ripple/blob/main/.cargo/config.toml &
+https://github.comcast.com/ottx/dpab_appsanity/blob/ripple-2-main/.cargo/config.toml
 
 ## Authentication 
+Currently partner_artifactory is setup to be annonymous, if that change then the following is necessary. 
 
-“cargo login –registry partner_artifactory” will prompt you for the toeken and save the credentials in ~/.cargo/credentials.toml OR update it directly as follows 
+“cargo login –registry partner_artifactory” will prompt you for the token and save the credentials in ~/.cargo/credentials.toml OR update it directly as follows 
 
  
 ~/.cargo/credentials.toml: 
 ```
-[registries.artifactory] 
+[registries.partner_artifactory] 
 token = "Bearer <TOKEN>" 
 ```
  
 
 ## Publishing crates 
+WARNING: Do not publish without updating the version.
+
 To publish ottx-protos-create follow in the instructions in README.md
 > Source: https://github.comcast.com/ottx/ottx-protos-crate 
 
@@ -63,7 +57,7 @@ To publish distro-protos-crate follow in the instructions in README.md
  
 Once published crate cannot be deleted, to prevent using a specific version, use yank 
 
-> rgo yank [options] --version version [crate] 
+> cargo yank [options] --version version [crate] 
 
 Index of eos-ripple/crates: https://partners.artifactory.comcast.com/ui/native/eos-ripple/ 
 
