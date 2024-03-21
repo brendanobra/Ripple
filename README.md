@@ -28,7 +28,18 @@ Unfortunately during this window we have to bear the difficulties of building a 
 
 Below instructions are needed as Ripple OSS is still private within Github.com. 
 
+### Rust
+To install rust for the 1st time on your workstation, use these instructions: https://www.rust-lang.org/tools/install
+
+The current version of rust that Ripple compiles with is: 1.76.0
+
+to set the default version on your workstation (which is generally a good idea to prevent issues from being hidden):
+
+` rustup default 1.76.0`
+
+
 ### Setup
+
 
 
 1. Clone EOS Ripple Repo
