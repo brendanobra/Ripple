@@ -1,0 +1,672 @@
+{
+  "Controller.1.register": [
+    {
+      "params": {
+        "event": "statechange",
+        "id": "client.Controller.1.events"
+      },
+      "result": 0
+    }
+  ],
+  "org.rdk.System.1.getSystemVersions": [
+    {
+      "result": {
+        "receiverVersion": "6.9.0.0",
+        "stbTimestamp": "Tue 07 Nov 2023 00:03:20 AP UTC",
+        "stbVersion": "SCXI11BEI_VBN_23Q4_sprint_20231107000320sdy_FG_EDGE_R2PB_NG",
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.System.register": [
+    {
+      "params": {
+        "event": "onTimeZoneDSTChanged",
+        "id": "client.org.rdk.System.events"
+      },
+      "result": 0,
+      "events": [
+        {
+          "delay": 0,
+          "data": {
+            "oldTimeZone": "America/New_York",
+            "newTimeZone": "Europe/London",
+            "oldAccuracy": "INITIAL",
+            "newAccuracy": "FINAL"
+          }
+        }
+      ]
+    },
+    {
+      "params": {
+        "event": "onSystemPowerStateChanged",
+        "id": "client.org.rdk.System.events"
+      },
+      "result": 0,
+      "events": [
+        {
+          "delay": 0,
+          "data": {
+            "powerState": "ON",
+            "currentPowerState": "ON"
+          }
+        }
+      ]
+    }
+  ],
+  "org.rdk.Network.register": [
+    {
+      "params": {
+        "event": "onInternetStatusChange",
+        "id": "client.org.rdk.Network.events"
+      },
+      "result": 0,
+      "events": [
+        {
+          "delay": 0,
+          "data": {
+            "state": 0,
+            "status": "FULLY_CONNECTED"
+          }
+        }
+      ]
+    }
+  ],
+  "org.rdk.HdmiCec_2.0.getEnabled": [
+    {
+      "error": {
+        "code": 2,
+        "message": "Service is not active"
+      }
+    }
+  ],
+  "org.rdk.FrontPanel.0.getBrightness": [
+    {
+      "result": {
+        "brightness": 10,
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.System.0.getTimeZones": [
+    {
+      "result": {
+        "zoneinfo": {
+          "America": {
+            "Anchorage": "Wed Mar 15 03:34:17 2023 AKDT",
+            "Chicago": "Wed Mar 15 06:34:17 2023 CDT",
+            "Denver": "Wed Mar 15 05:34:17 2023 MDT",
+            "Edmonton": "Wed Mar 15 05:34:17 2023 MDT"
+          }
+        }
+      }
+    }
+  ],
+  "org.rdk.System.0.getPowerState": [
+    {
+      "result": {
+        "powerState": "ON",
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.System.0.getTerritory": [
+    {
+      "result": {
+        "territory": "USA",
+        "region": "US-NY",
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.System.0.getWakeupReason": [
+    {
+      "result": {
+        "wakeupReason": "WAKEUP_REASON_COLDBOOT",
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.HdmiCec_2.0.getOTPEnabled": [
+    {
+      "result": {
+        "enabled": false,
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.MaintenanceManager.0.getMaintenanceStartTime": [
+    {
+      "result": {
+        "maintenanceStartTime": 12345678,
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.System.0.setNetworkStandbyMode": [
+    {
+      "result": {
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.TextToSpeech.0.isttsenabled": [
+    {
+      "result": {
+        "isenabled": true,
+        "TTS_Status": 0,
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.TextToSpeech.0.setttsconfiguration": [
+    {
+      "params": {
+        "ttsendpointsecured": "https://sky-tts-run-api-gateway-3m02gblb.ew.gateway.dev/tts",
+        "volume": 100,
+        "language": "en-GB",
+        "voice": "en-GB-Standard-A",
+        "rate": "normal",
+        "authinfo": {
+          "type": "apikey"
+        },
+        "fallbacktext": {
+          "scenario": "offline",
+          "value": "Voice guidance is not available as we've lost connection to your internet. Please check your settings."
+        },
+        "primvolduckpercent": 0
+      },
+      "result": {
+        "TTS_Status": 0,
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.AuthService.0.getActivationStatus": [
+    {
+      "result": {
+        "status": "activation-ready",
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.SystemAudioPlayer.0.stop": [
+    {
+      "params": {
+        "id": 0
+      },
+      "result": {
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.MaintenanceManager.0.getMaintenanceActivityStatus": [
+    {
+      "result": {
+        "maintenanceStatus": "MAINTENANCE_ERROR",
+        "LastSuccessfulCompletionTime": 1677099757,
+        "isCriticalMaintenance": false,
+        "isRebootPending": true,
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.System.0.getPowerStateBeforeReboot": [
+    {
+      "result": {
+        "state": "STANDBY",
+        "success": true
+      }
+    }
+  ],
+  "DRMActivationService.GetActivationStatus": [
+    {
+      "error": {
+        "code": -32603,
+        "message": "Could not access requested service"
+      }
+    }
+  ],
+  "org.rdk.System.0.getTimeStatus": [
+    {
+      "result": {
+        "TimeQuality": "Good",
+        "TimeSrc": "NTP",
+        "Time": "1678880057",
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.System.1.getDeviceInfo": [
+    {
+      "params": {
+        "params": [
+          "estb_mac"
+        ]
+      },
+      "result": {
+        "estb_mac": "20:F1:9E:EE:62:08",
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.AuthService.1.getServiceAccountId": [
+    {
+      "result": "7487359890816911506"
+    }
+  ],
+  "org.rdk.AuthService.1.getDeviceId": [
+    {
+      "result": "c182ae04-84a6-4c51-ad8b-7de7aeb3c823"
+    }
+  ],
+  "org.rdk.AuthService.1.getXDeviceId": [
+    {
+      "result": "1360830220996266256"
+    }
+  ],
+  "org.rdk.AuthService.1.getServiceAccessToken": [
+    {
+      "result": {
+        "status": "0",
+        "token": "eyJraWQiOiJzYXQtcHIifQ==",
+        "expires": 31530812,
+        "success": true,
+        "message": ""
+      }
+    }
+  ],
+  "org.rdk.Network.1.getInterfaces": [
+    {
+      "result": {
+        "Interfaces": [
+          {
+            "interface": "WIFI",
+            "macAddress": "AA:AA:AA:AA:AA:AA",
+            "enabled": true,
+            "connected": true
+          }
+        ],
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.RDKShell.destroy": [
+    {
+      "params": {
+        "callsign": "Html-0"
+      },
+      "result": {
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.DisplaySettings.1.getAudioFormat": [
+    {
+      "result": {
+        "supportedAudioFormat": [
+          "NONE",
+          "PCM",
+          "AAC",
+          "VORBIS",
+          "WMA",
+          "DOLBY AC3",
+          "DOLBY EAC3",
+          "DOLBY AC4",
+          "DOLBY MAT",
+          "DOLBY TRUEHD",
+          "DOLBY EAC3 ATMOS",
+          "DOLBY TRUEHD ATMOS",
+          "DOLBY MAT ATMOS",
+          "DOLBY AC4 ATMOS",
+          "UNKNOWN"
+        ],
+        "currentAudioFormat": "PCM",
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.RDKShell.1.getSystemMemory": [
+    {
+      "result": {
+        "freeRam": 321944,
+        "swapRam": 0,
+        "totalRam": 624644,
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.System.1.getTimeZones": [
+    {
+      "result": {
+        "zoneinfo": {
+          "America": {
+            "New_York": "Thu Nov 5 15:21:17 2020 EST",
+            "Los_Angeles": "Thu Nov 5 12:21:17 2020 PST"
+          },
+          "Europe": {
+            "London": "Thu Nov 5 14:21:18 2020 CST"
+          }
+        },
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.DisplaySettings.1.getCurrentResolution": [
+    {
+      "params": {
+        "videoDisplay": "HDMI0"
+      },
+      "result": {
+        "resolution": "1080p",
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.HdcpProfile.1.getHDCPStatus": [
+    {
+      "result": {
+        "HDCPStatus": {
+          "isConnected": false,
+          "isHDCPCompliant": false,
+          "isHDCPEnabled": false,
+          "hdcpReason": 1,
+          "supportedHDCPVersion": "2.2",
+          "receiverHDCPVersion": "1.4",
+          "currentHDCPVersion": "1.4"
+        },
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.HdcpProfile.1.getSettopHDCPSupport": [
+    {
+      "result": {
+        "supportedHDCPVersion": "2.2",
+        "isHDCPSupported": true,
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.DisplaySettings.1.getTVHDRCapabilities": [
+    {
+      "result": {
+        "capabilities": 3,
+        "success": true
+      }
+    }
+  ],
+  "LocationSync.1.location": [
+    {
+      "result": {
+        "city": "Wroclaw",
+        "country": "Poland",
+        "publicip": "78.11.117.118",
+        "region": "Wroclaw",
+        "timezone": "CET-1CEST,M3.5.0,M10.5.0/3"
+      }
+    }
+  ],
+  "org.rdk.DisplaySettings.1.getDefaultResolution": [
+    {
+      "result": {
+        "defaultResolution": "720p",
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.TextToSpeech.1.isttsenabled": [
+    {
+      "result": {
+        "isenabled": true,
+        "TTS_Status": 0,
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.TextToSpeech.getttsconfiguration": [
+    {
+      "result": {
+        "TTS_Status": "0",
+        "language": "en-US",
+        "rate": 50,
+        "success": true,
+        "ttsendpoint": "http://url_for_the_text_to_speech_processing_unit.com",
+        "ttsendpointsecured": "https://url_for_the_text_to_speech_processing_unit.com",
+        "voice": "carol",
+        "volume": "100.000000"
+      }
+    }
+  ],
+  "org.rdk.PersistentStore.1.getValue": [
+    {
+      "params": {
+        "namespace": "ns1",
+        "key": "key1"
+      },
+      "result": {
+        "value": "value1",
+        "success": true
+      }
+    },
+    {
+      "params": {
+        "key": "language",
+        "namespace": "Localization"
+      },
+      "result": {
+        "value": "value1",
+        "success": true
+      }
+    },
+    {
+      "params": {
+        "key": "name",
+        "namespace": "DeviceName"
+      },
+      "result": {
+        "value": "value1",
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.RDKShell.1.launch": [
+    {
+      "params": {
+        "callsign": "Html-0",
+        "focused": true,
+        "h": 1080,
+        "suspend": false,
+        "type": "HtmlApp",
+        "uri": "https://url_for_app",
+        "visible": true,
+        "w": 1920,
+        "x": 0,
+        "y": 0
+      },
+      "result": {
+        "launchType": "activate",
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.RDKShell.1.moveToBack": [
+    {
+      "params": {
+        "client": "org.rdk.Netflix",
+        "callsign": "org.rdk.Netflix"
+      },
+      "result": {
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.RDKShell.1.moveToFront": [
+    {
+      "params": {
+        "client": "org.rdk.Netflix",
+        "callsign": "org.rdk.Netflix"
+      },
+      "result": {
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.System.1.setTimeZoneDST": [
+    {
+      "params": {
+        "timeZone": "America/New_York",
+        "accuracy": "INITIAL"
+      },
+      "result": {
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.TextToSpeech.1.enabletts": [
+    {
+      "params": {
+        "enabletts": true
+      },
+      "result": {
+        "TTS_Status": 0,
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.TextToSpeech.1.setttsconfiguration": [
+    {
+      "params": {
+        "rate": 50
+      },
+      "result": {
+        "TTS_Status": 0,
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.PersistentStore.1.setValue": [
+    {
+      "params": {
+        "namespace": "ns1",
+        "key": "key1",
+        "value": "value1"
+      },
+      "result": {
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.RDKShell.1.setVisibility": [
+    {
+      "params": {
+        "client": "org.rdk.Netflix",
+        "callsign": "org.rdk.Netflix",
+        "visible": true
+      },
+      "result": {
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.RDKShell.1.setBounds": [
+    {
+      "params": {
+        "client": "org.rdk.Netflix",
+        "callsign": "org.rdk.Netflix",
+        "h": 1080,
+        "w": 1980,
+        "x": 0,
+        "y": 0
+      },
+      "result": {
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.RDKShell.1.setFocus": [
+    {
+      "params": {
+        "client": "org.rdk.Netflix",
+        "callsign": "org.rdk.Netflix"
+      },
+      "result": {
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.AuthService.getXDeviceId": [
+    {
+      "result": {
+        "xDeviceId": "1360830220996266256",
+        "success": true,
+        "message": " "
+      }
+    }
+  ],
+  "org.rdk.AuthService.getDeviceId": [
+    {
+      "result": {
+        "deviceId": "c182ae04-84a6-4c51-ad8b-7de7aeb3c823",
+        "partnerId": "comcast",
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.AuthService.getServiceAccountId": [
+    {
+      "result": {
+        "serviceAccountId": "7487359890816911506",
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.AuthService.getServiceAccessToken": [
+    {
+      "result": {
+        "status": "0",
+        "token": "eyJraWQiOiJzYXQtcHJ",
+        "expires": 31530812,
+        "success": true,
+        "message": " "
+      }
+    }
+  ],
+  "org.rdk.System.1.getPowerState": [
+    {
+      "result": {
+        "powerState": "ON",
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.Network.1.getInternetConnectionState": [
+    {
+      "result": {
+        "state": 3,
+        "URI": "http://10.0.0.1/captiveportal.jst",
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.DisplaySettings.register": [
+    {
+      "params": {
+        "event": "resolutionChanged",
+        "id": "client.org.rdk.DisplaySettings.events"
+      },
+      "result": 0,
+      "events": [
+        {
+          "delay": 1000,
+          "data": {
+            "width": 1920,
+            "height": 1080,
+            "videoDisplayType": "HDMI0",
+            "resolution": "1080p"
+          }
+        }
+      ]
+    }
+  ]
+}

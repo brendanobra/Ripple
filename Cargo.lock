@@ -647,7 +647,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tokio",
- "tokio-tungstenite",
+ "tokio-tungstenite 0.17.2",
  "url",
 ]
 
@@ -1090,6 +1090,12 @@ dependencies = [
  "quote",
  "syn 1.0.109",
 ]
+
+[[package]]
+name = "data-encoding"
+version = "2.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7e962a19be5cfc3f3bf6dd8f61eb50107f356ad6270fbb3ed41476571db78be5"
 
 [[package]]
 name = "deadpool"
@@ -2536,7 +2542,7 @@ dependencies = [
  "sd-notify",
  "serde",
  "serde_json",
- "tokio-tungstenite",
+ "tokio-tungstenite 0.17.2",
  "vergen",
 ]
 
@@ -2610,6 +2616,20 @@ dependencies = [
  "libc",
  "wasi 0.11.0+wasi-snapshot-preview1",
  "windows-sys 0.48.0",
+]
+
+[[package]]
+name = "mock_device"
+version = "1.0.0"
+dependencies = [
+ "http",
+ "jsonrpsee",
+ "ripple_sdk",
+ "ripple_tdk",
+ "serde",
+ "serde_json",
+ "tokio-tungstenite 0.20.1",
+ "url",
 ]
 
 [[package]]
@@ -3913,7 +3933,7 @@ dependencies = [
  "serde_json",
  "tokio",
  "tokio-test",
- "tokio-tungstenite",
+ "tokio-tungstenite 0.17.2",
  "tracing",
  "url",
  "uuid",
@@ -4609,7 +4629,7 @@ dependencies = [
  "strum",
  "strum_macros",
  "test-log",
- "tokio-tungstenite",
+ "tokio-tungstenite 0.17.2",
  "tree_magic_mini",
  "url",
 ]
@@ -4664,7 +4684,7 @@ dependencies = [
  "ripple_sdk",
  "serde",
  "serde_json",
- "tokio-tungstenite",
+ "tokio-tungstenite 0.17.2",
  "url",
 ]
 
@@ -4774,7 +4794,19 @@ dependencies = [
  "native-tls",
  "tokio",
  "tokio-native-tls",
- "tungstenite",
+ "tungstenite 0.17.3",
+]
+
+[[package]]
+name = "tokio-tungstenite"
+version = "0.20.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "212d5dcb2a1ce06d81107c3d0ffa3121fe974b73f068c8282cb1c32328113b6c"
+dependencies = [
+ "futures-util",
+ "log",
+ "tokio",
+ "tungstenite 0.20.1",
 ]
 
 [[package]]
@@ -5067,6 +5099,25 @@ dependencies = [
  "native-tls",
  "rand 0.8.5",
  "sha-1 0.10.1",
+ "thiserror",
+ "url",
+ "utf-8",
+]
+
+[[package]]
+name = "tungstenite"
+version = "0.20.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9e3dac10fd62eaf6617d3a904ae222845979aec67c615d1c842b4002c7666fb9"
+dependencies = [
+ "byteorder",
+ "bytes",
+ "data-encoding",
+ "http",
+ "httparse",
+ "log",
+ "rand 0.8.5",
+ "sha1",
  "thiserror",
  "url",
  "utf-8",

@@ -1,6 +1,6 @@
 #!/bin/bash
 shopt -s nocasematch
-workspace_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+workspace_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
 echo "*****      Welcome to Eos-Ripple Run script        *****"
 echo ""
@@ -9,9 +9,9 @@ echo "Current working directory: ${workspace_dir}"
 
 echo ""
 echo "Before we proceed lets setup the manifest"
- 
-if [ -z "$1" ]; then 
-    echo "Please enter the type of device you are on. Options: Panel, Puck"
+
+if [ -z "$1" ]; then
+    echo "Please enter the type of device you are on. Options: Panel, Puck, Mock"
     read -r device_type
 else
     device_type=$1
@@ -20,38 +20,44 @@ device_type=$(echo "$device_type" | tr '[:upper:]' '[:lower:]')
 
 echo "Device Type selected ${device_type}"
 
-if [ -z "$2" ]; then
-    echo "Please enter the type of Partner you are on. Options: Cert, Sky-UK, Xumo"
-    read -r partner_type
+if [ "$device_type" == "mock" ]; then
+    echo "Initializing mock mode"
+    is_mock=true
+    device_type=puck
+    partner_type=xumo
 else
-    partner_type=$2
+    if [ -z "$2" ]; then
+        echo "Please enter the type of Partner you are on. Options: Cert, Sky-UK, Xumo"
+        read -r partner_type
+    else
+        partner_type=$2
+    fi
+
+    partner_type=$(echo "$partner_type" | tr '[:upper:]' '[:lower:]')
+
+    echo "Partner Type selected ${partner_type}"
+
+    if [ -z "$3" ]; then
+        echo "Please enter the ip address of the device"
+        read -r device_ip
+    else
+        device_ip=$3
+    fi
+
+    echo "Device ip entered ${device_ip}"
 fi
-
-partner_type=$(echo "$partner_type" | tr '[:upper:]' '[:lower:]')
-
-echo "Partner Type selected ${partner_type}"
-
-if [ -z "$3" ]; then
-    echo "Please enter the ip address of the device"
-    read -r device_ip
-else
-    device_ip=$3
-fi
-
-echo "Device ip entered ${device_ip}"
-
 
 function get_default_extension() {
     case "$(uname -s)" in
-        Darwin)
-            echo "dylib"
-            ;;
-        CYGWIN*|MINGW32*|MSYS*|MINGW*)
-            echo "dll"
-            ;;
-        Linux)
-            echo "so"
-            ;;
+    Darwin)
+        echo "dylib"
+        ;;
+    CYGWIN* | MINGW32* | MSYS* | MINGW*)
+        echo "dll"
+        ;;
+    Linux)
+        echo "so"
+        ;;
     esac
 }
 
@@ -60,9 +66,18 @@ echo "Cleaning up manifest folder in target directory"
 mkdir -p target/manifests
 rm -rf ./target/manifests/firebolt-extn-manifest.json
 echo "Copying to target directory"
-cp firebolt-devices/"$partner_type"/"$device_type"/extn.json target/manifests/firebolt-extn-manifest.json
-cp firebolt-devices/"$partner_type"/"$device_type"/manifest.json target/manifests/firebolt-device-manifest.json
 cp firebolt-devices/"$partner_type"/"$device_type"/app-library.json target/manifests/firebolt-app-library.json
+
+if [ "$is_mock" ]; then
+    echo "Copying mock manifests"
+    cp mock/manifest.json target/manifests/firebolt-device-manifest.json
+    cp mock/extn.json target/manifests/firebolt-extn-manifest.json
+    cp mock/mock-thunder-device.json target/manifests/mock-thunder-device.json
+    sed -i "" "s@\"mock_data_file\": \"mock-device.json\"@\"mock_data_file\": \"$workspace_dir/target/manifests/mock-thunder-device.json\"@" target/manifests/firebolt-extn-manifest.json
+else
+    cp firebolt-devices/"$partner_type"/"$device_type"/manifest.json target/manifests/firebolt-device-manifest.json
+    cp firebolt-devices/"$partner_type"/"$device_type"/extn.json target/manifests/firebolt-extn-manifest.json
+fi
 
 sed -i "" "s@\"default_path\": \"/usr/lib/rust/\"@\"default_path\": \"$workspace_dir/target/debug/\"@" target/manifests/firebolt-extn-manifest.json
 default_extension=$(get_default_extension)
@@ -78,5 +93,4 @@ echo "Environment variables for manifests set"
 echo ""
 echo "DEVICE_MANIFEST=${DEVICE_MANIFEST}"
 echo "EXTN_MANIFEST=${EXTN_MANIFEST}"
-cd Ripple ... || exit
-./ripple run "$device_ip"
+target/debug/ripple

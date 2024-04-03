@@ -1,0 +1,177 @@
+{
+    "default_path": "/usr/lib/rust/",
+    "default_extension": "so",
+    "extns": [
+        {
+            "path": "libbadger",
+            "symbols": [
+                {
+                    "id": "ripple:extn:jsonrpsee:badger",
+                    "uses": [
+                        "config",
+                        "rpc",
+                        "account_link",
+                        "manager.storage",
+                        "settings",
+                        "device_info",
+                        "lifecycle_management",
+                        "keyboard",
+                        "pin_challenge",
+                        "app_events",
+                        "caps",
+                        "account.session",
+                        "metrics"
+                    ],
+                    "fulfills": [
+                        "json_rpsee"
+                    ]
+                }
+            ]
+        },
+        {
+            "path": "libthunder_comcast",
+            "symbols": [
+                {
+                    "id": "ripple:channel:device:thunder_comcast",
+                    "uses": [
+                        "config",
+                        "app_events",
+                        "rpc",
+                        "ripple_context",
+                        "operational_metric_listener",
+                        "listener.pubsub",
+                        "metrics",
+                        "observability"
+                    ],
+                    "fulfills": [
+                        "root.session",
+                        "device.session",
+                        "bridge_protocol",
+                        "account.session",
+                        "device_info",
+                        "window_manager",
+                        "browser",
+                        "wifi",
+                        "local.storage",
+                        "remote_accessory",
+                        "app_events",
+                        "input.device_events",
+                        "hdr.device_events",
+                        "screen_resolution.device_events",
+                        "video_resolution.device_events",
+                        "voice_guidance.device_events",
+                        "network.device_events",
+                        "internet.device_events",
+                        "audio.device_events",
+                        "system_power_state.device_events",
+                        "time_zone.device_events",
+                        "remote_feature_control",
+                        "apps"
+                    ]
+                }
+            ]
+        },
+        {
+            "path": "libdpab_appsanity",
+            "symbols": [
+                {
+                    "id": "ripple:channel:distributor:eos",
+                    "uses": [
+                        "config",
+                        "usergrant_local.storage",
+                        "ripple_context",
+                        "provider.pubsub",
+                        "listener.pubsub",
+                        "privacy_local.storage",
+                        "account.session",
+                        "device_info",
+                        "ripple_context",
+                        "metrics",
+                        "observability"
+                    ],
+                    "fulfills": [                                                                                                                 
+                        "permissions",                                                                                                            
+                        "secure.storage",                                                                                                         
+                        "advertising",                                                                                                            
+                        "media_events",
+                        "privacy_cloud.storage",
+                        "cloud_sync",
+                        "discovery",
+                        "encoder",
+                        "behavior_metrics",
+                        "platform.session",
+                        "usergrant_cloud.storage",
+                        "publish.pubsub",
+                        "provider.pubsub",
+                        "app_catalog"
+                    ],
+                    "config": {
+                        "use_integrated_linchpin": "false"
+                    }
+                }                                                                                                                                 
+            ]
+        },
+        {
+            "path": "libmock_device",
+            "symbols": [
+                {
+                    "id": "ripple:channel:device:mock_device",
+                    "config": {
+                        "mock_data_file": "mock-device.json",
+                        "activate_all_plugins": "true"
+                    },
+                    "uses": [
+                        "config"
+                    ],
+                    "fulfills": [
+                    ]
+                },
+                {
+                    "id": "ripple:extn:jsonrpsee:mock_device",
+                    "uses": [
+                        "ripple:channel:device:mock_device"
+                    ],
+                    "fulfills": [
+                        "json_rpsee"
+                    ]
+                }
+            ]
+        }
+    ],
+    "required_contracts": [
+        "rpc",
+        "lifecycle_management",
+        "device_info",
+        "window_manager",
+        "browser",
+        "permissions",
+        "account.session",
+        "wifi",
+        "local.storage",
+        "remote_accessory",
+        "secure.storage",
+        "advertising",
+        "privacy_settings",
+        "metrics",
+        "root.session",
+        "device.session",
+        "bridge_protocol",
+        "privacy_cloud.storage",
+        "behavior_metrics",
+        "encoder",
+        "remote_feature_control",
+        "app_catalog",
+        "apps",
+        "ripple_context",
+        "observability"
+    ],
+    "rpc_aliases": {
+        "advertising.advertisingId": [
+            "badger.advertisingId",
+            "badger.xifa"
+        ],
+        "advertising.appBundleId": [
+            "badger.appStoreId"
+        ]
+    }
+}

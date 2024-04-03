@@ -60,6 +60,12 @@ to set the default version on your workstation (which is generally a good idea t
 
 > git config user.email "yourpublicemail@github.com"
 
+## Running without a device
+
+Eos-Ripple now supports mock device extension using which you can emulate thunder responses and run Ripple without needing a device.
+Command to run Ripple without a device
+>./run.sh mock
+
 # Knowledgebase 
 Please refer to the [knowledge base](./kb) in the `kb` folder
 
