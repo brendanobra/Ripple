@@ -1,0 +1,389 @@
+[2024-03-25T15:43:54Z INFO  unused_features::subcommands::analyze] /home/vsathy552/MyWork/Vin-WIP/Ripple/temp/eos-ripple
+[2024-03-25T15:43:54Z INFO  unused_features::subcommands::analyze] |===== Crate 'ripple_sdk' =====|
+[2024-03-25T15:43:54Z INFO  unused_features::subcommands::analyze] Start pruning feature flags. The process will recompile the project 40 times.
+[2024-03-25T15:43:54Z INFO  unused_features::subcommands::analyze] [0.0%]: ==== Dependency 'semver', removing 1 flags =====
+[2024-03-25T15:43:54Z INFO  unused_features::subcommands::analyze] [0.0%]: Prune 'std' feature flag from 'semver'
+[2024-03-25T15:44:23Z INFO  unused_features::subcommands::analyze] [10.0%]: ==== Dependency 'serde', removing 3 flags =====
+[2024-03-25T15:44:23Z INFO  unused_features::subcommands::analyze] [10.0%]: Prune 'std' feature flag from 'serde'
+[2024-03-25T15:44:24Z INFO  unused_features::subcommands::analyze] [13.3%]: Prune 'serde_derive' feature flag from 'serde'
+[2024-03-25T15:44:24Z INFO  unused_features::subcommands::analyze] [16.7%]: Prune 'derive' feature flag from 'serde'
+[2024-03-25T15:44:24Z INFO  unused_features::subcommands::analyze] [20.0%]: ==== Dependency 'futures', removing 3 flags =====
+[2024-03-25T15:44:24Z INFO  unused_features::subcommands::analyze] [20.0%]: Prune 'executor' feature flag from 'futures'
+[2024-03-25T15:44:49Z INFO  unused_features::subcommands::analyze] [23.3%]: Prune 'async-await' feature flag from 'futures'
+[2024-03-25T15:45:18Z INFO  unused_features::subcommands::analyze] [26.7%]: Prune 'std' feature flag from 'futures'
+[2024-03-25T15:45:18Z INFO  unused_features::subcommands::analyze] [30.0%]: ==== Dependency 'serde_json', removing 1 flags =====
+[2024-03-25T15:45:18Z INFO  unused_features::subcommands::analyze] [30.0%]: Prune 'std' feature flag from 'serde_json'
+[2024-03-25T15:45:18Z INFO  unused_features::subcommands::analyze] [40.0%]: ==== Dependency 'regex', removing 3 flags =====
+[2024-03-25T15:45:18Z INFO  unused_features::subcommands::analyze] [40.0%]: Prune 'perf' feature flag from 'regex'
+[2024-03-25T15:45:46Z INFO  unused_features::subcommands::analyze] [43.3%]: Prune 'std' feature flag from 'regex'
+[2024-03-25T15:45:46Z INFO  unused_features::subcommands::analyze] [46.7%]: Prune 'unicode' feature flag from 'regex'
+[2024-03-25T15:46:11Z INFO  unused_features::subcommands::analyze] [50.0%]: ==== Dependency 'uuid', removing 6 flags =====
+[2024-03-25T15:46:11Z INFO  unused_features::subcommands::analyze] [50.0%]: Prune 'rng' feature flag from 'uuid'
+[2024-03-25T15:46:34Z INFO  unused_features::subcommands::analyze] [51.7%]: Prune 'std' feature flag from 'uuid'
+[2024-03-25T15:46:58Z INFO  unused_features::subcommands::analyze] [53.3%]: Prune 'v4' feature flag from 'uuid'
+[2024-03-25T15:47:05Z INFO  unused_features::subcommands::analyze] [55.0%]: Prune 'v5' feature flag from 'uuid'
+[2024-03-25T15:47:28Z INFO  unused_features::subcommands::analyze] [56.7%]: Prune 'sha1' feature flag from 'uuid'
+[2024-03-25T15:47:52Z INFO  unused_features::subcommands::analyze] [58.3%]: Prune 'serde' feature flag from 'uuid'
+[2024-03-25T15:47:59Z INFO  unused_features::subcommands::analyze] [60.0%]: ==== Dependency 'async-channel', removing 1 flags =====
+[2024-03-25T15:47:59Z INFO  unused_features::subcommands::analyze] [60.0%]: Prune 'std' feature flag from 'async-channel'
+[2024-03-25T15:48:24Z INFO  unused_features::subcommands::analyze] [70.0%]: ==== Dependency 'tokio', removing 10 flags =====
+[2024-03-25T15:48:24Z INFO  unused_features::subcommands::analyze] [70.0%]: Prune 'rt' feature flag from 'tokio'
+[2024-03-25T15:48:24Z INFO  unused_features::subcommands::analyze] [71.0%]: Prune 'macros' feature flag from 'tokio'
+[2024-03-25T15:48:50Z INFO  unused_features::subcommands::analyze] [72.0%]: Prune 'signal' feature flag from 'tokio'
+[2024-03-25T15:49:17Z INFO  unused_features::subcommands::analyze] [73.0%]: Prune 'rt-multi-thread' feature flag from 'tokio'
+[2024-03-25T15:49:26Z INFO  unused_features::subcommands::analyze] [74.0%]: Prune 'num_cpus' feature flag from 'tokio'
+[2024-03-25T15:49:27Z INFO  unused_features::subcommands::analyze] [75.0%]: Prune 'sync' feature flag from 'tokio'
+[2024-03-25T15:49:27Z INFO  unused_features::subcommands::analyze] [76.0%]: Prune 'tokio-macros' feature flag from 'tokio'
+[2024-03-25T15:49:52Z INFO  unused_features::subcommands::analyze] [77.0%]: Prune 'time' feature flag from 'tokio'
+[2024-03-25T15:50:01Z INFO  unused_features::subcommands::analyze] [78.0%]: Prune 'signal-hook-registry' feature flag from 'tokio'
+[2024-03-25T15:50:28Z INFO  unused_features::subcommands::analyze] [79.0%]: Prune 'libc' feature flag from 'tokio'
+[2024-03-25T15:50:54Z INFO  unused_features::subcommands::analyze] [80.0%]: ==== Dependency 'jsonrpsee-core', removing 8 flags =====
+[2024-03-25T15:50:54Z INFO  unused_features::subcommands::analyze] [80.0%]: Prune 'server' feature flag from 'jsonrpsee-core'
+[2024-03-25T15:51:21Z INFO  unused_features::subcommands::analyze] [81.2%]: Prune 'tokio' feature flag from 'jsonrpsee-core'
+[2024-03-25T15:51:48Z INFO  unused_features::subcommands::analyze] [82.5%]: Prune 'async-channel' feature flag from 'jsonrpsee-core'
+[2024-03-25T15:52:18Z INFO  unused_features::subcommands::analyze] [83.8%]: Prune 'parking_lot' feature flag from 'jsonrpsee-core'
+[2024-03-25T15:52:45Z INFO  unused_features::subcommands::analyze] [85.0%]: Prune 'tracing' feature flag from 'jsonrpsee-core'
+[2024-03-25T15:53:10Z INFO  unused_features::subcommands::analyze] [86.2%]: Prune 'futures-util' feature flag from 'jsonrpsee-core'
+[2024-03-25T15:53:35Z INFO  unused_features::subcommands::analyze] [87.5%]: Prune 'rustc-hash' feature flag from 'jsonrpsee-core'
+[2024-03-25T15:54:00Z INFO  unused_features::subcommands::analyze] [88.8%]: Prune 'rand' feature flag from 'jsonrpsee-core'
+[2024-03-25T15:54:00Z INFO  unused_features::subcommands::analyze] [90.0%]: ==== Dependency 'chrono', removing 4 flags =====
+[2024-03-25T15:54:00Z INFO  unused_features::subcommands::analyze] [90.0%]: Prune 'wasmbind' feature flag from 'chrono'
+[2024-03-25T15:54:01Z INFO  unused_features::subcommands::analyze] [92.5%]: Prune 'clock' feature flag from 'chrono'
+[2024-03-25T15:54:08Z INFO  unused_features::subcommands::analyze] [95.0%]: Prune 'oldtime' feature flag from 'chrono'
+[2024-03-25T15:54:34Z INFO  unused_features::subcommands::analyze] [97.5%]: Prune 'std' feature flag from 'chrono'
+
+[2024-03-25T15:54:35Z INFO  unused_features::subcommands::analyze] |===== Crate 'ripple_tdk' =====|
+[2024-03-25T15:54:35Z INFO  unused_features::subcommands::analyze] Start pruning feature flags. The process will recompile the project 3 times.
+[2024-03-25T15:54:35Z INFO  unused_features::subcommands::analyze] [0.0%]: ==== Dependency 'ripple_sdk', removing 2 flags =====
+[2024-03-25T15:54:35Z INFO  unused_features::subcommands::analyze] [0.0%]: Prune 'full' feature flag from 'ripple_sdk'
+[2024-03-25T15:55:01Z INFO  unused_features::subcommands::analyze] [25.0%]: Prune 'rpc' feature flag from 'ripple_sdk'
+[2024-03-25T15:55:28Z INFO  unused_features::subcommands::analyze] [50.0%]: ==== Dependency 'serde_json', removing 1 flags =====
+[2024-03-25T15:55:28Z INFO  unused_features::subcommands::analyze] [50.0%]: Prune 'std' feature flag from 'serde_json'
+
+[2024-03-25T15:55:53Z INFO  unused_features::subcommands::analyze] |===== Crate 'thunder_ripple_sdk' =====|
+[2024-03-25T15:55:53Z INFO  unused_features::subcommands::analyze] Start pruning feature flags. The process will recompile the project 14 times.
+[2024-03-25T15:55:53Z INFO  unused_features::subcommands::analyze] [0.0%]: ==== Dependency 'base64', removing 1 flags =====
+[2024-03-25T15:55:53Z INFO  unused_features::subcommands::analyze] [0.0%]: Prune 'std' feature flag from 'base64'
+[2024-03-25T15:56:38Z INFO  unused_features::subcommands::analyze] [16.7%]: ==== Dependency 'jsonrpsee', removing 5 flags =====
+[2024-03-25T15:56:38Z INFO  unused_features::subcommands::analyze] [16.7%]: Prune 'jsonrpsee-types' feature flag from 'jsonrpsee'
+[2024-03-25T15:57:07Z INFO  unused_features::subcommands::analyze] [20.0%]: Prune 'ws-client' feature flag from 'jsonrpsee'
+[2024-03-25T15:57:10Z INFO  unused_features::subcommands::analyze] [23.3%]: Prune 'jsonrpsee-ws-client' feature flag from 'jsonrpsee'
+[2024-03-25T15:57:11Z INFO  unused_features::subcommands::analyze] [26.7%]: Prune 'jsonrpsee-proc-macros' feature flag from 'jsonrpsee'
+[2024-03-25T15:57:11Z INFO  unused_features::subcommands::analyze] [30.0%]: Prune 'macros' feature flag from 'jsonrpsee'
+[2024-03-25T15:57:24Z INFO  unused_features::subcommands::analyze] [33.3%]: ==== Dependency 'reqwest', removing 1 flags =====
+[2024-03-25T15:57:24Z INFO  unused_features::subcommands::analyze] [33.3%]: Prune 'default-tls' feature flag from 'reqwest'
+[2024-03-25T15:57:24Z INFO  unused_features::subcommands::analyze] [50.0%]: ==== Dependency 'serde', removing 3 flags =====
+[2024-03-25T15:57:24Z INFO  unused_features::subcommands::analyze] [50.0%]: Prune 'std' feature flag from 'serde'
+[2024-03-25T15:57:24Z INFO  unused_features::subcommands::analyze] [55.6%]: Prune 'derive' feature flag from 'serde'
+[2024-03-25T15:57:25Z INFO  unused_features::subcommands::analyze] [61.1%]: Prune 'serde_derive' feature flag from 'serde'
+[2024-03-25T15:57:25Z INFO  unused_features::subcommands::analyze] [66.7%]: ==== Dependency 'regex', removing 3 flags =====
+[2024-03-25T15:57:25Z INFO  unused_features::subcommands::analyze] [66.7%]: Prune 'unicode' feature flag from 'regex'
+[2024-03-25T15:57:25Z INFO  unused_features::subcommands::analyze] [72.2%]: Prune 'perf' feature flag from 'regex'
+[2024-03-25T15:57:25Z INFO  unused_features::subcommands::analyze] [77.8%]: Prune 'std' feature flag from 'regex'
+[2024-03-25T15:57:26Z INFO  unused_features::subcommands::analyze] [83.3%]: ==== Dependency 'strum', removing 1 flags =====
+[2024-03-25T15:57:26Z INFO  unused_features::subcommands::analyze] [83.3%]: Prune 'std' feature flag from 'strum'
+
+[2024-03-25T15:57:34Z INFO  unused_features::subcommands::analyze] |===== Crate 'main' =====|
+[2024-03-25T15:57:34Z INFO  unused_features::subcommands::analyze] Start pruning feature flags. The process will recompile the project 24 times.
+[2024-03-25T15:57:34Z INFO  unused_features::subcommands::analyze] [0.0%]: ==== Dependency 'jsonrpsee', removing 6 flags =====
+[2024-03-25T15:57:34Z INFO  unused_features::subcommands::analyze] [0.0%]: Prune 'jsonrpsee-ws-server' feature flag from 'jsonrpsee'
+[2024-03-25T15:58:09Z INFO  unused_features::subcommands::analyze] [1.5%]: Prune 'jsonrpsee-types' feature flag from 'jsonrpsee'
+[2024-03-25T15:58:10Z INFO  unused_features::subcommands::analyze] [3.0%]: Prune 'jsonrpsee-proc-macros' feature flag from 'jsonrpsee'
+[2024-03-25T15:58:11Z INFO  unused_features::subcommands::analyze] [4.5%]: Prune 'macros' feature flag from 'jsonrpsee'
+[2024-03-25T15:58:12Z INFO  unused_features::subcommands::analyze] [6.1%]: Prune 'jsonrpsee-core' feature flag from 'jsonrpsee'
+[2024-03-25T15:58:12Z INFO  unused_features::subcommands::analyze] [7.6%]: Prune 'ws-server' feature flag from 'jsonrpsee'
+[2024-03-25T15:58:13Z INFO  unused_features::subcommands::analyze] [9.1%]: ==== Dependency 'base64', removing 1 flags =====
+[2024-03-25T15:58:13Z INFO  unused_features::subcommands::analyze] [9.1%]: Prune 'std' feature flag from 'base64'
+[2024-03-25T15:58:13Z INFO  unused_features::subcommands::analyze] [18.2%]: ==== Dependency 'arrayvec', removing 1 flags =====
+[2024-03-25T15:58:13Z INFO  unused_features::subcommands::analyze] [18.2%]: Prune 'std' feature flag from 'arrayvec'
+[2024-03-25T15:58:14Z INFO  unused_features::subcommands::analyze] [27.3%]: ==== Dependency 'tokio-tungstenite', removing 1 flags =====
+[2024-03-25T15:58:14Z INFO  unused_features::subcommands::analyze] [27.3%]: Prune 'connect' feature flag from 'tokio-tungstenite'
+[2024-03-25T15:58:15Z INFO  unused_features::subcommands::analyze] [36.4%]: ==== Dependency 'serde', removing 3 flags =====
+[2024-03-25T15:58:15Z INFO  unused_features::subcommands::analyze] [36.4%]: Prune 'serde_derive' feature flag from 'serde'
+[2024-03-25T15:58:15Z INFO  unused_features::subcommands::analyze] [39.4%]: Prune 'std' feature flag from 'serde'
+[2024-03-25T15:58:16Z INFO  unused_features::subcommands::analyze] [42.4%]: Prune 'derive' feature flag from 'serde'
+[2024-03-25T15:58:16Z INFO  unused_features::subcommands::analyze] [45.5%]: ==== Dependency 'ripple_sdk', removing 2 flags =====
+[2024-03-25T15:58:16Z INFO  unused_features::subcommands::analyze] [45.5%]: Prune 'full' feature flag from 'ripple_sdk'
+[2024-03-25T15:58:41Z INFO  unused_features::subcommands::analyze] [50.0%]: Prune 'rpc' feature flag from 'ripple_sdk'
+[2024-03-25T15:59:05Z INFO  unused_features::subcommands::analyze] [54.5%]: ==== Dependency 'serde_json', removing 1 flags =====
+[2024-03-25T15:59:05Z INFO  unused_features::subcommands::analyze] [54.5%]: Prune 'std' feature flag from 'serde_json'
+[2024-03-25T15:59:05Z INFO  unused_features::subcommands::analyze] [63.6%]: ==== Dependency 'futures-channel', removing 1 flags =====
+[2024-03-25T15:59:05Z INFO  unused_features::subcommands::analyze] [63.6%]: Prune 'std' feature flag from 'futures-channel'
+[2024-03-25T15:59:06Z INFO  unused_features::subcommands::analyze] [72.7%]: ==== Dependency 'rand', removing 2 flags =====
+[2024-03-25T15:59:06Z INFO  unused_features::subcommands::analyze] [72.7%]: Prune 'std' feature flag from 'rand'
+[2024-03-25T15:59:07Z INFO  unused_features::subcommands::analyze] [77.3%]: Prune 'std_rng' feature flag from 'rand'
+[2024-03-25T15:59:07Z INFO  unused_features::subcommands::analyze] [81.8%]: ==== Dependency 'futures', removing 3 flags =====
+[2024-03-25T15:59:07Z INFO  unused_features::subcommands::analyze] [81.8%]: Prune 'std' feature flag from 'futures'
+[2024-03-25T15:59:08Z INFO  unused_features::subcommands::analyze] [84.8%]: Prune 'async-await' feature flag from 'futures'
+[2024-03-25T15:59:09Z INFO  unused_features::subcommands::analyze] [87.9%]: Prune 'executor' feature flag from 'futures'
+[2024-03-25T15:59:09Z INFO  unused_features::subcommands::analyze] [90.9%]: ==== Dependency 'regex', removing 3 flags =====
+[2024-03-25T15:59:09Z INFO  unused_features::subcommands::analyze] [90.9%]: Prune 'unicode' feature flag from 'regex'
+[2024-03-25T15:59:10Z INFO  unused_features::subcommands::analyze] [93.9%]: Prune 'perf' feature flag from 'regex'
+[2024-03-25T15:59:11Z INFO  unused_features::subcommands::analyze] [97.0%]: Prune 'std' feature flag from 'regex'
+
+[2024-03-25T15:59:12Z INFO  unused_features::subcommands::analyze] |===== Crate 'launcher' =====|
+[2024-03-25T15:59:12Z INFO  unused_features::subcommands::analyze] Start pruning feature flags. The process will recompile the project 4 times.
+[2024-03-25T15:59:12Z INFO  unused_features::subcommands::analyze] [0.0%]: ==== Dependency 'serde', removing 3 flags =====
+[2024-03-25T15:59:12Z INFO  unused_features::subcommands::analyze] [0.0%]: Prune 'serde_derive' feature flag from 'serde'
+[2024-03-25T15:59:21Z INFO  unused_features::subcommands::analyze] [16.7%]: Prune 'std' feature flag from 'serde'
+[2024-03-25T15:59:21Z INFO  unused_features::subcommands::analyze] [33.3%]: Prune 'derive' feature flag from 'serde'
+[2024-03-25T15:59:21Z INFO  unused_features::subcommands::analyze] [50.0%]: ==== Dependency 'serde_json', removing 1 flags =====
+[2024-03-25T15:59:21Z INFO  unused_features::subcommands::analyze] [50.0%]: Prune 'std' feature flag from 'serde_json'
+
+[2024-03-25T15:59:22Z INFO  unused_features::subcommands::analyze] |===== Crate 'thunder' =====|
+[2024-03-25T15:59:22Z INFO  unused_features::subcommands::analyze] Start pruning feature flags. The process will recompile the project 3 times.
+[2024-03-25T15:59:22Z INFO  unused_features::subcommands::analyze] [0.0%]: ==== Dependency 'serde', removing 3 flags =====
+[2024-03-25T15:59:22Z INFO  unused_features::subcommands::analyze] [0.0%]: Prune 'serde_derive' feature flag from 'serde'
+[2024-03-25T15:59:38Z INFO  unused_features::subcommands::analyze] [33.3%]: Prune 'std' feature flag from 'serde'
+[2024-03-25T15:59:38Z INFO  unused_features::subcommands::analyze] [66.7%]: Prune 'derive' feature flag from 'serde'
+
+[2024-03-25T15:59:39Z INFO  unused_features::subcommands::analyze] |===== Crate 'distributor_general' =====|
+[2024-03-25T15:59:39Z INFO  unused_features::subcommands::analyze] Start pruning feature flags. The process will recompile the project 4 times.
+[2024-03-25T15:59:39Z INFO  unused_features::subcommands::analyze] [0.0%]: ==== Dependency 'serde_json', removing 1 flags =====
+[2024-03-25T15:59:39Z INFO  unused_features::subcommands::analyze] [0.0%]: Prune 'std' feature flag from 'serde_json'
+[2024-03-25T15:59:47Z INFO  unused_features::subcommands::analyze] [50.0%]: ==== Dependency 'serde', removing 3 flags =====
+[2024-03-25T15:59:47Z INFO  unused_features::subcommands::analyze] [50.0%]: Prune 'serde_derive' feature flag from 'serde'
+[2024-03-25T15:59:47Z INFO  unused_features::subcommands::analyze] [66.7%]: Prune 'std' feature flag from 'serde'
+[2024-03-25T15:59:47Z INFO  unused_features::subcommands::analyze] [83.3%]: Prune 'derive' feature flag from 'serde'
+
+[2024-03-25T15:59:48Z INFO  unused_features::subcommands::analyze] |===== Crate 'rpc_extn' =====|
+[2024-03-25T15:59:48Z INFO  unused_features::subcommands::analyze] Start pruning feature flags. The process will recompile the project 10 times.
+[2024-03-25T15:59:48Z INFO  unused_features::subcommands::analyze] [0.0%]: ==== Dependency 'jsonrpsee', removing 4 flags =====
+[2024-03-25T15:59:48Z INFO  unused_features::subcommands::analyze] [0.0%]: Prune 'jsonrpsee-types' feature flag from 'jsonrpsee'
+[2024-03-25T15:59:49Z INFO  unused_features::subcommands::analyze] [6.2%]: Prune 'macros' feature flag from 'jsonrpsee'
+[2024-03-25T15:59:50Z INFO  unused_features::subcommands::analyze] [12.5%]: Prune 'jsonrpsee-core' feature flag from 'jsonrpsee'
+[2024-03-25T16:00:15Z INFO  unused_features::subcommands::analyze] [18.8%]: Prune 'jsonrpsee-proc-macros' feature flag from 'jsonrpsee'
+[2024-03-25T16:00:15Z INFO  unused_features::subcommands::analyze] [25.0%]: ==== Dependency 'ripple_sdk', removing 2 flags =====
+[2024-03-25T16:00:15Z INFO  unused_features::subcommands::analyze] [25.0%]: Prune 'full' feature flag from 'ripple_sdk'
+[2024-03-25T16:00:46Z INFO  unused_features::subcommands::analyze] [37.5%]: Prune 'rpc' feature flag from 'ripple_sdk'
+[2024-03-25T16:01:12Z INFO  unused_features::subcommands::analyze] [50.0%]: ==== Dependency 'serde', removing 3 flags =====
+[2024-03-25T16:01:12Z INFO  unused_features::subcommands::analyze] [50.0%]: Prune 'std' feature flag from 'serde'
+[2024-03-25T16:01:13Z INFO  unused_features::subcommands::analyze] [58.3%]: Prune 'derive' feature flag from 'serde'
+[2024-03-25T16:01:13Z INFO  unused_features::subcommands::analyze] [66.7%]: Prune 'serde_derive' feature flag from 'serde'
+[2024-03-25T16:01:14Z INFO  unused_features::subcommands::analyze] [75.0%]: ==== Dependency 'serde_json', removing 1 flags =====
+[2024-03-25T16:01:14Z INFO  unused_features::subcommands::analyze] [75.0%]: Prune 'std' feature flag from 'serde_json'
+
+[2024-03-25T16:01:16Z INFO  unused_features::subcommands::analyze] |===== Crate 'tm_extn' =====|
+[2024-03-25T16:01:16Z INFO  unused_features::subcommands::analyze] Start pruning feature flags. The process will recompile the project 5 times.
+[2024-03-25T16:01:16Z INFO  unused_features::subcommands::analyze] [0.0%]: ==== Dependency 'serde', removing 3 flags =====
+[2024-03-25T16:01:16Z INFO  unused_features::subcommands::analyze] [0.0%]: Prune 'derive' feature flag from 'serde'
+[2024-03-25T16:01:47Z INFO  unused_features::subcommands::analyze] [11.1%]: Prune 'std' feature flag from 'serde'
+[2024-03-25T16:01:47Z INFO  unused_features::subcommands::analyze] [22.2%]: Prune 'serde_derive' feature flag from 'serde'
+[2024-03-25T16:01:47Z INFO  unused_features::subcommands::analyze] [33.3%]: ==== Dependency 'serde_json', removing 1 flags =====
+[2024-03-25T16:01:47Z INFO  unused_features::subcommands::analyze] [33.3%]: Prune 'std' feature flag from 'serde_json'
+[2024-03-25T16:01:47Z INFO  unused_features::subcommands::analyze] [66.7%]: ==== Dependency 'tokio-tungstenite', removing 1 flags =====
+[2024-03-25T16:01:47Z INFO  unused_features::subcommands::analyze] [66.7%]: Prune 'connect' feature flag from 'tokio-tungstenite'
+
+[2024-03-25T16:02:23Z INFO  unused_features::subcommands::analyze] |===== Crate 'badger' =====|
+[2024-03-25T16:02:23Z INFO  unused_features::subcommands::analyze] Start pruning feature flags. The process will recompile the project 11 times.
+[2024-03-25T16:02:23Z INFO  unused_features::subcommands::analyze] [0.0%]: ==== Dependency 'jsonrpsee', removing 6 flags =====
+[2024-03-25T16:02:23Z INFO  unused_features::subcommands::analyze] [0.0%]: Prune 'jsonrpsee-types' feature flag from 'jsonrpsee'
+[2024-03-25T16:02:24Z INFO  unused_features::subcommands::analyze] [5.6%]: Prune 'ws-server' feature flag from 'jsonrpsee'
+[2024-03-25T16:02:24Z INFO  unused_features::subcommands::analyze] [11.1%]: Prune 'jsonrpsee-core' feature flag from 'jsonrpsee'
+[2024-03-25T16:02:24Z INFO  unused_features::subcommands::analyze] [16.7%]: Prune 'jsonrpsee-ws-server' feature flag from 'jsonrpsee'
+[2024-03-25T16:02:24Z INFO  unused_features::subcommands::analyze] [22.2%]: Prune 'jsonrpsee-proc-macros' feature flag from 'jsonrpsee'
+[2024-03-25T16:02:24Z INFO  unused_features::subcommands::analyze] [27.8%]: Prune 'macros' feature flag from 'jsonrpsee'
+[2024-03-25T16:02:24Z INFO  unused_features::subcommands::analyze] [33.3%]: ==== Dependency 'ripple_sdk', removing 2 flags =====
+[2024-03-25T16:02:24Z INFO  unused_features::subcommands::analyze] [33.3%]: Prune 'full' feature flag from 'ripple_sdk'
+[2024-03-25T16:02:24Z INFO  unused_features::subcommands::analyze] [50.0%]: Prune 'rpc' feature flag from 'ripple_sdk'
+[2024-03-25T16:02:24Z INFO  unused_features::subcommands::analyze] [66.7%]: ==== Dependency 'serde', removing 3 flags =====
+[2024-03-25T16:02:24Z INFO  unused_features::subcommands::analyze] [66.7%]: Prune 'derive' feature flag from 'serde'
+[2024-03-25T16:02:24Z INFO  unused_features::subcommands::analyze] [77.8%]: Prune 'std' feature flag from 'serde'
+[2024-03-25T16:02:24Z INFO  unused_features::subcommands::analyze] [88.9%]: Prune 'serde_derive' feature flag from 'serde'
+
+
+[2024-03-25T16:02:25Z INFO  unused_features::subcommands::analyze] |===== Crate 'thunder_comcast' =====|
+[2024-03-25T16:02:25Z INFO  unused_features::subcommands::analyze] Start pruning feature flags. The process will recompile the project 4 times.
+[2024-03-25T16:02:25Z INFO  unused_features::subcommands::analyze] [0.0%]: ==== Dependency 'base64', removing 1 flags =====
+[2024-03-25T16:02:25Z INFO  unused_features::subcommands::analyze] [0.0%]: Prune 'std' feature flag from 'base64'
+[2024-03-25T16:02:25Z INFO  unused_features::subcommands::analyze] [50.0%]: ==== Dependency 'serde', removing 3 flags =====
+[2024-03-25T16:02:25Z INFO  unused_features::subcommands::analyze] [50.0%]: Prune 'derive' feature flag from 'serde'
+[2024-03-25T16:02:25Z INFO  unused_features::subcommands::analyze] [66.7%]: Prune 'serde_derive' feature flag from 'serde'
+[2024-03-25T16:02:25Z INFO  unused_features::subcommands::analyze] [83.3%]: Prune 'std' feature flag from 'serde'
+
+
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] |===== Crate 'dpab_appsanity' =====|
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] Start pruning feature flags. The process will recompile the project 76 times.
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [0.0%]: ==== Dependency 'prost', removing 2 flags =====
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [0.0%]: Prune 'std' feature flag from 'prost'
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [2.6%]: Prune 'prost-derive' feature flag from 'prost'
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [5.3%]: ==== Dependency 'chrono', removing 4 flags =====
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [5.3%]: Prune 'oldtime' feature flag from 'chrono'
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [6.6%]: Prune 'wasmbind' feature flag from 'chrono'
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [7.9%]: Prune 'std' feature flag from 'chrono'
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [9.2%]: Prune 'clock' feature flag from 'chrono'
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [10.5%]: ==== Dependency 'tower', removing 3 flags =====
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [10.5%]: Prune 'discover' feature flag from 'tower'
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [12.3%]: Prune 'log' feature flag from 'tower'
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [14.0%]: Prune '__common' feature flag from 'tower'
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [15.8%]: ==== Dependency 'reqwest', removing 1 flags =====
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [15.8%]: Prune 'default-tls' feature flag from 'reqwest'
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [21.1%]: ==== Dependency 'tracing', removing 2 flags =====
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [21.1%]: Prune 'attributes' feature flag from 'tracing'
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [23.7%]: Prune 'std' feature flag from 'tracing'
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [26.3%]: ==== Dependency 'serde', removing 3 flags =====
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [26.3%]: Prune 'std' feature flag from 'serde'
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [28.1%]: Prune 'derive' feature flag from 'serde'
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [29.8%]: Prune 'serde_derive' feature flag from 'serde'
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [31.6%]: ==== Dependency 'rand', removing 2 flags =====
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [31.6%]: Prune 'std' feature flag from 'rand'
+[2024-03-25T16:02:26Z INFO  unused_features::subcommands::analyze] [34.2%]: Prune 'std_rng' feature flag from 'rand'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [36.8%]: ==== Dependency 'log4rs', removing 7 flags =====
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [36.8%]: Prune 'yaml_format' feature flag from 'log4rs'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [37.6%]: Prune 'config_parsing' feature flag from 'log4rs'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [38.3%]: Prune 'rolling_file_appender' feature flag from 'log4rs'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [39.1%]: Prune 'parking_lot' feature flag from 'log4rs'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [39.8%]: Prune 'pattern_encoder' feature flag from 'log4rs'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [40.6%]: Prune 'simple_writer' feature flag from 'log4rs'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [41.4%]: Prune 'all_components' feature flag from 'log4rs'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [42.1%]: ==== Dependency 'log', removing 1 flags =====
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [42.1%]: Prune 'std' feature flag from 'log'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [47.4%]: ==== Dependency 'tokio', removing 4 flags =====
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [47.4%]: Prune 'rt' feature flag from 'tokio'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [48.7%]: Prune 'sync' feature flag from 'tokio'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [50.0%]: Prune 'tokio-macros' feature flag from 'tokio'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [51.3%]: Prune 'macros' feature flag from 'tokio'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [52.6%]: ==== Dependency 'cryptoxide', removing 17 flags =====
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [52.6%]: Prune 'poly1305' feature flag from 'cryptoxide'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [52.9%]: Prune 'curve25519' feature flag from 'cryptoxide'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [53.3%]: Prune 'chacha' feature flag from 'cryptoxide'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [53.6%]: Prune 'digest' feature flag from 'cryptoxide'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [53.9%]: Prune 'argon2' feature flag from 'cryptoxide'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [54.2%]: Prune 'ripemd160' feature flag from 'cryptoxide'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [54.5%]: Prune 'x25519' feature flag from 'cryptoxide'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [54.8%]: Prune 'ed25519' feature flag from 'cryptoxide'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [55.1%]: Prune 'pbkdf2' feature flag from 'cryptoxide'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [55.4%]: Prune 'hmac' feature flag from 'cryptoxide'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [55.7%]: Prune 'salsa' feature flag from 'cryptoxide'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [56.0%]: Prune 'scrypt' feature flag from 'cryptoxide'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [56.3%]: Prune 'hkdf' feature flag from 'cryptoxide'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [56.7%]: Prune 'sha2' feature flag from 'cryptoxide'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [57.0%]: Prune 'sha3' feature flag from 'cryptoxide'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [57.3%]: Prune 'blake2' feature flag from 'cryptoxide'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [57.6%]: Prune 'sha1' feature flag from 'cryptoxide'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [57.9%]: ==== Dependency 'uuid', removing 5 flags =====
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [57.9%]: Prune 'fast-rng' feature flag from 'uuid'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [58.9%]: Prune 'rng' feature flag from 'uuid'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [60.0%]: Prune 'std' feature flag from 'uuid'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [61.1%]: Prune 'v4' feature flag from 'uuid'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [62.1%]: Prune 'macro-diagnostics' feature flag from 'uuid'
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [63.2%]: ==== Dependency 'prost-types', removing 1 flags =====
+[2024-03-25T16:02:27Z INFO  unused_features::subcommands::analyze] [63.2%]: Prune 'std' feature flag from 'prost-types'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [68.4%]: ==== Dependency 'tower-http', removing 10 flags =====
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [68.4%]: Prune 'set-header' feature flag from 'tower-http'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [68.9%]: Prune 'decompression-full' feature flag from 'tower-http'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [69.5%]: Prune 'decompression-gzip' feature flag from 'tower-http'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [70.0%]: Prune 'auth' feature flag from 'tower-http'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [70.5%]: Prune 'decompression-deflate' feature flag from 'tower-http'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [71.1%]: Prune 'tracing' feature flag from 'tower-http'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [71.6%]: Prune 'decompression-br' feature flag from 'tower-http'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [72.1%]: Prune 'metrics' feature flag from 'tower-http'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [72.6%]: Prune 'trace' feature flag from 'tower-http'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [73.2%]: Prune 'base64' feature flag from 'tower-http'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [73.7%]: ==== Dependency 'cached', removing 2 flags =====
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [73.7%]: Prune 'proc_macro' feature flag from 'cached'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [76.3%]: Prune 'async' feature flag from 'cached'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [78.9%]: ==== Dependency 'serde_json', removing 1 flags =====
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [78.9%]: Prune 'std' feature flag from 'serde_json'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [84.2%]: ==== Dependency 'base64', removing 1 flags =====
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [84.2%]: Prune 'std' feature flag from 'base64'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [89.5%]: ==== Dependency 'tonic', removing 7 flags =====
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [89.5%]: Prune 'channel' feature flag from 'tonic'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [90.2%]: Prune 'transport' feature flag from 'tonic'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [91.0%]: Prune 'prost' feature flag from 'tonic'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [91.7%]: Prune 'codegen' feature flag from 'tonic'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [92.5%]: Prune 'tls-roots-common' feature flag from 'tonic'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [93.2%]: Prune 'tls' feature flag from 'tonic'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [94.0%]: Prune 'tls-roots' feature flag from 'tonic'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [94.7%]: ==== Dependency 'env_logger', removing 3 flags =====
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [94.7%]: Prune 'auto-color' feature flag from 'env_logger'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [96.5%]: Prune 'regex' feature flag from 'env_logger'
+[2024-03-25T16:02:28Z INFO  unused_features::subcommands::analyze] [98.2%]: Prune 'humantime' feature flag from 'env_logger'
+
+.
+[2024-03-25T16:02:29Z INFO  unused_features::subcommands::analyze] |===== Crate 'bolt' =====|
+[2024-03-25T16:02:29Z INFO  unused_features::subcommands::analyze] Start pruning feature flags. The process will recompile the project 28 times.
+[2024-03-25T16:02:29Z INFO  unused_features::subcommands::analyze] [0.0%]: ==== Dependency 'futures-util', removing 5 flags =====
+[2024-03-25T16:02:29Z INFO  unused_features::subcommands::analyze] [0.0%]: Prune 'alloc' feature flag from 'futures-util'
+[2024-03-25T16:02:29Z INFO  unused_features::subcommands::analyze] [2.9%]: Prune 'std' feature flag from 'futures-util'
+[2024-03-25T16:02:29Z INFO  unused_features::subcommands::analyze] [5.7%]: Prune 'slab' feature flag from 'futures-util'
+[2024-03-25T16:02:29Z INFO  unused_features::subcommands::analyze] [8.6%]: Prune 'futures-sink' feature flag from 'futures-util'
+[2024-03-25T16:02:29Z INFO  unused_features::subcommands::analyze] [11.4%]: Prune 'sink' feature flag from 'futures-util'
+[2024-03-25T16:02:29Z INFO  unused_features::subcommands::analyze] [14.3%]: ==== Dependency 'serde', removing 3 flags =====
+[2024-03-25T16:02:29Z INFO  unused_features::subcommands::analyze] [14.3%]: Prune 'std' feature flag from 'serde'
+[2024-03-25T16:02:29Z INFO  unused_features::subcommands::analyze] [19.0%]: Prune 'serde_derive' feature flag from 'serde'
+[2024-03-25T16:02:29Z INFO  unused_features::subcommands::analyze] [23.8%]: Prune 'derive' feature flag from 'serde'
+[2024-03-25T16:02:29Z INFO  unused_features::subcommands::analyze] [28.6%]: ==== Dependency 'serde_json', removing 1 flags =====
+[2024-03-25T16:02:29Z INFO  unused_features::subcommands::analyze] [28.6%]: Prune 'std' feature flag from 'serde_json'
+[2024-03-25T16:02:29Z INFO  unused_features::subcommands::analyze] [42.9%]: ==== Dependency 'tokio-tungstenite', removing 1 flags =====
+[2024-03-25T16:02:29Z INFO  unused_features::subcommands::analyze] [42.9%]: Prune 'connect' feature flag from 'tokio-tungstenite'
+[2024-03-25T16:02:29Z INFO  unused_features::subcommands::analyze] [57.1%]: ==== Dependency 'reqwest', removing 3 flags =====
+[2024-03-25T16:02:29Z INFO  unused_features::subcommands::analyze] [57.1%]: Prune 'json' feature flag from 'reqwest'
+[2024-03-25T16:02:29Z INFO  unused_features::subcommands::analyze] [61.9%]: Prune 'default-tls' feature flag from 'reqwest'
+[2024-03-25T16:02:29Z INFO  unused_features::subcommands::analyze] [66.7%]: Prune 'serde_json' feature flag from 'reqwest'
+[2024-03-25T16:02:29Z INFO  unused_features::subcommands::analyze] [71.4%]: ==== Dependency 'tokio', removing 13 flags =====
+[2024-03-25T16:02:29Z INFO  unused_features::subcommands::analyze] [71.4%]: Prune 'rt' feature flag from 'tokio'
+[2024-03-25T16:02:30Z INFO  unused_features::subcommands::analyze] [72.5%]: Prune 'io-util' feature flag from 'tokio'
+[2024-03-25T16:02:30Z INFO  unused_features::subcommands::analyze] [73.6%]: Prune 'io-std' feature flag from 'tokio'
+[2024-03-25T16:02:30Z INFO  unused_features::subcommands::analyze] [74.7%]: Prune 'sync' feature flag from 'tokio'
+[2024-03-25T16:02:30Z INFO  unused_features::subcommands::analyze] [75.8%]: Prune 'parking_lot' feature flag from 'tokio'
+[2024-03-25T16:02:30Z INFO  unused_features::subcommands::analyze] [76.9%]: Prune 'process' feature flag from 'tokio'
+[2024-03-25T16:02:30Z INFO  unused_features::subcommands::analyze] [78.0%]: Prune 'rt-multi-thread' feature flag from 'tokio'
+[2024-03-25T16:02:30Z INFO  unused_features::subcommands::analyze] [79.1%]: Prune 'macros' feature flag from 'tokio'
+[2024-03-25T16:02:30Z INFO  unused_features::subcommands::analyze] [80.2%]: Prune 'net' feature flag from 'tokio'
+[2024-03-25T16:02:30Z INFO  unused_features::subcommands::analyze] [81.3%]: Prune 'full' feature flag from 'tokio'
+[2024-03-25T16:02:30Z INFO  unused_features::subcommands::analyze] [82.4%]: Prune 'time' feature flag from 'tokio'
+[2024-03-25T16:02:30Z INFO  unused_features::subcommands::analyze] [83.5%]: Prune 'fs' feature flag from 'tokio'
+[2024-03-25T16:02:30Z INFO  unused_features::subcommands::analyze] [84.6%]: Prune 'signal' feature flag from 'tokio'
+[2024-03-25T16:02:30Z INFO  unused_features::subcommands::analyze] [85.7%]: ==== Dependency 'ripple_sdk', removing 2 flags =====
+[2024-03-25T16:02:30Z INFO  unused_features::subcommands::analyze] [85.7%]: Prune 'rpc' feature flag from 'ripple_sdk'
+[2024-03-25T16:02:30Z INFO  unused_features::subcommands::analyze] [92.9%]: Prune 'full' feature flag from 'ripple_sdk'
+
+
+[2024-03-25T16:02:30Z INFO  unused_features::subcommands::analyze] |===== Crate 'comcast_observability' =====|
+[2024-03-25T16:02:30Z INFO  unused_features::subcommands::analyze] Start pruning feature flags. The process will recompile the project 33 times.
+[2024-03-25T16:02:30Z INFO  unused_features::subcommands::analyze] [0.0%]: ==== Dependency 'tonic', removing 3 flags =====
+[2024-03-25T16:02:30Z INFO  unused_features::subcommands::analyze] [0.0%]: Prune 'codegen' feature flag from 'tonic'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [3.3%]: Prune 'prost' feature flag from 'tonic'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [6.7%]: Prune 'transport' feature flag from 'tonic'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [10.0%]: ==== Dependency 'env_logger', removing 3 flags =====
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [10.0%]: Prune 'auto-color' feature flag from 'env_logger'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [13.3%]: Prune 'regex' feature flag from 'env_logger'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [16.7%]: Prune 'humantime' feature flag from 'env_logger'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [20.0%]: ==== Dependency 'once_cell', removing 1 flags =====
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [20.0%]: Prune 'std' feature flag from 'once_cell'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [30.0%]: ==== Dependency 'opentelemetry-otlp', removing 10 flags =====
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [30.0%]: Prune 'tonic' feature flag from 'opentelemetry-otlp'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [31.0%]: Prune 'tls' feature flag from 'opentelemetry-otlp'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [32.0%]: Prune 'logs' feature flag from 'opentelemetry-otlp'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [33.0%]: Prune 'grpc-tonic' feature flag from 'opentelemetry-otlp'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [34.0%]: Prune 'metrics' feature flag from 'opentelemetry-otlp'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [35.0%]: Prune 'prost' feature flag from 'opentelemetry-otlp'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [36.0%]: Prune 'tls-roots' feature flag from 'opentelemetry-otlp'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [37.0%]: Prune 'trace' feature flag from 'opentelemetry-otlp'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [38.0%]: Prune 'http' feature flag from 'opentelemetry-otlp'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [39.0%]: Prune 'tokio' feature flag from 'opentelemetry-otlp'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [40.0%]: ==== Dependency 'opentelemetry-stdout', removing 2 flags =====
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [40.0%]: Prune 'metrics' feature flag from 'opentelemetry-stdout'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [45.0%]: Prune 'async-trait' feature flag from 'opentelemetry-stdout'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [50.0%]: ==== Dependency 'ripple_sdk', removing 2 flags =====
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [50.0%]: Prune 'full' feature flag from 'ripple_sdk'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [55.0%]: Prune 'rpc' feature flag from 'ripple_sdk'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [60.0%]: ==== Dependency 'rand', removing 2 flags =====
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [60.0%]: Prune 'std_rng' feature flag from 'rand'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [65.0%]: Prune 'std' feature flag from 'rand'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [70.0%]: ==== Dependency 'opentelemetry', removing 2 flags =====
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [70.0%]: Prune 'metrics' feature flag from 'opentelemetry'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [75.0%]: Prune 'trace' feature flag from 'opentelemetry'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [80.0%]: ==== Dependency 'opentelemetry_sdk', removing 7 flags =====
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [80.0%]: Prune 'tokio' feature flag from 'opentelemetry_sdk'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [81.4%]: Prune 'glob' feature flag from 'opentelemetry_sdk'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [82.9%]: Prune 'async-trait' feature flag from 'opentelemetry_sdk'
+[2024-03-25T16:02:31Z INFO  unused_features::subcommands::analyze] [84.3%]: Prune 'metrics' feature flag from 'opentelemetry_sdk'
+[2024-03-25T16:02:32Z INFO  unused_features::subcommands::analyze] [85.7%]: Prune 'trace' feature flag from 'opentelemetry_sdk'
+[2024-03-25T16:02:32Z INFO  unused_features::subcommands::analyze] [87.1%]: Prune 'rt-tokio' feature flag from 'opentelemetry_sdk'
+[2024-03-25T16:02:32Z INFO  unused_features::subcommands::analyze] [88.6%]: Prune 'tokio-stream' feature flag from 'opentelemetry_sdk'
+[2024-03-25T16:02:32Z INFO  unused_features::subcommands::analyze] [90.0%]: ==== Dependency 'prometheus', removing 1 flags =====
+[2024-03-25T16:02:32Z INFO  unused_features::subcommands::analyze] [90.0%]: Prune 'protobuf' feature flag from 'prometheus'
+
+[2024-03-25T16:02:32Z INFO  unused_features] Finished the process
