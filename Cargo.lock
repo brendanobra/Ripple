@@ -1206,9 +1206,9 @@ dependencies = [
 
 [[package]]
 name = "distro_protos"
-version = "0.1.10"
+version = "1.0.0"
 source = "sparse+https://partners.artifactory.comcast.com/artifactory/api/cargo/eos-ripple/index/"
-checksum = "0aac9608556c4fd11b896e5cab4dd4e3bbe0f6fadff5d35ddba17ed9ca35ca4a"
+checksum = "b8ad64aefe854f7bbee8ff8e7d60850d463a622b1f45c1acef3b8385a2bf523a"
 dependencies = [
  "home",
  "prost 0.10.4",
@@ -1913,7 +1913,7 @@ dependencies = [
  "httpdate",
  "itoa 1.0.10",
  "pin-project-lite",
- "socket2 0.5.6",
+ "socket2 0.4.10",
  "tokio",
  "tower-service",
  "tracing",
@@ -2955,9 +2955,9 @@ dependencies = [
 
 [[package]]
 name = "ottx_protos"
-version = "0.1.6"
+version = "1.0.0"
 source = "sparse+https://partners.artifactory.comcast.com/artifactory/api/cargo/eos-ripple/index/"
-checksum = "3500dbb8ac1ef1b79490c27fd7ed7e261a5dc62c468809dc8108fc52c989a9cc"
+checksum = "70b3b19b028a20204c2db6e83d7b4ac410abb3e4e5bbe1144e1ba281d3ebc0a5"
 dependencies = [
  "home",
  "prost 0.10.4",
@@ -4625,6 +4625,7 @@ dependencies = [
  "reqwest",
  "ripple_sdk",
  "ripple_tdk",
+ "rstest",
  "serde",
  "strum",
  "strum_macros",

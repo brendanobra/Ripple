@@ -93,4 +93,4 @@ echo "Environment variables for manifests set"
 echo ""
 echo "DEVICE_MANIFEST=${DEVICE_MANIFEST}"
 echo "EXTN_MANIFEST=${EXTN_MANIFEST}"
-target/debug/ripple
+THUNDER_HOST=${device_ip} target/debug/ripple
