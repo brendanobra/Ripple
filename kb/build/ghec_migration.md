@@ -31,9 +31,9 @@ https://ccp.sys.comcast.net/browse/RPPL-1985
 Objective of this effort is to setup a flatter dependency structure for Eos-Ripple repo
 
 ### Setup CI CD pipeline for each Repos
- ripple-eos-distributor-extn https://ccp.sys.comcast.net/browse/RPPL-1981
- ripple-eos-thunder-extn https://ccp.sys.comcast.net/browse/RPPL-1989
- ripple-badger-extn https://ccp.sys.comcast.net/browse/RPPL-1991
+ 1. ripple-eos-distributor-extn https://ccp.sys.comcast.net/browse/RPPL-1981
+ 2. ripple-eos-thunder-extn https://ccp.sys.comcast.net/browse/RPPL-1989
+ 3. ripple-badger-extn https://ccp.sys.comcast.net/browse/RPPL-1991
 
 
 ## Phase 3: Enhancement
