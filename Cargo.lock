@@ -1232,7 +1232,6 @@ dependencies = [
  "chrono-tz 0.4.1",
  "cryptoxide",
  "distro_protos",
- "dpab_core",
  "env-file-reader",
  "env_logger 0.9.3",
  "expectest",
@@ -1267,22 +1266,6 @@ dependencies = [
  "uuid",
  "vergen",
  "wiremock",
-]
-
-[[package]]
-name = "dpab_core"
-version = "1.0.0"
-dependencies = [
- "async-trait",
- "serde",
- "serde_json",
- "serde_yaml 0.9.32",
- "thiserror",
- "tokio",
- "tokio-test",
- "tracing",
- "tracing-futures",
- "url",
 ]
 
 [[package]]

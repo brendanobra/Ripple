@@ -1,9 +1,9 @@
 [submodule "Ripple"]
 	path = Ripple
 	url = https://github.com/rdkcentral/Ripple.git
-[submodule "ripple_comcast_extns"]
-	path = ripple_comcast_extns
-	url = git@github.comcast.com:ottx/ripple_comcast_extns.git
 [submodule "firebolt-devices"]
 	path = firebolt-devices
-	url = git@github.comcast.com:ottx/firebolt-devices.git
+	url = https://github.com/comcast-firebolt/firebolt-devices.git
+[submodule "ripple-eos-thunder-extn"]
+	path = ripple-eos-thunder-extn
+	url = https://github.com/comcast-firebolt/ripple-eos-thunder-extn.git
