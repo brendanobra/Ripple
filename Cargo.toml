@@ -11,11 +11,11 @@ members = [
     "Ripple/distributor/general",
     "Ripple/examples/rpc_extn",
     "Ripple/examples/tm_extn",
-    "ripple_comcast_extns/badger",
-    "ripple_comcast_extns/thunder_comcast",
-    "ripple_comcast_extns/dpab_appsanity",
-    "ripple_comcast_extns/ripple-bolt-extn",
-    "ripple_comcast_extns/ripple_comcast_observability",
+    "ripple-eos-thunder-extn/badger",
+    "ripple-eos-thunder-extn/thunder_comcast",
+    "ripple-eos-thunder-extn/ripple-eos-distributor-extn",
+    "ripple-eos-thunder-extn/ripple-bolt-extn",
+    "ripple-eos-thunder-extn/ripple-eos-observability-extn",
     "Ripple/device/mock_device"
 ]
 
