@@ -20,7 +20,7 @@ https://ccp.sys.comcast.net/browse/RPPL-1985
 1. Checking Format
 2. Run unit tests
 3. Run Contract Tests
-4. Deploy artifacts to Partner Artifactory
+4. Deploy artifacts to Partner Artifactory in a different path to ghe
 
 ### Build Edge firmware build using artifacts generated from S3
 
