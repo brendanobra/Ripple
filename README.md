@@ -40,26 +40,35 @@ to set the default version on your workstation (which is generally a good idea t
 
 ### Setup
 
+For security reasons its imperative that we have 3 different private/public ssh key pairs for GHEC, GHE and OSS. Suggestion below will ensure your development machine will be able to handle all 3 keys for this workspace.
 
+1. Setup the ~/.ssh/config like below
+```
+Host github.comcast.com
+ Hostname github.comcast.com
+ AddKeysToAgent yes
+ IdentityFile ~/.ssh/<private key for ghe>
+ IdentitiesOnly yes
+ User <ntid>
 
-1. Clone EOS Ripple Repo
->git clone git@github.comcast.com:ottx/eos-ripple.git
+Host github.com
+ Hostname github.com
+ IdentityFile ~/.ssh/<private key for ghec>
+ IdentitiesOnly yes
+ User <>_comcast
 
-2. > cd eos-ripple
+```
 
-3. Open it in VSCode
-> code .
-
-3. Open Terminal 
-> ./setup
-
-4. Setup opensource Ripple with correct github creds. Skip this step if you already signed RDK consent with your comcast Github id
-> cd Ripple
-
-> git config user.name "Your public name"
-
-> git config user.email "yourpublicemail@github.com"
-
+2. Add the below environment variables in your profile
+```
+export GH_OSS_RSA_PATH=~/.ssh/<your private key path for github opensource>
+export GH_OSS_NAME=<your OSS github name>
+export GH_OSS_EMAIL=<your OSS github email>
+```
+3. Cd to the eos-ripple project folder
+```
+./setup
+```
 ## Running without a device
 
 Eos-Ripple now supports mock device extension using which you can emulate thunder responses and run Ripple without needing a device.
