@@ -13,9 +13,9 @@ members = [
     "Ripple/examples/tm_extn",
     "ripple-eos-thunder-extn/badger",
     "ripple-eos-thunder-extn/thunder_comcast",
-    "ripple-eos-thunder-extn/ripple-eos-distributor-extn",
-    "ripple-eos-thunder-extn/ripple-bolt-extn",
-    "ripple-eos-thunder-extn/ripple-eos-observability-extn",
+    "ripple-eos-distributor-extn",
+    "ripple-bolt-extn",
+    "ripple-eos-observability-extn",
     "Ripple/device/mock_device"
 ]
 

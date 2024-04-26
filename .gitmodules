@@ -7,3 +7,12 @@
 [submodule "ripple-eos-thunder-extn"]
 	path = ripple-eos-thunder-extn
 	url = git@github.com:comcast-firebolt/ripple-eos-thunder-extn.git
+[submodule "ripple-eos-distributor-extn"]
+	path = ripple-eos-distributor-extn
+	url = git@github.com:comcast-firebolt/ripple-eos-distributor-extn.git
+[submodule "ripple-eos-observability-extn"]
+	path = ripple-eos-observability-extn
+	url = git@github.com:comcast-firebolt/ripple-eos-observability-extn.git
+[submodule "ripple-bolt-extn"]
+	path = ripple-bolt-extn
+	url = git@github.com:comcast-firebolt/ripple-bolt-extn.git
