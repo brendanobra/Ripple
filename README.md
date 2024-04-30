@@ -51,17 +51,22 @@ Host github.comcast.com
  IdentitiesOnly yes
  User <ntid>
 
-Host github.com
+Host fireboltghec.comcast.com
  Hostname github.com
- IdentityFile ~/.ssh/<private key for ghec>
+ IdentityFile ~/.ssh/<private key for firebolt ghec org>
  IdentitiesOnly yes
  User <>_comcast
+
+Host github.com
+ Hostname github.com
+ IdentityFile ~/.ssh/<private key for public oss>
+ IdentitiesOnly yes
+ User <public oss id>
 
 ```
 
 2. Add the below environment variables in your profile
 ```
-export GH_OSS_RSA_PATH=~/.ssh/<your private key path for github opensource>
 export GH_OSS_NAME=<your OSS github name>
 export GH_OSS_EMAIL=<your OSS github email>
 ```
