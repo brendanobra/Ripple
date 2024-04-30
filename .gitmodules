@@ -3,7 +3,16 @@
 	url = https://github.com/rdkcentral/Ripple.git
 [submodule "firebolt-devices"]
 	path = firebolt-devices
-	url = git@github.com:comcast-firebolt/firebolt-devices.git
+	url = git@fireboltghec.comcast.com:comcast-firebolt/firebolt-devices.git
 [submodule "ripple-eos-thunder-extn"]
 	path = ripple-eos-thunder-extn
-	url = git@github.com:comcast-firebolt/ripple-eos-thunder-extn.git
+	url = git@fireboltghec.comcast.com:comcast-firebolt/ripple-eos-thunder-extn.git
+[submodule "ripple-eos-distributor-extn"]
+	path = ripple-eos-distributor-extn
+	url = git@fireboltghec.comcast.com:comcast-firebolt/ripple-eos-distributor-extn.git
+[submodule "ripple-eos-observability-extn"]
+	path = ripple-eos-observability-extn
+	url = git@fireboltghec.comcast.com:comcast-firebolt/ripple-eos-observability-extn.git
+[submodule "ripple-bolt-extn"]
+	path = ripple-bolt-extn
+	url = git@fireboltghec.comcast.com:comcast-firebolt/ripple-bolt-extn.git

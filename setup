@@ -6,10 +6,19 @@ git submodule update --init --recursive
 # TODO remove this dependency when we have more platforms
 cd Ripple || exit
 git config url."git@github.com:".pushInsteadOf https://github.com/
-echo "Building OSS"
-cargo build
+
+if [ -z "${GH_OSS_NAME}" ]; then
+  echo "No GH_OSS_NAME environment variable found expecting user to have setup the Name for the Opensource contributions correctly"
+else
+  git config user.name "${GH_OSS_NAME}"
+fi
+
+if [ -z "${GH_OSS_EMAIL}" ]; then
+  echo "No GH_OSS_EMAIL environment variable found expecting user to have setup the Email for the Opensource contributions correctly"
+else
+  git config user.email "${GH_OSS_EMAIL}"
+fi
+
+
 cd ..
-cd ripple_comcast_extns || exit
-echo "Building Comcast Extns"
 cargo build
-cd ..
