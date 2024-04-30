@@ -7,12 +7,6 @@ git submodule update --init --recursive
 cd Ripple || exit
 git config url."git@github.com:".pushInsteadOf https://github.com/
 
-if [ -z "${GH_OSS_RSA_PATH}" ]; then
-  echo "No GH_OSS_RSA_PATH environment variable found expecting user to have setup private key for opensource github correctly"
-else
-  git config core.sshCommand "ssh -o IdentitiesOnly=yes -i ${GH_OSS_RSA_PATH} -F /dev/null"
-fi
-
 if [ -z "${GH_OSS_NAME}" ]; then
   echo "No GH_OSS_NAME environment variable found expecting user to have setup the Name for the Opensource contributions correctly"
 else
