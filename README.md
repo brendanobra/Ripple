@@ -5,7 +5,11 @@ This is a workspace repo for building Ripple 2.0 OSS and its extensions
 
 -- Ripple OSS
 
--- Comcast extns
+-- Thunder extns
+
+-- Distributor extn
+
+-- Observability extn
 
 -- firebolt-devices
 
