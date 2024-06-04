@@ -25,6 +25,7 @@ if [ "$device_type" == "mock" ]; then
     is_mock=true
     device_type=puck
     partner_type=xumo
+
 else
     if [ -z "$2" ]; then
         echo "Please enter the type of Partner you are on. Options: Cert, Sky-UK, Xumo"
@@ -64,6 +65,7 @@ function get_default_extension() {
 cargo build --features local_dev || exit
 echo "Cleaning up manifest folder in target directory"
 mkdir -p target/manifests
+mkdir -p target/debug/rules
 rm -rf ./target/manifests/firebolt-extn-manifest.json
 echo "Copying to target directory"
 cp firebolt-devices/"$partner_type"/"$device_type"/app-library.json target/manifests/firebolt-app-library.json
@@ -73,6 +75,7 @@ if [ "$is_mock" ]; then
     cp mock/manifest.json target/manifests/firebolt-device-manifest.json
     cp mock/extn.json target/manifests/firebolt-extn-manifest.json
     cp mock/mock-thunder-device.json target/manifests/mock-thunder-device.json
+    cp mock/rules/* target/debug/rules
     sed -i "" "s@\"mock_data_file\": \"mock-device.json\"@\"mock_data_file\": \"$workspace_dir/target/manifests/mock-thunder-device.json\"@" target/manifests/firebolt-extn-manifest.json
 else
     cp firebolt-devices/"$partner_type"/"$device_type"/manifest.json target/manifests/firebolt-device-manifest.json

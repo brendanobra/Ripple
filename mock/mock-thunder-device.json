@@ -2,8 +2,7 @@
   "Controller.1.register": [
     {
       "params": {
-        "event": "statechange",
-        "id": "client.Controller.1.events"
+        "event": "statechange"
       },
       "result": 0
     }
@@ -21,8 +20,7 @@
   "org.rdk.System.register": [
     {
       "params": {
-        "event": "onTimeZoneDSTChanged",
-        "id": "client.org.rdk.System.events"
+        "event": "onTimeZoneDSTChanged"
       },
       "result": 0,
       "events": [
@@ -39,8 +37,7 @@
     },
     {
       "params": {
-        "event": "onSystemPowerStateChanged",
-        "id": "client.org.rdk.System.events"
+        "event": "onSystemPowerStateChanged"
       },
       "result": 0,
       "events": [
@@ -52,13 +49,29 @@
           }
         }
       ]
+    },
+    {
+      "params": {
+        "event": "onTerritoryChanged"
+      },
+      "result": 0,
+      "events": [
+        {
+          "delay": 0,
+          "data": {
+            "oldTerritory": "GBR",
+            "newTerritory": "USA",
+            "oldRegion": "GB-ENG",
+            "newRegion": "US-NY"
+          }
+        }
+      ]
     }
   ],
   "org.rdk.Network.register": [
     {
       "params": {
-        "event": "onInternetStatusChange",
-        "id": "client.org.rdk.Network.events"
+        "event": "onInternetStatusChange"
       },
       "result": 0,
       "events": [
@@ -468,6 +481,19 @@
         "value": "value1",
         "success": true
       }
+    },
+    {
+      
+      "params": {
+        "key": "someNewKey",
+        "namespace": "epg",
+        "scope": "account"
+      },
+      "result": {
+        "value": "someNewValue",
+        "success": true,
+        "ttl": 100
+      }
     }
   ],
   "org.rdk.RDKShell.1.launch": [
@@ -551,6 +577,17 @@
         "namespace": "ns1",
         "key": "key1",
         "value": "value1"
+      },
+      "result": {
+        "success": true
+      }
+    },
+    {
+      "params": {
+        "namespace": "epg",
+        "key": "someNewKey",
+        "value": "someNewValue",
+        "scope": "account"
       },
       "result": {
         "success": true
@@ -652,8 +689,7 @@
   "org.rdk.DisplaySettings.register": [
     {
       "params": {
-        "event": "resolutionChanged",
-        "id": "client.org.rdk.DisplaySettings.events"
+        "event": "resolutionChanged"
       },
       "result": 0,
       "events": [
@@ -667,6 +703,35 @@
           }
         }
       ]
+    }
+  ],
+  "org.rdk.System.getTerritory": [
+    {
+      "result": {
+        "territory": "ITA",
+        "region": "EU-IT",
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.System.setTerritory": [
+    {
+      "params": {
+        "territory": "ITA",
+        "region": "EU-IT"
+      },
+      "result": {
+        "success": true
+      }
+    },
+    {
+      "params": {
+        "territory": "GBR",
+        "region": "GB-EN"
+      },
+      "result": {
+        "success": true
+      }
     }
   ]
 }

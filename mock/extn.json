@@ -173,5 +173,8 @@
         "advertising.appBundleId": [
             "badger.appStoreId"
         ]
-    }
+    },
+    "rules_path": [
+        "rules/ripple.common.rules.json"
+    ]
 }
