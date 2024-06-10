@@ -1,44 +1,13 @@
 {
   "configuration": {
-    "ws_configuration": {
-      "enabled": true,
-      "gateway": "127.0.0.1:3473"
-    },
-    "internal_ws_configuration": {
-      "enabled": true,
-      "gateway": "127.0.0.1:3474"
-    },
-    "platform_parameters": {
-      "gateway": "ws://127.0.0.1:9998/jsonrpc"
-    },
-    "distribution_id_salt": {
-      "algorithm": "SHA1",
-      "magic": "5dA6Sg34jdG0PhXf"
-    },
     "features": {
       "privacy_settings_storage_type": "sync",
-      "intent_validation": "failOpen",
-      "cloud_permissions": true,
       "catalog_uninstalls_enabled": {
         "default": true,
         "remote_key": "Device.DeviceInfo.X_RDKCENTRAL-COM_RFC.Feature.EntOsAppPlatform.EnableAppUninstalls"
       }
     },
     "form_factor": "ipstb",
-    "default_values": {
-      "country_code": "US",
-      "language": "en",
-      "locale": "en-US",
-      "name": "Living Room",
-      "skip_restriction": "none",
-      "captions": {
-        "enabled": false
-      },
-      "voice": {
-        "enabled": false,
-        "speed": 5
-      }
-    },
     "model_friendly_names": {
       "SCXI11AIC": "XiOne",
       "SCXI11ADS": "XiOne",
@@ -69,20 +38,7 @@
         "secure_storage_service": {
           "url": "ss.prod.developer.comcast.com"
         },
-        "xvp_playback_service": {
-          "url": "https://playback.exp.xvp.na-1.xcal.tv/v1"
-        },
-        "xvp_video_service": {
-          "url": "https://ess.exp.xvp.na-1.xcal.tv/v1"
-        },
-        "xvp_session_service": {
-          "url": "https://session.exp.xvp.na-1.xcal.tv/v1"
-        },
-        "xvp_xifa_service": {
-          "url": "https://xifa.exp.xvp.na-1.xcal.tv/v2"
-        },
         "catalog_service": {
-          "enabled": false,
           "url": "catalog-service.prod.developer.comcast.com",
           "polling_interval_secs": 3600,
           "min_polling_delay_secs": 300,
@@ -92,66 +48,12 @@
         },
         "behavioral_metrics": {
           "sift": {
-            "endpoint": "https://collector.sift.comcast.com/events/entos",
-            "ontology": false,
             "api_key": "",
-            "batch_size": 1,
-            "max_queue_size": 20,
-            "send_interval_seconds": 30,
-            "metrics_schemas": {
-              "default_metrics_namespace": "entos",
-              "default_metrics_schema_version": "1",
-              "metrics_schemas": [
-                {
-                  "event_name": "app_lc_state_change",
-                  "namespace": "entos",
-                  "version": "2",
-                  "alias": "app_lc_state_change"
-                },
-                {
-                  "event_name": "custom",
-                  "namespace": "entos",
-                  "version": "3",
-                  "alias": "custom"
-                }
-              ]
-            }
+            "batch_size": 1
           }
         },
         "privacy_service": {
           "url": "https://ess.exp.xvp.na-1.xcal.tv/"
-        },
-        "linchpin_config": {
-          "url": "wss://linchpin.lp.xcal.tv:18082/",
-          "initial_reconnect_delay_ms": 1000,
-          "max_reconnect_delay_ms": 32000,
-          "heartbeat_timeout_secs": 300
-        },
-        "sync_monitor_service": {
-          "services": [
-            {
-              "service_name": "privacy_service",
-              "listen_topic": "p:{partnerId}:a:{accountId}:t:xvp-client",
-              "ttl": 43200
-            },
-            {
-              "service_name": "xvp_session_service",
-              "listen_topic": "p:{partnerId}:a:{accountId}:t:xvp-client",
-              "ttl": 43200
-            }
-          ]
-        },
-        "cloud_firebolt_mapping": {
-          "user_grants": {
-            "xcal:appDataCollection": {
-              "cap": "xrn:firebolt:capability:data:app-usage",
-              "role": "Use"
-            },
-            "xcal:appEntitlementCollection": {
-              "cap": "xrn:firebolt:capability:discovery:entitlements",
-              "role": "Use"
-            }
-          }
         }
       }
     },
@@ -198,92 +100,6 @@
         "capabilities.onUnavailable",
         "capabilities.onGranted",
         "capabilities.onRevoked"
-      ]
-    },
-    "data_governance": {
-      "policies": [
-        {
-          "data_type": "Watched",
-          "setting_tags": [
-            {
-              "setting": "AllowPersonalization",
-              "enforcement_value": false,
-              "tags": [
-                "dataPlatform:cet:xvp:personalization:recommendation"
-              ]
-            },
-            {
-              "setting": "AllowResumePoints",
-              "enforcement_value": false,
-              "tags": [
-                "dataPlatform:cet:xvp:personalization:continueWatching"
-              ]
-            },
-            {
-              "setting": "AllowWatchHistory",
-              "enforcement_value": false,
-              "tags": [
-                "dataPlatform:cet:xvp:personalization:continueWatching"
-              ]
-            },
-            {
-              "setting": "AllowProductAnalytics",
-              "enforcement_value": false,
-              "tags": [
-                "dataPlatform:cet:xvp:analytics"
-              ]
-            },
-            {
-              "setting": "AllowBusinessAnalytics",
-              "enforcement_value": false,
-              "tags": [
-                "dataPlatform:cet:xvp:analytics:business"
-              ]
-            }
-          ],
-          "drop_on_all_tags": false
-        },
-        {
-          "data_type": "BusinessIntelligence",
-          "setting_tags": [
-            {
-              "setting": "AllowPersonalization",
-              "enforcement_value": false,
-              "tags": [
-                "dataPlatform:cet:xvp:personalization:recommendation"
-              ]
-            },
-            {
-              "setting": "AllowResumePoints",
-              "enforcement_value": false,
-              "tags": [
-                "dataPlatform:cet:xvp:personalization:continueWatching"
-              ]
-            },
-            {
-              "setting": "AllowWatchHistory",
-              "enforcement_value": false,
-              "tags": [
-                "dataPlatform:cet:xvp:personalization:continueWatching"
-              ]
-            },
-            {
-              "setting": "AllowProductAnalytics",
-              "enforcement_value": false,
-              "tags": [
-                "dataPlatform:cet:xvp:analytics"
-              ]
-            },
-            {
-              "setting": "AllowBusinessAnalytics",
-              "enforcement_value": false,
-              "tags": [
-                "dataPlatform:cet:xvp:analytics:business"
-              ]
-            }
-          ],
-          "drop_on_all_tags": false
-        }
       ]
     },
     "metrics_logging_percentage": 10
@@ -394,20 +210,12 @@
     ]
   },
   "lifecycle": {
-    "appReadyTimeoutMs": 30000,
-    "appFinishedTimeoutMs": 500,
-    "maxLoadedApps": 5,
-    "minAvailableMemoryKb": 1024,
-    "prioritized": []
+    "appFinishedTimeoutMs": 500
   },
   "applications": {
-    "distribution": {
-      "library": "/etc/firebolt-app-library.json"
-    },
     "defaults": {
       "xrn:firebolt:application-type:main": "com.bskyb.epgui",
       "xrn:firebolt:application-type:settings": "com.bskyb.epgui"
-    },
-    "distributor_app_aliases": {}
+    }
   }
 }
