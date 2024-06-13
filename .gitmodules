@@ -16,3 +16,6 @@
 [submodule "ripple-bolt-extn"]
 	path = ripple-bolt-extn
 	url = git@fireboltghec.comcast.com:comcast-firebolt/ripple-bolt-extn.git
+[submodule "ripple-eos-test-utils"]
+	path = ripple-eos-test-utils
+	url = git@fireboltghec.comcast.com:comcast-firebolt/ripple-eos-test-utils.git
