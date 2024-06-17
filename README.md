@@ -5,11 +5,13 @@ This is a workspace repo for building Ripple 2.0 OSS and its extensions.
 
 -- Ripple OSS
 
--- Thunder extns
+-- ripple-bolt-extn
 
--- Distributor extn
+-- ripple-eos-distributor-extn
 
--- Observability extn
+-- ripple-eos-observability-extn
+
+-- ripple-eos-thunder-extn
 
 -- firebolt-devices
 
@@ -25,7 +27,7 @@ Below instructions are useful for setting up the workspace with a VS Code IDE.
 
 # Ripple Opensource issue
 
-Ripple exists in public Github.com with private visibility and it is approved for opensource but there is a window in which it will still be private. 
+Ripple exists in public Github.com with private visibility and it is approved for opensource but there is a window in which it will still be private.
 
 This inconvenience is a product of this time and will disappear once we Ripple OSS becomes public and sdk is published to crates.io
 Unfortunately during this window we have to bear the difficulties of building a repo from two different Github locations.
@@ -90,10 +92,24 @@ Please refer to the [knowledge base](./kb) in the `kb` folder
 
 # Release Mapping 
 
-| EOS Version | Ripple Open Source Version |ripple_comcast_exension Verion | dpab_appsanity | Firebolt Devices | 
-| ----------- | -------------------------- | ----------------------------- | -------------- | ---------------- |
+| EOS Version | Ripple Open Source Version | ripple-eos-distributor-extn | ripple-eos-thunder-extn | Firebolt Devices | 
+| ----------- | -------------------------- | --------------------------- | ----------------------- | ---------------- |
 | 1.15.0 | Ripple 1.0.0 #f744e53 | #ddf7a69 | #0df6bbb | #96f1347 | 
 | 1.15.1 | Ripple 1.0.0 #b3b202b | #99e14d9 | #1a26d72 | #cde30ee |
 | 1.16.0 | Ripple 1.1.0 #adac025 | #bfb2ead | #2a39af7 | #463c39c | 
 | 1.16.1 | Ripple 1.1.0 #24b6f5a | #bfb2ead | #2a39af7 | #463c39c |
 | 1.16.2 | Ripple 1.1.0 #f5c6e0d | #bfb2ead | #2a39af7 | #463c39c |
+| 1.17.0 | Ripple 1.2.0 #ce9541f | #df0308d | #691c2b1 | #33e5e02 |
+| 1.18.0 | Ripple 1.3.0 #b28c214 | #40b1a06 | #677ff08 | #147a15d | 
+| 1.18.1 | Ripple 1.3.0 #d8f0fd6 | #16ec4b0 | #218281f | #c4fc4e6 | 
+| 1.19.0 | Ripple 1.4.0 #8e6fc66 | #64ebdc1 | #5419beb | #183ffec | 
+| 1.19.1 | Ripple 1.4.1 #3d19b87 | #64ebdc1 | #5419beb | #aa1715c | 
+| 1.20.0 | Ripple 1.5.0 #985cce7 | #fdcebb8 | #4a81c48 | #34b0576 | 
+| 1.21.0 | Ripple 1.6.0 #1175c5d | #e4b8b50 | #303795f | #fae8d07 | 
+| 1.21.1 | Ripple 1.6.0 #1175c5d | #0bc6cdd | #ab4b34b | #fae8d07 |
+
+GHEC Migration ------------------------------------------------------------------------------------------------
+
+| EOS Version | Ripple Open Source Version |ripple_comcast_exension Verion | dpab_appsanity | Firebolt Devices | 
+| ----------- | -------------------------- | ----------------------------- | -------------- | ---------------- |
+| 1.22.0 | Ripple 1.7.0 | | | | 

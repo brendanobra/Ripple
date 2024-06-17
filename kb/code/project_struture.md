@@ -1,9 +1,11 @@
 # Project Structure
 eos-ripple is an "aggregator" project that facilitates one integration point for 
 - Ripple - the open source components
-- ripple_comcast_extensions - proprietary extensions to ripple
+- ripple-bolt-extn - Automation Extension
+- ripple-eos-thunder-extn - Thunder communcation extension
+- ripple-eos-observability - Observability metrics 
+- ripple-eos-distributor-extn - proprietary commucation extension
 - firebolt-devices - device manifest and configurations that are used to configure ripple at runtime.
-
 
 # Layout
 
@@ -24,10 +26,9 @@ eos-ripple
 |   |-- docs
 |   |-- examples
 |   `-- systemd
-`-- ripple_comcast_extns <- submodule
-    |-- badger 
-    |-- dpab_appsanity <- submodule
-    |-- dpab_core <- submodule
+|-- ripple-bolt-extn <- submodule
+|-- ripple-eos-thunder-extn <- submodule
+|-- ripple-eos-observability <- submodule
+|-- ripple-eos-distributor-extn <- submodule
 
 ```
-
