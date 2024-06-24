@@ -19,3 +19,6 @@
 [submodule "ripple-eos-test-utils"]
 	path = ripple-eos-test-utils
 	url = git@fireboltghec.comcast.com:comcast-firebolt/ripple-eos-test-utils.git
+[submodule "ripple-badger-extn"]
+	path = ripple-badger-extn
+	url = git@fireboltghec.comcast.com:comcast-firebolt/ripple-badger-extn.git

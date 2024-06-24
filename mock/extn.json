@@ -23,13 +23,14 @@
                         "metrics"
                     ],
                     "fulfills": [
-                        "json_rpsee"
+                        "json_rpsee",
+                        "local.storage"
                     ]
                 }
             ]
         },
         {
-            "path": "libthunder_comcast",
+            "path": "libeos_thunder",
             "symbols": [
                 {
                     "id": "ripple:channel:device:thunder_comcast",
@@ -72,7 +73,7 @@
             ]
         },
         {
-            "path": "libdpab_appsanity",
+            "path": "libeos_distributor",
             "symbols": [
                 {
                     "id": "ripple:channel:distributor:eos",
