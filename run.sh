@@ -24,7 +24,7 @@ if [ "$device_type" == "mock" ]; then
     echo "Initializing mock mode"
     is_mock=true
     device_type=puck
-    partner_type=xumo
+    partner_type=cert
 
 else
     if [ -z "$2" ]; then
