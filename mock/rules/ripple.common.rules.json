@@ -39,14 +39,14 @@
                 "response": "if .success then \"null\" else { code: -32100, message: \"couldnt set timezone\" } end"
             }
         },
-        "secureStorage.remove": {
+        "securestorage.remove": {
             "alias": "org.rdk.PersistentStore.1.deleteKey",
             "transform": {
                 "request": "{ namespace: \"$context.appId\", scope: .scope, key: .key }",
                 "response": "if .success then \"null\" else { code: -32100, message: \"couldnt set timezone\" } end"
             }
         },
-        "secureStorage.clear": {
+        "securestorage.clear": {
             "alias": "org.rdk.PersistentStore.1.deleteNamespace",
             "transform": {
                 "request": "{ namespace: \"$context.appId\", scope: .scope}",
