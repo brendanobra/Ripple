@@ -90,6 +90,7 @@ sed -i "" "s@\"default_extension\": \"so\"@\"default_extension\": \"$default_ext
 sed -i "" "s@\"library\": \"/etc/firebolt-app-library.json\"@\"library\": \"$workspace_dir/target/manifests/firebolt-app-library.json\"@" target/manifests/firebolt-device-manifest.json
 export EXTN_MANIFEST=${workspace_dir}/target/manifests/firebolt-extn-manifest.json
 export DEVICE_MANIFEST=${workspace_dir}/target/manifests/firebolt-device-manifest.json
+#export FIREBOLT_OPEN_RPC=${workspace_dir}/target/manifests/firebolt-open-rpc.json
 
 echo ""
 echo "Environment variables for manifests set"
