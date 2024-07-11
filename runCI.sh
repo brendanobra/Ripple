@@ -69,8 +69,16 @@ echo ""
 echo "DEVICE_MANIFEST=${DEVICE_MANIFEST}"
 echo "EXTN_MANIFEST=${EXTN_MANIFEST}"
 target/debug/ripple > /tmp/ripple.stdout.log 2>&1 &
-sleep 5s
-echo "ripple log after 5s: "
-tail /tmp/ripple.stdout.log
-echo "ripple ps:"
-ps -ef |grep ripple
+sleep 10s
+pgrep ripple
+RIPPLE_RUNNING=$?
+if [ "${RIPPLE_RUNNING}" -ne "0" ]; then
+   echo "ripple is not running, halting. please see logfile output for clues as to what went wrong:"
+   cat /tmp/ripple.stdout.log
+   exit "${RIPPLE_RUNNING}"
+else
+    echo "ripple is running, proceeeding"
+fi
+echo "ripple log after 10s: "
+tail -n 50 /tmp/ripple.stdout.log
+
