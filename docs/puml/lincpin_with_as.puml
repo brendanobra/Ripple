@@ -1,0 +1,50 @@
+@startuml "Linchpin with AS
+title "Linchpin with AS Phase 1"
+
+
+box "Distributor Extn" #LightGreen
+    participant clm as "Cloud Linchpin\nMonitor"
+    participant lp as "Linchpin Proxy"
+    participant alp as "AS Linchpin\nProxy Processor"
+end box
+
+box "Ripple" #LightYellow
+    participant m as "Main"
+    participant re as "Rules Engine"
+    participant ws as "Websocket Broker"
+end box
+
+box "Rules File" #Gold
+   participant ras as "Rules For AS"
+end box
+
+box "AS"  #LightBlue
+    participant a as "AS"
+end box
+
+group "Bootstrap phase Subscription"
+    m -> m : check cloudSync
+    note right of m: Cloud Sync enabled
+    m -> clm : syncAndMonitor()
+    clm -> lp : start
+    note right of clm: If use_as_linchping configå enabled\nflag for any issues\n to enable rollback
+    lp -> alp : start()
+    alp -> re: rpcRequest linchpin.connect()
+    re -> ras: get_rules()
+    ras -> re: (ws)\n(/system/notifications/status)
+    re -> ws: Setup socket
+    ws <-> a: setup AS websocket
+
+    group "Connection Status change"
+        ws -> alp: Connection Changed
+        alp -> lp: ClientEvent::State(connection_changed)
+    end
+end
+
+group "Linchpin Message phase"
+    ws -> alp: Linchpin Message
+    alp -> lp: ClientEvent::Notify(notify_message)
+    lp -> clm : existing flow
+end
+
+
