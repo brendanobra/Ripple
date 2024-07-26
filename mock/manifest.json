@@ -170,7 +170,8 @@
       "xrn:firebolt:capability:navigation:show-toaster",
       "xrn:firebolt:capability:accessibility:audiodescriptions",
       "xrn:firebolt:capability:usergrant:acknowledgechallenge",
-      "xrn:firebolt:capability:mock:device"
+      "xrn:firebolt:capability:mock:device",
+      "xrn:firebolt:capability:discovery:interest"
     ],
     "grantPolicies": {
       "xrn:firebolt:capability:data:app-usage": {
