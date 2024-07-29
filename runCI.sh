@@ -31,28 +31,41 @@ echo "Initializing mock mode"
 is_mock=true
 device_type=puck
 partner_type=cert
-
+HERE=`pwd`
+TARGET_DIR="${workspace_dir}/target"
+MANIFESTS_PATH="${TARGET_DIR}/manifests"
+RULES_PATH="${TARGET_DIR}/rules"
 cargo build --features local_dev || exit
 echo "Cleaning up manifest folder in target directory"
-mkdir -p target/manifests
-rm -rf ./target/manifests/firebolt-extn-manifest.json
-rm -rf ./target/manifests/firebolt-device-manifest.json
-rm -rf ./target/manifests/firebolt-app-library.json
+mkdir -p "${MANIFESTS_PATH}"
+mkdir -p "${RULES_PATH}"
+rm -rf "${MANIFESTS_PATH}/firebolt-extn-manifest.json"
+rm -rf "${MANIFESTS_PATH}/firebolt-device-manifest.json"
+rm -rf "${MANIFESTS_PATH}/firebolt-app-library.json"
 echo "Copying to target directory"
-cp firebolt-devices/"$partner_type"/"$device_type"/app-library.json target/manifests/firebolt-app-library.json
+cp firebolt-devices/"$partner_type"/"$device_type"/app-library.json "${MANIFESTS_PATH}/firebolt-app-library.json"
 
-echo "Copying mock manifests"
-cp mock/manifest.json target/manifests/firebolt-device-manifest.json
-cp mock/extn.json target/manifests/firebolt-extn-manifest.json
-cp mock/mock-thunder-device.json target/manifests/mock-thunder-device.json
+echo "Copying mock manifests and rules to target directory"
+cp mock/manifest.json "${MANIFESTS_PATH}/firebolt-device-manifest.json"
+cp mock/extn.json "${MANIFESTS_PATH}/firebolt-extn-manifest.json"
+cp mock/mock-thunder-device.json "${MANIFESTS_PATH}/mock-thunder-device.json"
+cp mock/rules/* "${RULES_PATH}/"
+ls -la "${MANIFESTS_PATH}"
+ls -la "${RULES_PATH}"
+#create list of rules in json format for loading into manifest 
+RULES=$(find "${RULES_PATH}" -maxdepth 1 -type f | jq -R -s -c 'split("\n")[:-1]' )
+echo "Rules path: ${RULES}"
 
 ## Update firebolt-extn-manifest.json
 default_extension=$(get_default_extension)
 extnManifestJson=$(<target/manifests/firebolt-extn-manifest.json)
 new_extnJson=$(echo "$extnManifestJson" | jq '.default_path = "'$workspace_dir'/target/debug/" |
     .default_extension = "'$default_extension'" |
+    .rules_path = '$RULES' |
     .extns[].symbols[] |= if has("config") and (.config | type == "object" and has("mock_data_file")) then .config.mock_data_file |= "'$workspace_dir'/target/manifests/mock-thunder-device.json" else . end')
 echo "$new_extnJson" > target/manifests/firebolt-extn-manifest.json
+## update rules_path to target/debug/rules
+
 
 
 ## Update firebolt-device-manifest.json
