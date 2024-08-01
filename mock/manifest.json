@@ -1,7 +1,7 @@
 {
   "configuration": {
     "features": {
-      "privacy_settings_storage_type": "sync",
+      "privacy_settings_storage_type": "local",
       "catalog_uninstalls_enabled": {
         "default": true,
         "remote_key": "Device.DeviceInfo.X_RDKCENTRAL-COM_RFC.Feature.EntOsAppPlatform.EnableAppUninstalls"
@@ -217,6 +217,9 @@
     "defaults": {
       "xrn:firebolt:application-type:main": "com.bskyb.epgui",
       "xrn:firebolt:application-type:settings": "com.bskyb.epgui"
+    },
+    "distribution": {
+      "library": "/etc/firebolt-app-library.json"
     }
   }
 }

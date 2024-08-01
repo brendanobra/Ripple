@@ -1,0 +1,62 @@
+@startuml "Integrated Player"
+title "Integrated Player API"
+
+
+box "IUI/AS" #Yellow
+    participant a as "Firebolt\nSDK"
+end box
+
+box "Ripple" #LightGreen
+    participant pb as "Provider Broker"
+end box
+
+box "Xumo IPA"  #LightBlue
+    participant x as "Firebolt\nSDK"
+end box
+
+
+
+group "Xumo IPA Provider Registration"
+    x -> pb : StreamingPlayer.onRequestCreate()
+    x -> pb : Player.onRequestLoad()
+    x -> pb : Player.onRequestPlay()
+   note right of pb : Keeps a map of \nappId as part \nof the registration
+end
+
+
+group "Player Creation"
+
+    group "Xumo Player Creation"
+    note right of a: Trigger to be decided could be PVS or Channel Tune
+        a -> pb : StreamingPlayer.create(appId:"xumo", request: {})
+        note right of a: Window ID needs to be specified
+        pb -> pb : find\nprovider\nwith\nappId
+        pb -> x : forward request\nto provided app id
+        note right of a: {\n"player": {\n"playerId": "123",\n"windowId": "456"\n},\n"appId": "xumo"\n}
+        x -> a 
+        note right of a: Remove App Id
+        group "General Player Event Registrations"
+            a -> pb : Player.progress(appId,playerId)
+            a -> pb : Player.status(appId,playerId)
+        end
+    end
+    
+    group "Xumo Player Load"
+        a -> pb : Player.load(appid, playerId, loadRequest: {"locator": ""})
+        note right of a: Autoplay should be true by default
+        pb -> pb : find\nprovider\nwith\ncapability\ntag
+        pb -> x : forward request (pull)
+        note right of a: {\n"mediaSessionId": "sess1"\n}
+        x -> a
+
+        group "Provider Play status and progress"
+          x -> pb: Player.provideStatus()
+          pb -> a: Player.status event
+          x -> pb : Player.provideProgress()
+          pb -> a: Player.progress event
+        end
+    end
+end
+
+
+

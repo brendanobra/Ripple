@@ -1,0 +1,74 @@
+@startuml "Provider Tags"
+title "Using Tags with providers"
+
+
+box "Player Client" #LightGreen
+    participant a as "Firebolt\nSDK"
+end box
+
+box "Ripple" #LightSlateGray
+    participant pb as "Provider Broker"
+end box
+
+box "Classic IPA" #Gold
+   participant c as "Firebolt\nSDK"
+end box
+
+box "Xumo IPA"  #LightBlue
+    participant x as "Firebolt\nSDK"
+end box
+
+group "Classic IPA Provider Registration"
+    note right of c: Provides a list of tags
+    c -> pb : onCreate([locator,broadcast])
+end
+
+group "Xumo IPA Provider Registration"
+    note right of c: Provides a list of tags
+    c -> pb : onCreate([xumo_play])
+end
+
+group "Player Creation"
+
+    group "Classic Player Creation"
+        a -> pb : StreamingPlayer.create(playerType:"locator")
+        pb -> pb : find\nprovider\nwith\ntag
+        pb -> c : forward request
+        c -> a : playerId: xrn:firebolt:capability:player:broadcast:locator:1
+    end
+
+    group "Classic Player Play"
+        a -> pb : Player.play(xrn:firebolt:capability:player:broadcast:locator:1)
+        pb -> pb : find\nprovider\nwith\ncapability\ntag
+        pb -> c : forward request (push)
+    end
+
+    group "Xumo Player Creation"
+        a -> pb : StreamingPlayer.create(playerType:"xumo")
+        pb -> pb : find\nprovider\nwith\ntag
+        pb -> x : forward request
+        x -> a : playerId: xrn:firebolt:capability:player:streaming:xumo:2
+    end
+
+    group "Xumo Player Play"
+        a -> pb : Player.play(xrn:firebolt:capability:player:streaming:xumo:2)
+         pb -> pb : find\nprovider\nwith\ncapability\ntag
+        pb -> x : forward request (push)
+    end
+
+    group "Foxtel Player Creation"
+        a -> pb : StreamingPlayer.create(playerType:"foxtel")
+        pb -> pb : find\nprovider\nwith\ntag
+        pb -> x : forward request
+        x -> a : playerId: xrn:firebolt:capability:player:streaming:foxtel:2
+    end
+
+    group "Foxtel Player Play"
+        a -> pb : Player.play(xrn:firebolt:capability:player:streaming:foxtel:2)
+         pb -> pb : find\nprovider\nwith\ncapability\ntag
+        pb -> x : forward request (push)
+    end
+end
+
+
+

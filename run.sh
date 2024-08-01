@@ -66,9 +66,11 @@ cargo build --features local_dev || exit
 echo "Cleaning up manifest folder in target directory"
 mkdir -p target/manifests
 mkdir -p target/debug/rules
+mkdir -p target/openrpc
 rm -rf ./target/manifests/firebolt-extn-manifest.json
 echo "Copying to target directory"
 cp firebolt-devices/"$partner_type"/"$device_type"/app-library.json target/manifests/firebolt-app-library.json
+cp firebolt-devices/openrpc/* target/openrpc
 
 if [ "$is_mock" ]; then
     echo "Copying mock manifests"
@@ -78,6 +80,7 @@ if [ "$is_mock" ]; then
     cp mock/rules/* target/debug/rules
     sed -i "" "s@\"mock_data_file\": \"mock-device.json\"@\"mock_data_file\": \"$workspace_dir/target/manifests/mock-thunder-device.json\"@" target/manifests/firebolt-extn-manifest.json
 else
+    cp firebolt-devices/rules/* target/debug/rules
     cp firebolt-devices/"$partner_type"/"$device_type"/manifest.json target/manifests/firebolt-device-manifest.json
     cp firebolt-devices/"$partner_type"/"$device_type"/extn.json target/manifests/firebolt-extn-manifest.json
 fi
@@ -88,6 +91,21 @@ sed -i "" "s@\"default_extension\": \"so\"@\"default_extension\": \"$default_ext
 
 ## Update firebolt-device-manifest.json
 sed -i "" "s@\"library\": \"/etc/firebolt-app-library.json\"@\"library\": \"$workspace_dir/target/manifests/firebolt-app-library.json\"@" target/manifests/firebolt-device-manifest.json
+
+rules="\/etc\/ripple\/rules"
+rules_relative="${workspace_dir}/target/debug/rules"
+rules_relative="${rules_relative//\//\\/}"
+echo "${rules} ||| ${rules_relative}"
+sed -i -e "s/${rules}/${rules_relative}/g" target/manifests/firebolt-extn-manifest.json
+
+
+openrpc="\/etc\/ripple\/openrpc"
+openrpc_relative="${workspace_dir}/target/openrpc"
+openrpc_relative="${openrpc_relative//\//\\/}"
+echo "${openrpc} ||| ${openrpc_relative}"
+sed -i -e "s/${openrpc}/${openrpc_relative}/g" target/manifests/firebolt-extn-manifest.json
+
+tail -10 target/manifests/firebolt-extn-manifest.json
 export EXTN_MANIFEST=${workspace_dir}/target/manifests/firebolt-extn-manifest.json
 export DEVICE_MANIFEST=${workspace_dir}/target/manifests/firebolt-device-manifest.json
 #export FIREBOLT_OPEN_RPC=${workspace_dir}/target/manifests/firebolt-open-rpc.json
@@ -97,4 +115,4 @@ echo "Environment variables for manifests set"
 echo ""
 echo "DEVICE_MANIFEST=${DEVICE_MANIFEST}"
 echo "EXTN_MANIFEST=${EXTN_MANIFEST}"
-THUNDER_HOST=${device_ip} target/debug/ripple
+DEVICE_HOST=${device_ip} target/debug/ripple
