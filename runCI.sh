@@ -35,7 +35,7 @@ HERE=`pwd`
 TARGET_DIR="${workspace_dir}/target"
 MANIFESTS_PATH="${TARGET_DIR}/manifests"
 RULES_PATH="${TARGET_DIR}/rules"
-cargo build --features local_dev || exit
+cargo build --quiet --features local_dev || exit
 echo "Cleaning up manifest folder in target directory"
 mkdir -p "${MANIFESTS_PATH}"
 mkdir -p "${RULES_PATH}"
