@@ -1,6 +1,5 @@
 # EOS Ripple
 
-
 This is a workspace repo for building Ripple 2.0 OSS and its extensions.
 
 -- Ripple OSS
@@ -80,15 +79,24 @@ export GH_OSS_EMAIL=<your OSS github email>
 ```
 ./setup
 ```
+
 ## Running without a device
 
 Eos-Ripple now supports mock device extension using which you can emulate thunder responses and run Ripple without needing a device.
 Command to run Ripple without a device
 >./run.sh mock
 
-# Knowledgebase 
+## Knowledgebase 
 Please refer to the [knowledge base](./kb) in the `kb` folder
 
+# Mapping ports
+`socat.sh` provide a convenience wrapper around `socat` to port forward from a dev workstation to a (VBN) device. 
+to forward ports:
+
+
+```
+./socat.sh <ip address of device> <ip address of AS host(optional)>
+```
 
 # Release Mapping 
 
