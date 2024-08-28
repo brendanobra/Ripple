@@ -68,19 +68,17 @@ echo "$new_extnJson" > target/manifests/firebolt-extn-manifest.json
 
 
 
-## Update firebolt-device-manifest.json
-deviceManifestJson=$(<target/manifests/firebolt-device-manifest.json)
-new_deviceJson=$(echo "$deviceManifestJson" | jq '.applications.distribution.library = "'$workspace_dir'/target/manifests/firebolt-app-library.json"')
-echo "$new_deviceJson" > target/manifests/firebolt-device-manifest.json
 
 export EXTN_MANIFEST=${workspace_dir}/target/manifests/firebolt-extn-manifest.json
 export DEVICE_MANIFEST=${workspace_dir}/target/manifests/firebolt-device-manifest.json
+export APP_LIBRARY=${workspace_dir}/target/manifests/firebolt-app-library.json
 
 echo ""
 echo "Environment variables for manifests set"
 echo ""
 echo "DEVICE_MANIFEST=${DEVICE_MANIFEST}"
 echo "EXTN_MANIFEST=${EXTN_MANIFEST}"
+echo "APP_LIBRARY=${APP_LIBRARY}"
 target/debug/ripple > /tmp/ripple.stdout.log 2>&1 &
 sleep 10s
 pgrep ripple
