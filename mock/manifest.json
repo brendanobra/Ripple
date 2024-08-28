@@ -171,7 +171,8 @@
       "xrn:firebolt:capability:accessibility:audiodescriptions",
       "xrn:firebolt:capability:usergrant:acknowledgechallenge",
       "xrn:firebolt:capability:mock:device",
-      "xrn:firebolt:capability:discovery:interest"
+      "xrn:firebolt:capability:discovery:interest",
+      "xrn:firebolt:capability:advertising:policy"
     ],
     "grantPolicies": {
       "xrn:firebolt:capability:data:app-usage": {
