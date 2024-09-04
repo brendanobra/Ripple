@@ -176,6 +176,9 @@
         ]
     },
     "rules_path": [
-        "rules/ripple.common.rules.json"
+        "/etc/ripple/rules/ripple.common.rules.json"
+    ],
+    "extn_sdks": [
+        "/etc/ripple/openrpc/firebolt-players-open-rpc.json"
     ]
 }

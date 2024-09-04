@@ -108,6 +108,8 @@ sed -i -e "s/${openrpc}/${openrpc_relative}/g" target/manifests/firebolt-extn-ma
 tail -10 target/manifests/firebolt-extn-manifest.json
 export EXTN_MANIFEST=${workspace_dir}/target/manifests/firebolt-extn-manifest.json
 export DEVICE_MANIFEST=${workspace_dir}/target/manifests/firebolt-device-manifest.json
+export APP_LIBRARY=${workspace_dir}/target/manifests/firebolt-app-library.json
+
 #export FIREBOLT_OPEN_RPC=${workspace_dir}/target/manifests/firebolt-open-rpc.json
 
 echo ""
@@ -115,4 +117,6 @@ echo "Environment variables for manifests set"
 echo ""
 echo "DEVICE_MANIFEST=${DEVICE_MANIFEST}"
 echo "EXTN_MANIFEST=${EXTN_MANIFEST}"
+echo "APP_LIBRARY=${APP_LIBRARY}"
+
 DEVICE_HOST=${device_ip} target/debug/ripple

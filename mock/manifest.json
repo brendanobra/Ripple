@@ -172,6 +172,7 @@
       "xrn:firebolt:capability:usergrant:acknowledgechallenge",
       "xrn:firebolt:capability:mock:device",
       "xrn:firebolt:capability:discovery:interest",
+      "xrn:firebolt:capability:integrated-player:playback",
       "xrn:firebolt:capability:advertising:policy"
     ],
     "grantPolicies": {
