@@ -67,6 +67,7 @@ echo "Cleaning up manifest folder in target directory"
 mkdir -p target/manifests
 mkdir -p target/debug/rules
 mkdir -p target/openrpc
+rm -rf target/openrpc/*
 rm -rf ./target/manifests/firebolt-extn-manifest.json
 echo "Copying to target directory"
 cp firebolt-devices/"$partner_type"/"$device_type"/app-library.json target/manifests/firebolt-app-library.json
@@ -109,8 +110,7 @@ tail -10 target/manifests/firebolt-extn-manifest.json
 export EXTN_MANIFEST=${workspace_dir}/target/manifests/firebolt-extn-manifest.json
 export DEVICE_MANIFEST=${workspace_dir}/target/manifests/firebolt-device-manifest.json
 export APP_LIBRARY=${workspace_dir}/target/manifests/firebolt-app-library.json
-
-#export FIREBOLT_OPEN_RPC=${workspace_dir}/target/manifests/firebolt-open-rpc.json
+export FIREBOLT_OPEN_RPC=${workspace_dir}/target/openrpc/firebolt-open-rpc.json
 
 echo ""
 echo "Environment variables for manifests set"

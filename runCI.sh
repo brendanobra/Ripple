@@ -66,12 +66,10 @@ new_extnJson=$(echo "$extnManifestJson" | jq '.default_path = "'$workspace_dir'/
 echo "$new_extnJson" > target/manifests/firebolt-extn-manifest.json
 ## update rules_path to target/debug/rules
 
-
-
-
 export EXTN_MANIFEST=${workspace_dir}/target/manifests/firebolt-extn-manifest.json
 export DEVICE_MANIFEST=${workspace_dir}/target/manifests/firebolt-device-manifest.json
 export APP_LIBRARY=${workspace_dir}/target/manifests/firebolt-app-library.json
+export FIREBOLT_OPEN_RPC=${workspace_dir}/target/openrpc/firebolt-open-rpc.json
 
 echo ""
 echo "Environment variables for manifests set"
