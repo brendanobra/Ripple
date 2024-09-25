@@ -21,7 +21,6 @@ members = [
 ]
 
 [workspace.package]
-name = "eos-ripple" # the name of the package
 version = "1.16.0"    # the current version, obeying semver
 edition = "2021"     # the edition, will have no effect on a resolver used in the workspace
 rust-version = "1.69.0" #MSRV

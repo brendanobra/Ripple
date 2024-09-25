@@ -16,7 +16,7 @@ function get_default_extension() {
       esac
 }
 
-echo "*****      Welcome to Eos-Ripple Run script        *****"
+echo "*****      Welcome to Eos-Ripple RunCI script        *****"
 echo ""
 echo "Note: Always run this in the eos-ripple folder"
 echo "Current working directory: ${workspace_dir}"
@@ -35,23 +35,35 @@ HERE=`pwd`
 TARGET_DIR="${workspace_dir}/target"
 MANIFESTS_PATH="${TARGET_DIR}/manifests"
 RULES_PATH="${TARGET_DIR}/rules"
+OPEN_RPC_PATH="${TARGET_DIR}/openrpc"
+OPEN_RPC_ETC_PATH="/etc/ripple/openrpc"
 cargo build --quiet --features local_dev || exit
 echo "Cleaning up manifest folder in target directory"
 mkdir -p "${MANIFESTS_PATH}"
 mkdir -p "${RULES_PATH}"
+mkdir -p "${OPEN_RPC_PATH}"
+mkdir -p "${OPEN_RPC_ETC_PATH}"
 rm -rf "${MANIFESTS_PATH}/firebolt-extn-manifest.json"
 rm -rf "${MANIFESTS_PATH}/firebolt-device-manifest.json"
 rm -rf "${MANIFESTS_PATH}/firebolt-app-library.json"
+rm -rf "${OPEN_RPC_PATH}/*"
+
 echo "Copying to target directory"
 cp firebolt-devices/"$partner_type"/"$device_type"/app-library.json "${MANIFESTS_PATH}/firebolt-app-library.json"
 
-echo "Copying mock manifests and rules to target directory"
+echo "Copying mock manifests, rules and open-rpc to target directory"
 cp mock/manifest.json "${MANIFESTS_PATH}/firebolt-device-manifest.json"
 cp mock/extn.json "${MANIFESTS_PATH}/firebolt-extn-manifest.json"
 cp mock/mock-thunder-device.json "${MANIFESTS_PATH}/mock-thunder-device.json"
+
+cp mock/firebolt-open-rpc.json "${OPEN_RPC_ETC_PATH}/firebolt-open-rpc.json"
+cp mock/firebolt-open-rpc.json "${OPEN_RPC_PATH}/firebolt-open-rpc.json"
+
 cp mock/rules/* "${RULES_PATH}/"
 ls -la "${MANIFESTS_PATH}"
 ls -la "${RULES_PATH}"
+ls -la "${OPEN_RPC_PATH}"
+
 #create list of rules in json format for loading into manifest 
 RULES=$(find "${RULES_PATH}" -maxdepth 1 -type f | jq -R -s -c 'split("\n")[:-1]' )
 echo "Rules path: ${RULES}"
@@ -77,6 +89,8 @@ echo ""
 echo "DEVICE_MANIFEST=${DEVICE_MANIFEST}"
 echo "EXTN_MANIFEST=${EXTN_MANIFEST}"
 echo "APP_LIBRARY=${APP_LIBRARY}"
+echo "FIREBOLT_OPEN_RPC=${FIREBOLT_OPEN_RPC}"
+
 target/debug/ripple > /tmp/ripple.stdout.log 2>&1 &
 sleep 10s
 pgrep ripple
