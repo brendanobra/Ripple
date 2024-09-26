@@ -15,7 +15,6 @@ members = [
     "ripple-badger-extn",
     "ripple-eos-distributor-extn",
     "ripple-bolt-extn",
-    "ripple-eos-observability-extn",
     "Ripple/device/mock_device",
     "ripple-eos-test-utils",
 ]
