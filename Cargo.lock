@@ -547,6 +547,7 @@ name = "badger"
 version = "1.16.0"
 dependencies = [
  "base64 0.21.7",
+ "cryptoxide",
  "jsonrpsee",
  "ripple_sdk",
  "serde",
