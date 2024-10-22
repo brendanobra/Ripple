@@ -71,7 +71,7 @@ rm -rf target/openrpc/*
 rm -rf ./target/manifests/firebolt-extn-manifest.json
 echo "Copying to target directory"
 cp firebolt-devices/"$partner_type"/"$device_type"/app-library.json target/manifests/firebolt-app-library.json
-cp firebolt-devices/openrpc/* target/openrpc
+cp firebolt-devices/openrpc/firebolt/1.4.0/* target/openrpc
 
 if [ "$is_mock" ]; then
     echo "Copying mock manifests"
