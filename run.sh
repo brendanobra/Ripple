@@ -71,7 +71,12 @@ rm -rf target/openrpc/*
 rm -rf ./target/manifests/firebolt-extn-manifest.json
 echo "Copying to target directory"
 cp firebolt-devices/"$partner_type"/"$device_type"/app-library.json target/manifests/firebolt-app-library.json
-cp firebolt-devices/openrpc/firebolt/1.4.0/* target/openrpc
+# Set the desired firebolt-version version
+FIREBOLT_VERSION="1.4.0" 
+echo "firebolt-version ${FIREBOLT_VERSION}"
+
+# Copy all files from the specific version directory
+cp firebolt-devices/openrpc/firebolt/${FIREBOLT_VERSION}/* target/openrpc/
 
 if [ "$is_mock" ]; then
     echo "Copying mock manifests"
