@@ -173,7 +173,8 @@
       "xrn:firebolt:capability:mock:device",
       "xrn:firebolt:capability:discovery:interest",
       "xrn:firebolt:capability:integrated-player:playback[provide]",
-      "xrn:firebolt:capability:advertising:policy"
+      "xrn:firebolt:capability:advertising:policy",
+      "xrn:firebolt:capability:secondscreen:protocols"
     ],
     "grantPolicies": {
       "xrn:firebolt:capability:data:app-usage": {
