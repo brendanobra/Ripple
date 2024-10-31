@@ -105,10 +105,7 @@
                         "publish.pubsub",
                         "provider.pubsub",
                         "app_catalog"
-                    ],
-                    "config": {
-                        "use_integrated_linchpin": "false"
-                    }
+                    ]
                 }                                                                                                                                 
             ]
         },
