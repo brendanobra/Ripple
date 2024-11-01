@@ -67,7 +67,8 @@
                         "system_power_state.device_events",
                         "time_zone.device_events",
                         "remote_feature_control",
-                        "apps"
+                        "apps",
+                        "analytics"
                     ]
                 }
             ]
@@ -88,7 +89,8 @@
                         "device_info",
                         "ripple_context",
                         "metrics",
-                        "observability"
+                        "observability",
+                        "analytics"
                     ],
                     "fulfills": [
                         "permissions",
@@ -107,6 +109,9 @@
                         "app_catalog"
 <<<<<<< HEAD
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
                     ],
                     "config": {
                         "use_integrated_linchpin": "false"
@@ -116,10 +121,13 @@
                     ]
                 }                                                                                                                                 
 >>>>>>> main
+<<<<<<< HEAD
+=======
 =======
                     ]
                 }
 >>>>>>> 8000433cfb655681eabe274be13cdb71a7aff797
+>>>>>>> main
             ]
         },
         {
@@ -173,7 +181,8 @@
         "app_catalog",
         "apps",
         "ripple_context",
-        "observability"
+        "observability",
+        "analytics"
     ],
     "rpc_aliases": {
         "advertising.advertisingId": [
