@@ -120,4 +120,14 @@ GHEC Migration -----------------------------------------------------------------
 
 | EOS Version | Ripple Open Source Version |ripple_comcast_exension Verion | dpab_appsanity | Firebolt Devices | 
 | ----------- | -------------------------- | ----------------------------- | -------------- | ---------------- |
-| 1.22.0 | Ripple 1.7.0 | | | | 
+| 1.22.0 | Ripple 1.7.0 | 
+| 1.22.0 | Ripple 1.7.0 |
+| 1.23.0 | Ripple 1.8.0 |
+| 1.30.0 | Ripple 1.9.0 |
+| 1.40.0 | Ripple 1.10.0 |
+| 1.50.0 | Ripple 1.11.0 |
+| 1.60.0 | Ripple 1.12.0 |
+| 1.70.0 | Ripple 1.13.0 |
+| 1.80.0 | Ripple 1.14.0 |
+| 1.90.0 | Ripple 1.15.0 | 
+| 2.0.0  | Ripple 1.16.0 | 

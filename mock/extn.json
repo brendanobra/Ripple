@@ -107,27 +107,11 @@
                         "publish.pubsub",
                         "provider.pubsub",
                         "app_catalog"
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> main
                     ],
                     "config": {
                         "use_integrated_linchpin": "false"
                     }
-                }
-=======
-                    ]
-                }                                                                                                                                 
->>>>>>> main
-<<<<<<< HEAD
-=======
-=======
-                    ]
-                }
->>>>>>> 8000433cfb655681eabe274be13cdb71a7aff797
->>>>>>> main
+                }                                                                                                                
             ]
         },
         {
@@ -197,6 +181,7 @@
         "/etc/ripple/rules/ripple.common.rules.json"
     ],
     "extn_sdks": [
+        "/etc/ripple/openrpc/ripple-rpc.json",
         "/etc/ripple/openrpc/firebolt-players-open-rpc.json"
     ]
 }
