@@ -25,6 +25,54 @@
                 "event": "if .newTerritory==\"ITA\" then \"IT\" else  \"UK\" end"
             }
         },
+        "localization.language": {
+            "alias": "org.rdk.PersistentStore.getValue",
+            "transform": {
+                "request": "{ namespace: \"Localization\", key: \"language\"}",
+                "response": "if .result and .result.success then (.result.value | fromjson | .value) else \"en\" end"
+            }
+        },
+        "localization.setLanguage": {
+            "alias": "org.rdk.PersistentStore.setValue",
+            "transform": {
+                "request": "{ value: {update_time: now | todateiso8601, value: .value}, namespace: \"Localization\", key: \"language\"}",
+                "response": "if .result and .result.success then null else { error: { code: -32100, message: \"couldn't set language\" }} end"
+            }
+        },
+        "localization.onLanguageChanged": {
+            "alias": "org.rdk.PersistentStore.onValueChanged",
+            "transform": {
+                "event": "(.value | fromjson | .value)"
+            },
+            "filter": "if .namespace == \"Localization\" and .key == \"language\" then true else false end"
+        },
+        "localization.additionalInfo": {
+            "alias": "org.rdk.PersistentStore.getValue",
+            "transform": {
+                "request": "{ namespace: \"Localization\", key: \"additionalInfo\"}",
+                "response": "if .result and .result.success then (.result.value | fromjson | .value) else \"en\" end"
+            }
+        },
+        "localization.setAdditionalInfo": {
+            "alias": "org.rdk.PersistentStore.setValue",
+            "transform": {
+                "request": "{ value: {update_time: now | todateiso8601, value: .value}, namespace: \"Localization\", key: \"additionalInfo\"}",
+                "response": "if .result and .result.success then null else { error: { code: -32100, message: \"couldn't set additionalInfo\" }} end"
+            }
+        },
+        "localization.onAdditionalInfoChanged": {
+            "alias": "org.rdk.PersistentStore.onValueChanged",
+            "transform": {
+                "event": "(.value | fromjson | .value)"
+            },
+            "filter": "if .namespace == \"Localization\" and .key == \"additionalInfo\" then true else false end"
+        },
+        "localization.timeZone": {
+            "alias": "org.rdk.System.getTimeZoneDST",
+            "transform": {
+                "response": "if .result and .result.success then .result.timeZone else { error: { code: -32100, message: \"couldn't get timezone\" }} end"
+            }
+        },
         "securestorage.get": {
             "alias": "org.rdk.PersistentStore.1.getValue",
             "transform": {
@@ -51,6 +99,12 @@
             "transform": {
                 "request": "{ namespace: \"$context.appId\", scope: .scope}",
                 "response": "if .success then \"null\" else { code: -32100, message: \"couldnt set timezone\" } end"
+            }
+        },
+        "secondscreen.device": {
+            "alias": "org.rdk.AuthService.getXDeviceId",
+            "transform": {
+                "response": "if .result and .result.success then .result.xDeviceId else { error: { code: -32100, message: \"couldn't get device ID\" }} end"
             }
         }
     }

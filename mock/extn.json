@@ -90,10 +90,10 @@
                         "metrics",
                         "observability"
                     ],
-                    "fulfills": [                                                                                                                 
-                        "permissions",                                                                                                            
-                        "secure.storage",                                                                                                         
-                        "advertising",                                                                                                            
+                    "fulfills": [
+                        "permissions",
+                        "secure.storage",
+                        "advertising",
                         "media_events",
                         "privacy_cloud.storage",
                         "cloud_sync",
@@ -105,8 +105,21 @@
                         "publish.pubsub",
                         "provider.pubsub",
                         "app_catalog"
+<<<<<<< HEAD
+<<<<<<< HEAD
+                    ],
+                    "config": {
+                        "use_integrated_linchpin": "false"
+                    }
+                }
+=======
                     ]
                 }                                                                                                                                 
+>>>>>>> main
+=======
+                    ]
+                }
+>>>>>>> 8000433cfb655681eabe274be13cdb71a7aff797
             ]
         },
         {
@@ -121,8 +134,7 @@
                     "uses": [
                         "config"
                     ],
-                    "fulfills": [
-                    ]
+                    "fulfills": []
                 },
                 {
                     "id": "ripple:extn:jsonrpsee:mock_device",
