@@ -155,6 +155,29 @@ pub enum RuleTransformType {
 pub struct RuleEngine {
     pub rules: RuleSet,
 }
+#[derive(Debug, Clone)]
+pub enum RuleEngineError {
+    PartialRuleLoadError(Vec<String>, RuleEngine),
+}
+
+#[derive(Debug, Clone)]
+pub enum JqError {
+    RuleParseFailed,
+    RuleCompileFailed(String),
+    RuleNotFound(String),
+    RuleFailedToProcess(String),
+    InvalidData,
+}
+impl From<RippleError> for JqError {
+    fn from(ripple_error: RippleError) -> Self {
+        JqError::RuleCompileFailed(ripple_error.to_string())
+    }
+}
+impl From<JqError> for RippleError {
+    fn from(_: JqError) -> Self {
+        RippleError::ParseError
+    }
+}
 
 impl RuleEngine {
     fn build_path(path: &str, default_path: &str) -> String {

@@ -130,7 +130,7 @@ pub struct ApiMessage {
     pub stats: Option<ApiStats>,
 }
 
-#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Default)]
 pub struct ApiStats {
     pub stats_ref: String,
     pub stats: RpcStats,
