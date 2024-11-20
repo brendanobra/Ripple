@@ -49,9 +49,11 @@ impl Default for EventManagementUtility {
 }
 impl EventManagementUtility {
     pub fn new() -> Self {
-        Self {
+        let me = Self {
             functions: Mutex::new(HashMap::new()),
-        }
+        };
+        me.register_custom_functions();
+        me
     }
     pub fn register_custom_functions(&self) {
         // Add a custom function to event utility based on the tag

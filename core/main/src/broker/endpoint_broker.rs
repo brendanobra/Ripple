@@ -267,6 +267,17 @@ impl From<JqError> for BrokerWorkFlowError {
         BrokerWorkFlowError::JqError(e)
     }
 }
+
+pub fn get_event_id_from_method(method: Option<String>) -> Option<u64> {
+    method.and_then(|m| {
+        let event: Vec<&str> = m.split('.').collect();
+        event.first().and_then(|v| v.parse::<u64>().ok())
+    })
+}
+pub fn is_event(method: Option<String>) -> bool {
+    get_event_id_from_method(method).is_some()
+}
+
 impl BrokerOutput {
     pub fn is_result(&self) -> bool {
         self.data.result.is_some()
@@ -302,6 +313,9 @@ impl BrokerOutput {
             }
         }
         "unknown".to_string()
+    }
+    pub fn is_event(&self) -> bool {
+        is_event(self.data.method.clone())
     }
 }
 
@@ -746,7 +760,7 @@ pub trait EndpointBroker {
 /// Forwarder gets the BrokerOutput and forwards the response to the gateway.
 pub struct BrokerOutputForwarder;
 
-pub fn get_event_id(broker_output: BrokerOutput) -> Option<u64> {
+pub fn get_event_id(broker_output: &BrokerOutput) -> Option<u64> {
     broker_output.get_event().or(broker_output.data.id)
 }
 
@@ -770,22 +784,57 @@ pub fn get_request_id(broker_request: &BrokerRequest, request_id: Option<u64>) -
         .map(|v| v.to_string())
         .unwrap_or_else(|| broker_request.rpc.ctx.call_id.to_string())
 }
+/*
+Acutal implementation of the broker workflow
+*/
+pub fn _run_broker_workflow(
+    broker_output: &BrokerOutput,
+    broker_request: &BrokerRequest,
+    event_utility: Arc<EventManagementUtility>,
+) -> Result<BrokerWorkflowSuccess, BrokerWorkFlowError> {
+    Err(BrokerWorkFlowError::MissingValue)
+}
+/*
+Interface for test framework
+*/
 pub fn run_broker_workflow(
     broker_output: &BrokerOutput,
     broker_request: &BrokerRequest,
 ) -> Result<BrokerWorkflowSuccess, BrokerWorkFlowError> {
+    _run_broker_workflow(
+        broker_output,
+        broker_request,
+        Arc::new(EventManagementUtility::new()),
+    )
+}
+/*
+interface for BrokerOutputForwarder::start_forwarder
+*/
+pub fn broker_workflow(
+    platform_state: &PlatformState,
+    broker_output: &BrokerOutput,
+    event_utility: Arc<EventManagementUtility>,
+) -> Result<BrokerWorkflowSuccess, BrokerWorkFlowError> {
+    /*
+       Decompose the broker_output and broker_request into their respective parts
+    */
+    if let (Some(id)) = get_event_id(broker_output) {
+        if let Ok(broker_request) = platform_state.endpoint_state.get_request(id) {
+            return _run_broker_workflow(broker_output, &broker_request, event_utility);
+        }
+    }
     Err(BrokerWorkFlowError::MissingValue)
 }
 
 impl BrokerOutputForwarder {
     pub fn start_forwarder(platform_state: PlatformState, mut rx: Receiver<BrokerOutput>) {
-        // set up the event utility
-        let event_utility = Arc::new(EventManagementUtility::new());
-        event_utility.register_custom_functions();
-        let event_utility_clone = event_utility.clone();
-
         tokio::spawn(async move {
+            let event_utility_clone = Arc::new(EventManagementUtility::new());
             while let Some(output) = rx.recv().await {
+                /*
+                abstract everything that follows below in run_worksflow and below
+                */
+
                 let output_c = output.clone();
                 let mut response = output.data.clone();
                 let mut is_event = false;

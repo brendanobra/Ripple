@@ -135,14 +135,6 @@ pub struct ApiStats {
     pub stats_ref: String,
     pub stats: RpcStats,
 }
-// impl Default for ApiStats {
-//     fn default() -> Self {
-//         Self {
-//             stats_ref: "stats".to_string(),
-//             stats: RpcStats::default(),
-//         }
-//     }
-// }
 
 /// Holds a message in jsonrpc protocol format and the protocol that it should be converted into
 /// The protocol of the request is passed in context and then when
