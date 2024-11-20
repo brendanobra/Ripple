@@ -15,12 +15,13 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+use hyper::Request;
 use ripple_sdk::{
     api::{
         firebolt::fb_capabilities::JSON_RPC_STANDARD_ERROR_INVALID_PARAMS,
         gateway::rpc_gateway_api::{
             ApiMessage, ApiProtocol, ApiStats, CallContext, JsonRpcApiRequest, JsonRpcApiResponse,
-            RpcRequest,
+            RpcRequest, RpcStats,
         },
         session::AccountSession,
     },
@@ -57,7 +58,7 @@ use crate::{
 use super::{
     event_management_utility::EventManagementUtility,
     http_broker::HttpBroker,
-    rules_engine::{jq_compile, Rule, RuleEndpoint, RuleEndpointProtocol, RuleEngine},
+    rules_engine::{jq_compile, JqError, Rule, RuleEndpoint, RuleEndpointProtocol, RuleEngine},
     thunder_broker::ThunderBroker,
     websocket_broker::WebsocketBroker,
     workflow_broker::WorkflowBroker,
@@ -240,7 +241,32 @@ pub struct BrokerContext {
 pub struct BrokerOutput {
     pub data: JsonRpcApiResponse,
 }
+#[derive(Debug, Clone)]
+pub enum BrokerWorkFlowError {
+    MissingValue,
+    NoRuleFound,
+    JqError(JqError),
+    JsonParseError,
+    ApiMessageError,
+}
 
+#[derive(Debug, Clone)]
+pub struct SessionizedApiMessage {
+    pub session_id: String,
+    pub api_message: ApiMessage,
+}
+#[derive(Debug, Clone)]
+pub enum BrokerWorkflowSuccess {
+    SubscriptionProcessed(BrokerOutput, Option<u64>),
+    Unsubcribe(BrokerOutput, Option<u64>),
+    RuleAppliedToEvent(BrokerOutput, Option<u64>),
+    FilterApplied(BrokerOutput, Option<u64>),
+}
+impl From<JqError> for BrokerWorkFlowError {
+    fn from(e: JqError) -> Self {
+        BrokerWorkFlowError::JqError(e)
+    }
+}
 impl BrokerOutput {
     pub fn is_result(&self) -> bool {
         self.data.result.is_some()
@@ -719,6 +745,37 @@ pub trait EndpointBroker {
 
 /// Forwarder gets the BrokerOutput and forwards the response to the gateway.
 pub struct BrokerOutputForwarder;
+
+pub fn get_event_id(broker_output: BrokerOutput) -> Option<u64> {
+    broker_output.get_event().or(broker_output.data.id)
+}
+
+pub fn brokered_to_api_message_response(
+    broker_output: BrokerOutput,
+    broker_request: &BrokerRequest,
+    request_id: String,
+) -> Result<ApiMessage, BrokerWorkFlowError> {
+    match serde_json::to_string(&broker_output.data) {
+        Ok(jsonrpc_msg) => Ok(ApiMessage {
+            request_id,
+            protocol: broker_request.rpc.ctx.protocol.clone(),
+            jsonrpc_msg,
+            stats: Some(ApiStats::default()),
+        }),
+        Err(_) => Err(BrokerWorkFlowError::ApiMessageError),
+    }
+}
+pub fn get_request_id(broker_request: &BrokerRequest, request_id: Option<u64>) -> String {
+    request_id
+        .map(|v| v.to_string())
+        .unwrap_or_else(|| broker_request.rpc.ctx.call_id.to_string())
+}
+pub fn run_broker_workflow(
+    broker_output: &BrokerOutput,
+    broker_request: &BrokerRequest,
+) -> Result<BrokerWorkflowSuccess, BrokerWorkFlowError> {
+    Err(BrokerWorkFlowError::MissingValue)
+}
 
 impl BrokerOutputForwarder {
     pub fn start_forwarder(platform_state: PlatformState, mut rx: Receiver<BrokerOutput>) {
