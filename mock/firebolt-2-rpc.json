@@ -1,0 +1,110 @@
+{
+	"schemaVersion": {
+		"major": 1,
+		"minor": 0,
+		"patch": 0,
+		"readable": "Firebolt Version Manifest v1.0.0"
+	},
+	"capabilities": {
+		"xrn:firebolt:capability:rpc:initialize": {
+			"level": "must",
+			"use": {
+				"public": true,
+				"negotiable": false
+			},
+			"manage": {
+				"public": false,
+				"negotiable": true
+			},
+			"provide": {
+				"public": false,
+				"negotiable": true
+			}
+		}
+	},
+	"apis": {
+		"1":{
+	"openrpc": "1.2.4",
+	"info": {
+		"title": "Lifecycle 2 Adapter",
+		"version": "1.0.0-next.1"
+	},
+	"methods": [
+		{
+			"name": "rpc.initialize",
+			"summary": "Used by Client library to send metadata to API Gateway.",
+			"params": [
+				{
+					"name": "context",
+					"required": true,
+					"schema": {
+						"type": "array",
+                        "items": {
+							"type": "string"
+						}
+					}
+				}
+			],
+			"tags": [
+				{
+					"name": "capabilities",
+					"x-manages": [
+						"xrn:firebolt:capability:lifecycle:state"
+					]
+				}
+			],
+			"result": {
+				"name": "result",
+				"schema": {
+					"const": null
+				}
+			},
+			"examples": [
+				{
+					"name": "Set application lifecycle state to inactive",
+					"params": [
+						{
+							"name": "context",
+							"value": ["eventBased"]
+						}
+					],
+					"result": {
+						"name": "defaultResult",
+						"value": null
+					}
+				}
+			]
+		},
+		{
+			"name": "keyboard.provideStandard",
+			"summary": "Register for keyboard provider.",
+			"params": [
+			],
+			"tags": [
+				{
+					"name": "capabilities",
+					"x-provides": "xrn:firebolt:capability:input:keyboard"
+				}
+			],
+			"result": {
+				"name": "result",
+				"schema": {
+					"const": null
+				}
+			},
+			"examples": [
+				{
+					"name": "Set application lifecycle state to inactive",
+					"params": [
+					],
+					"result": {
+						"name": "defaultResult",
+						"value": null
+					}
+				}
+			]
+		}
+    ]
+    }
+    }
+}

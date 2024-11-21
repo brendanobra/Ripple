@@ -84,6 +84,7 @@ if [ "$is_mock" ]; then
     cp mock/extn.json target/manifests/firebolt-extn-manifest.json
     cp mock/mock-thunder-device.json target/manifests/mock-thunder-device.json
     cp mock/rules/* target/debug/rules
+    cp firebolt-devices/openrpc/extns/* target/openrpc/
     sed -i "" "s@\"mock_data_file\": \"mock-device.json\"@\"mock_data_file\": \"$workspace_dir/target/manifests/mock-thunder-device.json\"@" target/manifests/firebolt-extn-manifest.json
 else
     cp firebolt-devices/rules/* target/debug/rules

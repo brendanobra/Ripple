@@ -106,6 +106,12 @@
             "transform": {
                 "response": "if .result and .result.success then .result.xDeviceId else { error: { code: -32100, message: \"couldn't get device ID\" }} end"
             }
+        },
+        "keyboard.provideStandard": {
+            "alias": "provided"
+        },
+        "keyboard.standard": {
+            "alias": "provided"
         }
     }
 }
