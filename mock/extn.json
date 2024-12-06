@@ -57,11 +57,7 @@
                         "remote_accessory",
                         "app_events",
                         "input.device_events",
-                        "hdr.device_events",
-                        "screen_resolution.device_events",
-                        "video_resolution.device_events",
                         "voice_guidance.device_events",
-                        "network.device_events",
                         "internet.device_events",
                         "audio.device_events",
                         "system_power_state.device_events",
@@ -111,7 +107,7 @@
                     "config": {
                         "use_integrated_linchpin": "false"
                     }
-                }                                                                                                                
+                }
             ]
         },
         {
