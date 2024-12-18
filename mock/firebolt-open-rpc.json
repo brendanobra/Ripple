@@ -10539,6 +10539,130 @@
 					]
 				},
 				{
+					"name": "LifecycleManagement.session",
+					"summary": "Called before an app is launched in order to set up the lifecycle session. The session should be given an intent that will be passed to the application. This will behave differently depending on the current state of the application. If the application is already loaded but not active then a new active session is started. The intent is given to the application via the onNavigateTo event. If the app is not loaded, then it is considered a 'cold start'. A new loaded session will be created and the intent will be stored for the app to access via Parameters.initialization. Before a session is created for the application some checks may take place. For instance, if a user grant is required for the application then the user grant will be resolved before the session is transitions to the active status. In this case, this API will return immediately with a transitionPending=true flag. The updated session will then be sent as an event in the LifecycleManagement.onSessionTransitionCompleted event. If the pre-session checks fail, such as a user deferring a grant, then the LifecycleManagement.onSessionTransitionCanceled event will be emitted.",
+					"params": [
+					  {
+						"name": "session",
+						"required": true,
+						"schema": {
+						  "$ref": "#/components/schemas/AppSessionRequest"
+						}
+					  }
+					],
+					"tags": [
+					  {
+						"name": "capabilities",
+						"x-manages": [
+						  "xrn:firebolt:capability:lifecycle:state"
+						]
+					  }
+					],
+					"result": {
+					  "name": "result",
+					  "schema": {
+						"$ref": "#/components/schemas/AppSession"
+					  }
+					},
+					"examples": [
+					  {
+						"name": "Starts or updates an app session",
+						"params": [
+						  {
+							"name": "session",
+							"value": {
+							  "app": {
+								"id": "SomeApp",
+								"url": "https://some-app.firebolt.rdkcentral.com"
+							  },
+							  "runtime": {
+								"id": "WebBrowser-1"
+							  },
+							  "launch": {
+								"intent": {
+								  "action": "search",
+								  "data": {
+									"query": "Dog videos"
+								  },
+								  "context": {
+									"source": "voice"
+								  }
+								}
+							  }
+							}
+						  }
+						],
+						"result": {
+						  "name": "defaultResult",
+						  "value": {
+							"appId": "SomeApp",
+							"sessionId": "c0d012b4-0854-4bbc-82d5-ab52ac29dd94",
+							"loadedSessionId": "612f307e-8b32-412e-bcec-831779bc07ae",
+							"activeSessionId": "05b6f6af-c2f8-4761-beeb-6029590b8e8c",
+							"transitionPending": false
+						  }
+						}
+					  },
+					  {
+						"name": "Starts an inactive app session",
+						"params": [
+						  {
+							"name": "session",
+							"value": {
+							  "app": {
+								"id": "SomeApp",
+								"url": "https://some-app.firebolt.rdkcentral.com"
+							  },
+							  "runtime": {
+								"id": "WebBrowser-1"
+							  },
+							  "launch": {
+								"inactive": true
+							  }
+							}
+						  }
+						],
+						"result": {
+						  "name": "defaultResult",
+						  "value": {
+							"appId": "SomeApp",
+							"sessionId": "c0d012b4-0854-4bbc-82d5-ab52ac29dd94",
+							"loadedSessionId": "612f307e-8b32-412e-bcec-831779bc07ae",
+							"transitionPending": false
+						  }
+						}
+					  },
+					  {
+						"name": "Start a session that results in a pending session",
+						"params": [
+						  {
+							"name": "session",
+							"value": {
+							  "app": {
+								"id": "SomeApp",
+								"url": "https://some-app.firebolt.rdkcentral.com"
+							  },
+							  "runtime": {
+								"id": "WebBrowser-1"
+							  },
+							  "launch": {
+								"inactive": false
+							  }
+							}
+						  }
+						],
+						"result": {
+						  "name": "pendingResult",
+						  "value": {
+							"appId": "SomeApp",
+							"transitionPending": true
+						  }
+						}
+					  }
+					]
+				  },
+		  
+				{
 					"name": "Lifecycle.ready",
 					"tags": [
 						{

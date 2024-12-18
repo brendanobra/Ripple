@@ -56,13 +56,14 @@ cp mock/manifest.json "${MANIFESTS_PATH}/firebolt-device-manifest.json"
 cp mock/extn.json "${MANIFESTS_PATH}/firebolt-extn-manifest.json"
 cp mock/mock-thunder-device.json "${MANIFESTS_PATH}/mock-thunder-device.json"
 
-cp mock/firebolt-open-rpc.json "${OPEN_RPC_ETC_PATH}/firebolt-open-rpc.json"
-cp mock/firebolt-open-rpc.json "${OPEN_RPC_PATH}/firebolt-open-rpc.json"
+cp mock/*rpc*.json "${OPEN_RPC_ETC_PATH}/"
+cp mock/*rpc*.json "${OPEN_RPC_PATH}/"
 
 cp mock/rules/* "${RULES_PATH}/"
 ls -la "${MANIFESTS_PATH}"
 ls -la "${RULES_PATH}"
 ls -la "${OPEN_RPC_PATH}"
+ls -la "${OPEN_RPC_ETC_PATH}/"
 
 #create list of rules in json format for loading into manifest 
 RULES=$(find "${RULES_PATH}" -maxdepth 1 -type f | jq -R -s -c 'split("\n")[:-1]' )

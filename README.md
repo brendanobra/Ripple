@@ -86,6 +86,12 @@ Eos-Ripple now supports mock device extension using which you can emulate thunde
 Command to run Ripple without a device
 >./run.sh mock
 
+## Running sanity tests
+Sanity tests (Firebolt Certification tests, aka "FCA") can be run locally
+with:
+`./run_sanity_on_mock_device.sh` 
+Note that this is a very small set of tests, but will provide basic "smoke test" confidence.
+
 ## Knowledgebase 
 Please refer to the [knowledge base](./kb) in the `kb` folder
 

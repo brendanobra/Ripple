@@ -166,7 +166,7 @@
   "org.rdk.TextToSpeech.0.isttsenabled": [
     {
       "result": {
-        "isenabled": true,
+        "isenabled": false,
         "TTS_Status": 0,
         "success": true
       }
@@ -289,6 +289,11 @@
       }
     }
   ],
+  "org.rdk.AuthService.1.register": [
+    {
+      "result": "0"
+    }
+  ],
   "org.rdk.Network.1.getInterfaces": [
     {
       "result": {
@@ -346,6 +351,23 @@
         "swapRam": 0,
         "totalRam": 624644,
         "success": true
+      }
+    }
+  ],
+  "org.rdk.TextToSpeech.isttsenabled": [
+    {
+      "result": {
+        "isenabled": false,
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.AuthService.getAuthToken": [
+    {
+      "result": {
+       "status": 0,
+       "token": "eyJraWQiOiJzYXQtcHIifQ==",
+       "expires" : 159673618	
       }
     }
   ],
@@ -431,18 +453,18 @@
   "org.rdk.TextToSpeech.1.isttsenabled": [
     {
       "result": {
-        "isenabled": true,
+        "isenabled": false,
         "TTS_Status": 0,
         "success": true
       }
     }
   ],
-  "org.rdk.TextToSpeech.getttsconfiguration": [
+  "org.rdk.TextToSpeech.1.getttsconfiguration": [
     {
       "result": {
         "TTS_Status": "0",
         "language": "en-US",
-        "rate": 50,
+        "rate": 0,
         "success": true,
         "ttsendpoint": "http://url_for_the_text_to_speech_processing_unit.com",
         "ttsendpointsecured": "https://url_for_the_text_to_speech_processing_unit.com",
@@ -451,7 +473,265 @@
       }
     }
   ],
+  "org.rdk.SecManager.1.getDeviceIdentity": [
+    {
+      "params" : {
+        "identityContext" : {
+          "type" : "applicationId",
+          "value" : "refui",
+          "partnerId":"comcast"
+        }
+      },
+      "result": {
+        "isenabled": false,
+        "TTS_Status": 0,
+        "success": true
+      }
+    }
+  ],
   "org.rdk.PersistentStore.1.getValue": [
+
+    {
+      "params": {
+        "namespace": "ClosedCaptions",
+        "key": "enabled"
+      },
+      "error": {
+        "code": 43,
+        "message": "ERROR_NOT_EXIST"
+      }
+    },
+    {
+      "params": {
+        "namespace": "ClosedCaptions",
+        "key": "fontFamily"
+      },
+      "error": {
+        "code": 43,
+        "message": "ERROR_NOT_EXIST"
+      }
+    },
+    {
+      "params": {
+        "namespace": "ClosedCaptions",
+        "key": "fontSize"
+      },
+      "error": {
+        "code": 43,
+        "message": "ERROR_NOT_EXIST"
+      }
+    },
+    {
+      "params": {
+        "namespace": "ClosedCaptions",
+        "key": "fontColor"
+      },
+      "error": {
+        "code": 43,
+        "message": "ERROR_NOT_EXIST"
+      }
+    },
+    {
+      "params": {
+        "namespace": "ClosedCaptions",
+        "key": "fontEdge"
+      },
+      "error": {
+        "code": 43,
+        "message": "ERROR_NOT_EXIST"
+      }
+    },
+    {
+      "params": {
+        "namespace": "ClosedCaptions",
+        "key": "fontEdgeColor"
+      },
+      "error": {
+        "code": 43,
+        "message": "ERROR_NOT_EXIST"
+      }
+    },
+    {
+      "params": {
+        "namespace": "ClosedCaptions",
+        "key": "fontOpacity"
+      },
+      "error": {
+        "code": 43,
+        "message": "ERROR_NOT_EXIST"
+      }
+    },
+    {
+      "params": {
+        "namespace": "ClosedCaptions",
+        "key": "backgroundColor"
+      },
+      "error": {
+        "code": 43,
+        "message": "ERROR_NOT_EXIST"
+      }
+    },
+    {
+      "params": {
+        "namespace": "ClosedCaptions",
+        "key": "backgroundOpacity"
+      },
+      "error": {
+        "code": 43,
+        "message": "ERROR_NOT_EXIST"
+      }
+    },
+    {
+      "params": {
+        "namespace": "ClosedCaptions",
+        "key": "windowOpacity"
+      },
+      "error": {
+        "code": 43,
+        "message": "ERROR_NOT_EXIST"
+      }
+    },
+    {
+      "params": {
+        "namespace": "ClosedCaptions",
+        "key": "textAlign"
+      },
+      "error": {
+        "code": 43,
+        "message": "ERROR_NOT_EXIST"
+      }
+    },
+    {
+      "params": {
+        "namespace": "ClosedCaptions",
+        "key": "textAlignVertical"
+      },
+      "error": {
+        "code": 43,
+        "message": "ERROR_NOT_EXIST"
+      }
+    },
+    {
+      "params": {
+        "namespace": "ClosedCaptions",
+        "key": "windowColor"
+      },
+      "error": {
+        "code": 43,
+        "message": "ERROR_NOT_EXIST"
+      }
+    },
+    {
+      "params": {
+        "namespace": "Privacy",
+        "key": "allowPersonalization"
+      },
+      "result": {
+        "value": "true",
+        "success": true
+      }
+    },
+    {
+      "params": {
+        "namespace": "Privacy",
+        "key": "allowProductAnalytics"
+      },
+      "result": {
+        "value": "true",
+        "success": true
+      }
+    },
+    {
+      "params": {
+        "namespace": "Privacy",
+        "key": "allowWatchHistory"
+      },
+      "result": {
+        "value": "true",
+        "success": true
+      }
+    },
+    {
+      "params": {
+        "namespace": "Privacy",
+        "key": "partnerExclusions"
+      },
+      "result": {
+        "value":"{\"update_time\":\"2024-11-27T10:29:22.560871502+00:00\",\"value\":\"{\\\"acr\\\":null,\\\"app_content_ad_targeting\\\":null,\\\"business_analytics\\\":{\\\"data_events\\\":[\\\"Watched\\\"],\\\"entity_reference\\\":[\\\"Peacock\\\",\\\"amazonPrime\\\"],\\\"derivative_propagation\\\":true},\\\"camera_analytics\\\":null,\\\"continue_watching\\\":null,\\\"personalization\\\":null,\\\"primary_browse_ad_targeting\\\":null,\\\"primary_content_ad_targeting\\\":null,\\\"product_analytics\\\":null,\\\"remote_diagnostics\\\":null,\\\"unentitled_continue_watching\\\":null,\\\"unentitled_personalization\\\":null,\\\"watch_history\\\":null}\"}",
+        "success": true
+      }
+    },
+    
+    {
+      "params": {
+        "namespace": "Privacy",
+        "key": "allowResumePoints"
+      },
+      "result": {
+        "value": "true",
+        "success": true
+      }
+    },
+    {
+      "params": {
+        "namespace": "Privacy",
+        "key": "allowAppContentAdTargetting"
+      },
+      "result": {
+        "value": "true",
+        "success": true
+      }
+    },
+    {
+      "params": {
+        "namespace": "Privacy",
+        "key": "allowBusinessAnalytics"
+      },
+      "result": {
+        "value": "true",
+        "success": true
+      }
+    },
+    {
+      "params": {
+        "namespace": "accountProfile",
+        "key": "detailType"
+      },
+      "result": {
+        "value": "awesomeSessionId",
+        "success": true
+      }
+    },
+    {
+      "params": {
+        "namespace": "accountProfile",
+        "key": "deviceManufacturer"
+      },
+      "result": {
+        "value": "broadcom",
+        "success": true
+        }
+    },
+    {
+      "params": {
+        "namespace": "accountProfile",
+        "key": "deviceType"
+      },
+      "result": {
+        "value": "xsb",
+        "success": true
+      }
+    },
+    {
+      "params": {
+        "namespace": "accountProfile",
+        "key": "operator"
+      },
+      "result": {
+        "value": "xumo",
+        "success": true
+        }
+    },
     {
       "params": {
         "namespace": "ns1",
@@ -494,8 +774,219 @@
         "success": true,
         "ttl": 100
       }
+    },
+    {
+      "params": {
+        "namespace": "Localization",
+        "key": "locality"
+      },
+      "result": {
+        "value": "US",
+        "success": true
+      }
+    },
+    {
+      "params": {
+        "namespace": "Localization",
+        "key": "locale"
+      },
+      "result": {
+        "value": "en-US",
+        "success": true
+      }
+    },
+    {
+      "params": {
+        "namespace": "Localization",
+        "key": "postalCode"
+      },
+      "result": {
+        "value": "94533",
+        "success": true
+      }
+    },
+    
+    {
+      "params": {
+        "namespace": "Localization",
+        "key": "preferredAudioLanguages"
+      },
+      "result": {
+        "value": "Klingon",
+        "success": true
+      }
+    }, 
+    {
+      "params": {
+        "namespace": "ClosedCaptions",
+        "key": "preferredAudioLanguages"
+      },
+      "result": {
+        "value": "Klingon",
+        "success": true
+      }
+    },
+    {
+      "params": {
+        "namespace": "AudioDescription",
+        "key": "audioDescriptionEnabled"
+      },
+      "result": {
+        "value": false,
+        "success": true
+      }
+    },
+    {
+      "params": {
+        "namespace": "accountProfile",
+        "key": "accountType"
+      },
+      "result": {
+        "value": "slim",
+        "success": true
+      }
+    },
+    {
+      "params": {
+        "namespace": "accountProfile",
+        "key": "coam"
+      },
+      "result": {
+        "value": "foo",
+        "success": true
+      }
+    },
+    {
+      "params": {
+        "namespace": "accountProfile",
+        "key": "jvagent"
+      },
+      "result": {
+        "value": "refui",
+        "success": true
+      }
+    },
+    {
+      "params": {
+        "namespace": "accountProfile",
+        "key": "retailer"
+      },
+      "result": {
+        "value": "frys",
+        "success": true
+      }
+    },
+    {
+      "params": {
+        "namespace": "accountProfile",
+        "key": "proposition"
+      },
+      "result": {
+        "value": "ballot",
+        "success": true
+      }
+    },
+    {
+      "params": {
+        "namespace": "refui",
+        "key": "fireboltAccountUid",
+        "scope": "device"
+      },
+      "result": {
+        "value": "66666",
+        "success": true
+        }
+    },
+    {
+      "params": {
+        "namespace": "refui",
+        "key": "fireboltDeviceUid",
+        "scope": "device"
+      },
+      "result": {
+        "value": "66666",
+        "success": true
+        }
+    },
+    {
+      "params": {
+        "namespace": "refui",
+        "key": "postalCode"
+      },
+      "result": {
+        "value": "94533",
+        "success": true
+        }
+    },
+    {
+      "params": {
+        "namespace": "Advertising",
+        "key": "skipRestriction"
+      },
+      "result": {
+        "value": "false",
+        "success": true
+        }
+    }
+    
+  ],
+  "org.rdk.System.1.getTimeZoneDST": [
+    {
+      "params": {
+      },
+      "result": {
+        "timeZone":"America\/Anchorage",
+        "accuracy":"FINAL",
+        "success": true
+      }
     }
   ],
+  "org.rdk.Network.1.isConnectedToInternet": [
+    {
+      "params": {
+      },
+      "result": {
+        "timeZone":"America\/Anchorage",
+        "connectedToInternet": "true",
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.System.1.getSerialNumber": [
+    {
+      "params": {
+      },
+      "result": {
+        "serialNumber" : "1234567890",
+        "success": true
+      }
+    }
+  ],
+  "org.rdk.System.1.getRFCConfig": [
+    {
+      "params": {
+        "rfcList": [
+          "Device.DeviceInfo.X_RDKCENTRAL-COM_RFC.Feature.EntOsAppPlatform.EnableAppUninstalls" 
+        ]
+      },
+      "result": {
+        "RFCConfig":"{\"Device.DeviceInfo.X_RDKCENTRAL-COM_RFC.Feature.EntOsAppPlatform.EnableAppUninstalls\":\"Empty response received\"}",
+        "success": false
+      }
+    },
+    {
+      "params": {
+        "rfcList": [
+          "Device.DeviceInfo.X_RDKCENTRAL-COM_RFC.Feature.EntOsAppPlatform.EnableDistPlatform" 
+        ]
+      },
+      "result": {
+        "RFCConfig":"\"Device.DeviceInfo.X_RDKCENTRAL-COM_RFC.Feature.EntOsAppPlatform.EnableDistPlatform\":\"Empty response received\"}",
+        "success": false
+      }
+    }
+  ],
+  
   "org.rdk.RDKShell.1.launch": [
     {
       "params": {
@@ -517,6 +1008,17 @@
     }
   ],
   "org.rdk.RDKShell.1.moveToBack": [
+    {
+      "params": {
+        "client": "org.rdk.Netflix",
+        "callsign": "org.rdk.Netflix"
+      },
+      "result": {
+        "success": true
+      }
+    }
+  ],
+  "Controller.1.activate": [
     {
       "params": {
         "client": "org.rdk.Netflix",

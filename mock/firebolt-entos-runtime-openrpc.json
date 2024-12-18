@@ -1,0 +1,1427 @@
+{
+	"schemaVersion": {
+		"major": 1,
+		"minor": 0,
+		"patch": 0,
+		"readable": "Firebolt Version Manifest v1.0.0"
+	},
+	"capabilities": {
+		"xrn:firebolt:capability:accessibility:voiceguidance": {
+			"level": "must",
+			"use": {
+				"public": true,
+				"negotiable": false
+			},
+			"manage": {
+				"public": false,
+				"negotiable": false
+			},
+			"provide": {
+				"public": false,
+				"negotiable": false
+			}
+		},
+		"xrn:firebolt:capability:rpc:discover": {
+			"level": "must",
+			"use": {
+				"public": true,
+				"negotiable": true
+			},
+			"manage": {
+				"public": false,
+				"negotiable": false
+			},
+			"provide": {
+				"public": false,
+				"negotiable": false
+			}
+		}
+	},
+	"apis": {
+		"1": {
+			"openrpc": "1.2.4",
+			"info": {
+				"title": "Firebolt JSON-RPC API",
+				"version": "1.0.0-next.5",
+				"x-module-descriptions": {
+					"TextToSpeech": "A module for controlling and accessing Text To Speech over Firebolt."
+				}
+			},
+			"methods": [
+				{
+					"name": "rpc.discover",
+					"summary": "The OpenRPC schema for this JSON-RPC API",
+					"params": [],
+					"tags": [
+						{
+							"name": "capabilities",
+							"x-uses": [
+								"xrn:firebolt:capability:rpc:discover"
+							]
+						}
+					],
+					"result": {
+						"name": "OpenRPC Schema",
+						"schema": {
+							"type": "object"
+						}
+					},
+					"examples": [
+						{
+							"name": "Default",
+							"params": [],
+							"result": {
+								"name": "schema",
+								"value": {}
+							}
+						}
+					]
+				},
+				{
+					"name": "TextToSpeech.isttsenabled",
+					"summary": "Returns whether the TTS engine is enabled or disabled",
+					"params": [],
+					"tags": [
+						{
+							"name": "capabilities",
+							"x-uses": [
+								"xrn:firebolt:capability:accessibility:voiceguidance"
+							]
+						}
+					],
+					"result": {
+						"name": "ttsenabled",
+						"summary": "Returns whether the TTS engine is enabled or disabled",
+						"schema": {
+							"$ref": "#/components/schemas/TTSEnabled"
+						}
+					},
+					"examples": [
+						{
+							"name": "Whether TTS is enabled",
+							"params": [],
+							"result": {
+								"name": "ttsenabled",
+								"value": {
+									"isenabled": true,
+									"TTS_status": 0
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "TextToSpeech.listvoices",
+					"summary": "Get the list of Text to speech voices supported by the platform",
+					"params": [
+						{
+							"name": "language",
+							"summary": "Request language in ISO 3166-1 Alpha-2",
+							"schema": {
+								"type": "string"
+							},
+							"required": true
+						}
+					],
+					"tags": [
+						{
+							"name": "capabilities",
+							"x-uses": [
+								"xrn:firebolt:capability:accessibility:voiceguidance"
+							]
+						}
+					],
+					"result": {
+						"name": "listvoices",
+						"summary": "The list of voices supported for the language",
+						"schema": {
+							"$ref": "#/components/schemas/ListVoicesResponse"
+						}
+					},
+					"examples": [
+						{
+							"name": "Getting the list of voices",
+							"params": [
+								{
+									"name": "language",
+									"value": "en-US"
+								}
+							],
+							"result": {
+								"name": "voiceList",
+								"value": {
+									"TTS_status": 0,
+									"voices": [
+										"carol",
+										"tom"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "TextToSpeech.getttsconfiguration",
+					"summary": "Get the TTS configuration for the platform",
+					"params": [],
+					"tags": [
+						{
+							"name": "capabilities",
+							"x-uses": [
+								"xrn:firebolt:capability:accessibility:voiceguidance"
+							]
+						}
+					],
+					"result": {
+						"name": "getttsconfiguration",
+						"summary": "Settings the list of configurations",
+						"schema": {
+							"$ref": "#/components/schemas/TTSConfiguration"
+						}
+					},
+					"examples": [
+						{
+							"name": "Getting the TTS configuration",
+							"params": [],
+							"result": {
+								"name": "ttsendpoint",
+								"value": {
+									"success": true
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "TextToSpeech.speak",
+					"summary": "Speak the uttered text using the TTS engine",
+					"params": [
+						{
+							"name": "text",
+							"summary": "String to be converted to Audio for speech",
+							"schema": {
+								"type": "string"
+							},
+							"required": true
+						},
+						{
+							"name": "callsign",
+							"summary": "App calling text to speech",
+							"schema": {
+								"type": "string"
+							}
+						}
+					],
+					"tags": [
+						{
+							"name": "capabilities",
+							"x-uses": [
+								"xrn:firebolt:capability:accessibility:voiceguidance"
+							]
+						}
+					],
+					"result": {
+						"name": "speakResult",
+						"summary": "Result for Speak",
+						"schema": {
+							"$ref": "#/components/schemas/SpeechResponse"
+						}
+					},
+					"examples": [
+						{
+							"name": "Getting the result of speak",
+							"params": [
+								{
+									"name": "text",
+									"value": "I am a text waiting for speech."
+								},
+								{
+									"name": "callsign",
+									"value": "appA"
+								}
+							],
+							"result": {
+								"name": "result",
+								"value": {
+									"speechid": 1,
+									"TTS_status": 0,
+									"success": true
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "TextToSpeech.setttsconfiguration",
+					"summary": "Set the TTS configuration for the platform",
+					"params": [
+						{
+							"name": "ttsendpoint",
+							"schema": {
+								"type": "string"
+							},
+							"summary": "URL for Text to Speech API"
+						},
+						{
+							"name": "ttsendpointsecured",
+							"schema": {
+								"type": "string"
+							},
+							"summary": "URL for Secured Text to Speech API"
+						},
+						{
+							"name": "language",
+							"schema": {
+								"type": "string"
+							},
+							"summary": "Language used by Text to speech"
+						},
+						{
+							"name": "voice",
+							"schema": {
+								"type": "string"
+							},
+							"summary": "Voice used by Text to speech"
+						},
+						{
+							"name": "volume",
+							"summary": "Volume for Text to speech",
+							"schema": {
+								"type": "integer",
+								"minimum": 0,
+								"maximum": 100
+							}
+						},
+						{
+							"name": "primvolduckpercent",
+							"summary": "Prime Volume duck percent for Text to speech",
+							"schema": {
+								"type": "integer",
+								"minimum": 0,
+								"maximum": 100
+							}
+						},
+						{
+							"name": "rate",
+							"summary": "Speech rate for Text to speech",
+							"schema": {
+								"type": "integer",
+								"minimum": 0,
+								"maximum": 100
+							}
+						},
+						{
+							"name": "speechrate",
+							"summary": "Rate for speech",
+							"schema": {
+								"$ref": "#/components/schemas/SpeechRate"
+							}
+						},
+						{
+							"name": "fallbacktext",
+							"summary": "Fallback text for TTS",
+							"schema": {
+								"$ref": "#/components/schemas/FallbackText"
+							}
+						}
+					],
+					"tags": [
+						{
+							"name": "capabilities",
+							"x-uses": [
+								"xrn:firebolt:capability:accessibility:voiceguidance"
+							]
+						}
+					],
+					"result": {
+						"name": "setttsconfiguration",
+						"summary": "Settings the list of configurations",
+						"schema": {
+							"$ref": "#/components/schemas/TTSStatusResponse"
+						}
+					},
+					"examples": [
+						{
+							"name": "Setting the TTS Configuration",
+							"params": [
+								{
+									"name": "ttsendpoint",
+									"value": "http://url_for_the_text_to_speech_processing_unit"
+								},
+								{
+									"name": "ttsendpointsecured",
+									"value": "https://url_for_the_text_to_speech_processing_unit"
+								},
+								{
+									"name": "language",
+									"value": "en-US"
+								},
+								{
+									"name": "voice",
+									"value": "carol"
+								},
+								{
+									"name": "volume",
+									"value": 100
+								},
+								{
+									"name": "primvolduckpercent",
+									"value": 25
+								},
+								{
+									"name": "rate",
+									"value": 50
+								},
+								{
+									"name": "speechrate",
+									"value": "medium"
+								},
+								{
+									"name": "fallbacktext",
+									"value": {
+										"scenario": "offline",
+										"value": "No Internet connection"
+									}
+								}
+							],
+							"result": {
+								"name": "result",
+								"value": {
+									"TTS_status": 0,
+									"success": true
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "TextToSpeech.pause",
+					"summary": "Pauses the speech for given speech id",
+					"params": [
+						{
+							"name": "speechid",
+							"summary": "Identifier for the speech call",
+							"schema": {
+								"type": "integer"
+							},
+							"required": true
+						}
+					],
+					"tags": [
+						{
+							"name": "capabilities",
+							"x-uses": [
+								"xrn:firebolt:capability:accessibility:voiceguidance"
+							]
+						}
+					],
+					"result": {
+						"name": "pauseResult",
+						"summary": "Result for Pause",
+						"schema": {
+							"$ref": "#/components/schemas/TTSStatusResponse"
+						}
+					},
+					"examples": [
+						{
+							"name": "Pause a given speech id",
+							"params": [
+								{
+									"name": "speechid",
+									"value": 1
+								}
+							],
+							"result": {
+								"name": "TTS_status",
+								"value": {
+									"TTS_status": 0,
+									"success": true
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "TextToSpeech.resume",
+					"summary": "Resumes the speech for given speech id",
+					"params": [
+						{
+							"name": "speechid",
+							"summary": "Identifier for the speech call",
+							"schema": {
+								"type": "integer"
+							},
+							"required": true
+						}
+					],
+					"tags": [
+						{
+							"name": "capabilities",
+							"x-uses": [
+								"xrn:firebolt:capability:accessibility:voiceguidance"
+							]
+						}
+					],
+					"result": {
+						"name": "resumeResult",
+						"summary": "Result for Resume",
+						"schema": {
+							"$ref": "#/components/schemas/TTSStatusResponse"
+						}
+					},
+					"examples": [
+						{
+							"name": "Resume a given speech id.",
+							"params": [
+								{
+									"name": "speechid",
+									"value": 1
+								}
+							],
+							"result": {
+								"name": "TTS_status",
+								"value": {
+									"TTS_status": 0,
+									"success": true
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "TextToSpeech.cancel",
+					"summary": "Cancels the speech for given speech id",
+					"params": [
+						{
+							"name": "speechid",
+							"summary": "Identifier for the speech call",
+							"schema": {
+								"type": "integer"
+							},
+							"required": true
+						}
+					],
+					"tags": [
+						{
+							"name": "capabilities",
+							"x-uses": [
+								"xrn:firebolt:capability:accessibility:voiceguidance"
+							]
+						}
+					],
+					"result": {
+						"name": "cancelResult",
+						"summary": "Result for cancel",
+						"schema": {
+							"$ref": "#/components/schemas/TTSStatusResponse"
+						}
+					},
+					"examples": [
+						{
+							"name": "Cancel a given speech id.",
+							"params": [
+								{
+									"name": "speechid",
+									"value": 1
+								}
+							],
+							"result": {
+								"name": "TTS_status",
+								"value": {
+									"TTS_status": 0,
+									"success": true
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "TextToSpeech.getspeechstate",
+					"summary": "Returns the current state of the speech request.",
+					"params": [
+						{
+							"name": "speechid",
+							"summary": "Identifier for the speech call",
+							"schema": {
+								"type": "integer"
+							},
+							"required": true
+						}
+					],
+					"tags": [
+						{
+							"name": "capabilities",
+							"x-uses": [
+								"xrn:firebolt:capability:accessibility:voiceguidance"
+							]
+						}
+					],
+					"result": {
+						"name": "speechStateResult",
+						"summary": "Result for speech state",
+						"schema": {
+							"$ref": "#/components/schemas/SpeechStateResponse"
+						}
+					},
+					"examples": [
+						{
+							"name": "State for a given speech id.",
+							"params": [
+								{
+									"name": "speechid",
+									"value": 1
+								}
+							],
+							"result": {
+								"name": "speechstate",
+								"value": {
+									"speechstate": "SPEECH_IN_PROGRESS",
+									"TTS_status": 0,
+									"success": true
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "TextToSpeech.onWillspeak",
+					"summary": "Triggered when the text to speech conversion is about to start. It provides the speech ID, generated for the text input given in the speak",
+					"params": [
+						{
+							"name": "listen",
+							"required": true,
+							"schema": {
+								"type": "boolean"
+							}
+						}
+					],
+					"tags": [
+						{
+							"name": "event"
+						},
+						{
+							"name": "capabilities",
+							"x-uses": [
+								"xrn:firebolt:capability:accessibility:voiceguidance"
+							]
+						}
+					],
+					"result": {
+						"name": "value",
+						"summary": "",
+						"schema": {
+							"anyOf": [
+								{
+									"$ref": "#/x-schemas/Types/ListenResponse"
+								},
+								{
+									"$ref": "#/components/schemas/SpeechIdEvent"
+								}
+							]
+						}
+					},
+					"examples": [
+						{
+							"name": "Default Result",
+							"params": [
+								{
+									"name": "listen",
+									"value": true
+								},
+								{
+									"name": "listen",
+									"value": true
+								}
+							],
+							"result": {
+								"name": "result",
+								"value": {
+									"speechid": 1
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "TextToSpeech.onSpeechstart",
+					"summary": "Triggered when the speech start.",
+					"params": [
+						{
+							"name": "listen",
+							"required": true,
+							"schema": {
+								"type": "boolean"
+							}
+						}
+					],
+					"tags": [
+						{
+							"name": "event"
+						},
+						{
+							"name": "capabilities",
+							"x-uses": [
+								"xrn:firebolt:capability:accessibility:voiceguidance"
+							]
+						}
+					],
+					"result": {
+						"name": "value",
+						"summary": "",
+						"schema": {
+							"anyOf": [
+								{
+									"$ref": "#/x-schemas/Types/ListenResponse"
+								},
+								{
+									"$ref": "#/components/schemas/SpeechIdEvent"
+								}
+							]
+						}
+					},
+					"examples": [
+						{
+							"name": "Default Result",
+							"params": [
+								{
+									"name": "listen",
+									"value": true
+								},
+								{
+									"name": "listen",
+									"value": true
+								}
+							],
+							"result": {
+								"name": "result",
+								"value": {
+									"speechid": 1
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "TextToSpeech.onSpeechpause",
+					"summary": "Triggered when the ongoing speech pauses.",
+					"params": [
+						{
+							"name": "listen",
+							"required": true,
+							"schema": {
+								"type": "boolean"
+							}
+						}
+					],
+					"tags": [
+						{
+							"name": "event"
+						},
+						{
+							"name": "capabilities",
+							"x-uses": [
+								"xrn:firebolt:capability:accessibility:voiceguidance"
+							]
+						}
+					],
+					"result": {
+						"name": "value",
+						"summary": "",
+						"schema": {
+							"anyOf": [
+								{
+									"$ref": "#/x-schemas/Types/ListenResponse"
+								},
+								{
+									"$ref": "#/components/schemas/SpeechIdEvent"
+								}
+							]
+						}
+					},
+					"examples": [
+						{
+							"name": "Default Result",
+							"params": [
+								{
+									"name": "listen",
+									"value": true
+								},
+								{
+									"name": "listen",
+									"value": true
+								}
+							],
+							"result": {
+								"name": "result",
+								"value": {
+									"speechid": 1
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "TextToSpeech.onSpeechresume",
+					"summary": "Triggered when any paused speech resumes.",
+					"params": [
+						{
+							"name": "listen",
+							"required": true,
+							"schema": {
+								"type": "boolean"
+							}
+						}
+					],
+					"tags": [
+						{
+							"name": "event"
+						},
+						{
+							"name": "capabilities",
+							"x-uses": [
+								"xrn:firebolt:capability:accessibility:voiceguidance"
+							]
+						}
+					],
+					"result": {
+						"name": "value",
+						"summary": "",
+						"schema": {
+							"anyOf": [
+								{
+									"$ref": "#/x-schemas/Types/ListenResponse"
+								},
+								{
+									"$ref": "#/components/schemas/SpeechIdEvent"
+								}
+							]
+						}
+					},
+					"examples": [
+						{
+							"name": "Default Result",
+							"params": [
+								{
+									"name": "listen",
+									"value": true
+								},
+								{
+									"name": "listen",
+									"value": true
+								}
+							],
+							"result": {
+								"name": "result",
+								"value": {
+									"speechid": 1
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "TextToSpeech.onSpeechcomplete",
+					"summary": "Triggered when the speech completes.",
+					"params": [
+						{
+							"name": "listen",
+							"required": true,
+							"schema": {
+								"type": "boolean"
+							}
+						}
+					],
+					"tags": [
+						{
+							"name": "event"
+						},
+						{
+							"name": "capabilities",
+							"x-uses": [
+								"xrn:firebolt:capability:accessibility:voiceguidance"
+							]
+						}
+					],
+					"result": {
+						"name": "value",
+						"summary": "",
+						"schema": {
+							"anyOf": [
+								{
+									"$ref": "#/x-schemas/Types/ListenResponse"
+								},
+								{
+									"$ref": "#/components/schemas/SpeechIdEvent"
+								}
+							]
+						}
+					},
+					"examples": [
+						{
+							"name": "Default Result",
+							"params": [
+								{
+									"name": "listen",
+									"value": true
+								},
+								{
+									"name": "listen",
+									"value": true
+								}
+							],
+							"result": {
+								"name": "result",
+								"value": {
+									"speechid": 1
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "TextToSpeech.onSpeechinterrupted",
+					"summary": "Triggered when the current speech is interrupted either by a next speech request, by calling cancel or by disabling TTS, when speech is in progress.",
+					"params": [
+						{
+							"name": "listen",
+							"required": true,
+							"schema": {
+								"type": "boolean"
+							}
+						}
+					],
+					"tags": [
+						{
+							"name": "event"
+						},
+						{
+							"name": "capabilities",
+							"x-uses": [
+								"xrn:firebolt:capability:accessibility:voiceguidance"
+							]
+						}
+					],
+					"result": {
+						"name": "value",
+						"summary": "",
+						"schema": {
+							"anyOf": [
+								{
+									"$ref": "#/x-schemas/Types/ListenResponse"
+								},
+								{
+									"$ref": "#/components/schemas/SpeechIdEvent"
+								}
+							]
+						}
+					},
+					"examples": [
+						{
+							"name": "Default Result",
+							"params": [
+								{
+									"name": "listen",
+									"value": true
+								},
+								{
+									"name": "listen",
+									"value": true
+								}
+							],
+							"result": {
+								"name": "result",
+								"value": {
+									"speechid": 1
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "TextToSpeech.onNetworkerror",
+					"summary": "Triggered when an error occurs during playback including network failures",
+					"params": [
+						{
+							"name": "listen",
+							"required": true,
+							"schema": {
+								"type": "boolean"
+							}
+						}
+					],
+					"tags": [
+						{
+							"name": "event"
+						},
+						{
+							"name": "capabilities",
+							"x-uses": [
+								"xrn:firebolt:capability:accessibility:voiceguidance"
+							]
+						}
+					],
+					"result": {
+						"name": "value",
+						"summary": "",
+						"schema": {
+							"anyOf": [
+								{
+									"$ref": "#/x-schemas/Types/ListenResponse"
+								},
+								{
+									"$ref": "#/components/schemas/SpeechIdEvent"
+								}
+							]
+						}
+					},
+					"examples": [
+						{
+							"name": "Default Result",
+							"params": [
+								{
+									"name": "listen",
+									"value": true
+								},
+								{
+									"name": "listen",
+									"value": true
+								}
+							],
+							"result": {
+								"name": "result",
+								"value": {
+									"speechid": 1
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "TextToSpeech.onPlaybackError",
+					"summary": "Triggered when an error occurs during playback including pipeline failures",
+					"params": [
+						{
+							"name": "listen",
+							"required": true,
+							"schema": {
+								"type": "boolean"
+							}
+						}
+					],
+					"tags": [
+						{
+							"name": "event"
+						},
+						{
+							"name": "capabilities",
+							"x-uses": [
+								"xrn:firebolt:capability:accessibility:voiceguidance"
+							]
+						}
+					],
+					"result": {
+						"name": "value",
+						"summary": "",
+						"schema": {
+							"anyOf": [
+								{
+									"$ref": "#/x-schemas/Types/ListenResponse"
+								},
+								{
+									"$ref": "#/components/schemas/SpeechIdEvent"
+								}
+							]
+						}
+					},
+					"examples": [
+						{
+							"name": "Default Result",
+							"params": [
+								{
+									"name": "listen",
+									"value": true
+								},
+								{
+									"name": "listen",
+									"value": true
+								}
+							],
+							"result": {
+								"name": "result",
+								"value": {
+									"speechid": 1
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "TextToSpeech.onTTSstatechanged",
+					"summary": "Triggered when TTS is enabled or disabled",
+					"params": [
+						{
+							"name": "listen",
+							"required": true,
+							"schema": {
+								"type": "boolean"
+							}
+						}
+					],
+					"tags": [
+						{
+							"name": "event"
+						},
+						{
+							"name": "capabilities",
+							"x-uses": [
+								"xrn:firebolt:capability:accessibility:voiceguidance"
+							]
+						}
+					],
+					"result": {
+						"name": "value",
+						"summary": "",
+						"schema": {
+							"anyOf": [
+								{
+									"$ref": "#/x-schemas/Types/ListenResponse"
+								},
+								{
+									"$ref": "#/components/schemas/TTSState"
+								}
+							]
+						}
+					},
+					"examples": [
+						{
+							"name": "Default Result",
+							"params": [
+								{
+									"name": "listen",
+									"value": true
+								},
+								{
+									"name": "listen",
+									"value": true
+								}
+							],
+							"result": {
+								"name": "result",
+								"value": {
+									"state": true
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "TextToSpeech.onVoicechanged",
+					"summary": "Triggered when the configured voice changes.",
+					"params": [
+						{
+							"name": "listen",
+							"required": true,
+							"schema": {
+								"type": "boolean"
+							}
+						}
+					],
+					"tags": [
+						{
+							"name": "event"
+						},
+						{
+							"name": "capabilities",
+							"x-uses": [
+								"xrn:firebolt:capability:accessibility:voiceguidance"
+							]
+						}
+					],
+					"result": {
+						"name": "value",
+						"summary": "",
+						"schema": {
+							"anyOf": [
+								{
+									"$ref": "#/x-schemas/Types/ListenResponse"
+								},
+								{
+									"$ref": "#/components/schemas/TTSVoice"
+								}
+							]
+						}
+					},
+					"examples": [
+						{
+							"name": "Default Result",
+							"params": [
+								{
+									"name": "listen",
+									"value": true
+								},
+								{
+									"name": "listen",
+									"value": true
+								}
+							],
+							"result": {
+								"name": "result",
+								"value": {
+									"voice": "carol"
+								}
+							}
+						}
+					]
+				}
+			],
+			"components": {
+				"schemas": {
+					"TTSEnabled": {
+						"title": "TTSEnabled",
+						"type": "object",
+						"required": [
+							"TTS_status",
+							"isenabled"
+						],
+						"properties": {
+							"TTS_status": {
+								"$ref": "#/components/schemas/TTSStatus"
+							},
+							"isenabled": {
+								"type": "boolean"
+							}
+						}
+					},
+					"ListVoicesResponse": {
+						"title": "ListVoicesResponse",
+						"type": "object",
+						"required": [
+							"TTS_status",
+							"voices"
+						],
+						"properties": {
+							"TTS_status": {
+								"$ref": "#/components/schemas/TTSStatus"
+							},
+							"voices": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"TTSConfiguration": {
+						"title": "TTSConfiguration",
+						"type": "object",
+						"required": [
+							"success"
+						],
+						"properties": {
+							"success": {
+								"type": "boolean"
+							},
+							"ttsendpoint": {
+								"type": "string",
+								"description": "URL for Text to Speech API"
+							},
+							"ttsendpointsecured": {
+								"type": "string",
+								"description": "Secure URL for Text to Speech API"
+							},
+							"language": {
+								"type": "string",
+								"description": "Language used by Text to speech"
+							},
+							"voice": {
+								"type": "string",
+								"description": "Voice used by Text to speech"
+							},
+							"volume": {
+								"type": "integer",
+								"description": "Volume for Text to speech",
+								"minimum": 0,
+								"maximum": 100
+							},
+							"primvolduckpercent": {
+								"type": "integer",
+								"description": "Prime Volume duck percent for Text to speech",
+								"minimum": 0,
+								"maximum": 100
+							},
+							"rate": {
+								"type": "integer",
+								"description": "Speech rate for Text to speech",
+								"minimum": 0,
+								"maximum": 100
+							},
+							"speechrate": {
+								"description": "Rate for speech",
+								"$ref": "#/components/schemas/SpeechRate"
+							},
+							"fallbacktext": {
+								"description": "Fallback text for TTS",
+								"$ref": "#/components/schemas/FallbackText"
+							}
+						},
+						"examples": [
+							{}
+						]
+					},
+					"SpeechRate": {
+						"title": "SpeechRate",
+						"type": "string",
+						"enum": [
+							"slow",
+							"medium",
+							"fast",
+							"faster",
+							"fastest"
+						]
+					},
+					"FallbackText": {
+						"title": "FallbackText",
+						"type": "object",
+						"properties": {
+							"scenario": {
+								"type": "string",
+								"description": "Scenario for fallback Text"
+							},
+							"value": {
+								"type": "string",
+								"description": "Value for fallback Text"
+							}
+						}
+					},
+					"SpeechResponse": {
+						"title": "SpeechResponse",
+						"type": "object",
+						"properties": {
+							"speechid": {
+								"$ref": "#/components/schemas/SpeechId"
+							},
+							"TTS_status": {
+								"$ref": "#/components/schemas/TTSStatus"
+							},
+							"success": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"speechid",
+							"TTS_status",
+							"success"
+						]
+					},
+					"SpeechId": {
+						"type": "integer"
+					},
+					"SpeechIdEvent": {
+						"type": "object",
+						"properties": {
+							"speechid": {
+								"$ref": "#/components/schemas/SpeechId"
+							}
+						},
+						"required": [
+							"speechid"
+						]
+					},
+					"TTSStatus": {
+						"title": "TTSStatus",
+						"type": "integer",
+						"minimum": 0,
+						"maximum": 3
+					},
+					"SpeechState": {
+						"title": "SpeechState",
+						"type": "string"
+					},
+					"SpeechStateResponse": {
+						"title": "SpeechStateResponse",
+						"type": "object",
+						"properties": {
+							"speechstate": {
+								"$ref": "#/components/schemas/SpeechState"
+							},
+							"TTS_status": {
+								"$ref": "#/components/schemas/TTSStatus"
+							},
+							"success": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"speechstate",
+							"TTS_status",
+							"success"
+						]
+					},
+					"TTSStatusResponse": {
+						"title": "TTSStatusResponse",
+						"type": "object",
+						"properties": {
+							"TTS_status": {
+								"$ref": "#/components/schemas/TTSStatus"
+							},
+							"success": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"TTS_status",
+							"success"
+						]
+					},
+					"TTSState": {
+						"title": "TTSState",
+						"type": "object",
+						"properties": {
+							"state": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"state"
+						]
+					},
+					"TTSVoice": {
+						"title": "TTSVoice",
+						"type": "object",
+						"properties": {
+							"voice": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"voice"
+						]
+					}
+				}
+			},
+			"x-schemas": {
+				"Types": {
+					"uri": "https://meta.comcast.com/firebolt/types",
+					"ListenResponse": {
+						"title": "ListenResponse",
+						"type": "object",
+						"required": [
+							"event",
+							"listening"
+						],
+						"properties": {
+							"event": {
+								"type": "string",
+								"pattern": "[a-zA-Z]+\\.on[A-Z][a-zA-Z]+"
+							},
+							"listening": {
+								"type": "boolean"
+							}
+						},
+						"additionalProperties": false
+					}
+				}
+			}
+		}
+	}
+}

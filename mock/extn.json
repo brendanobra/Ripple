@@ -116,11 +116,18 @@
                 {
                     "id": "ripple:channel:device:mock_device",
                     "config": {
-                        "mock_data_file": "mock-device.json",
+                        "mock_data_file": "/etc/mock-thunder-device.json",
                         "activate_all_plugins": "true"
                     },
                     "uses": [
-                        "config"
+                        "config",
+                        "app_events",
+                        "rpc",
+                        "ripple_context",
+                        "operational_metric_listener",
+                        "listener.pubsub",
+                        "metrics",
+                        "observability"
                     ],
                     "fulfills": []
                 },
@@ -178,6 +185,7 @@
     ],
     "extn_sdks": [
         "/etc/ripple/openrpc/ripple-rpc.json",
-        "/etc/ripple/openrpc/firebolt-players-open-rpc.json"
+        "/etc/ripple/openrpc/firebolt-players-open-rpc.json",
+         "/etc/ripple/openrpc/firebolt-entos-runtime-openrpc.json"
     ]
 }

@@ -6,12 +6,18 @@
         }
     },
     "rules": {
-        "localization.countryCode": {
-            "alias": "org.rdk.System.getTerritory",
-            "transform": {
-                "response": "if .territory == \"ITA\" then \"IT\" elif .territory==\"GBR\" then \"UK\" else \"US\" end"
-            }
-        },
+        "device.type": {
+      "alias": "static",
+      "transform": {
+        "response": "\"TV\""
+      }
+    },
+    "localization.countryCode": {
+        "alias": "org.rdk.System.getTerritory",
+        "transform": {
+          "response": "if .result and .result.success then if .result.territory == \"CAN\" then \"CA\" else \"US\" end else \"US\" end"
+        }
+      },
         "localization.setCountryCode": {
             "alias": "org.rdk.System.setTerritory",
             "transform": {
@@ -112,6 +118,12 @@
         },
         "keyboard.standard": {
             "alias": "provided"
+        },
+        "advertising.appBundleId": {
+            "alias": "static",
+            "transform": {
+                "response": "\"refui.app\""
+            }
         }
     }
 }
