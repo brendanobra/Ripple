@@ -40,7 +40,6 @@
                         "rpc",
                         "ripple_context",
                         "operational_metric_listener",
-                        "listener.pubsub",
                         "metrics",
                         "observability"
                     ],
@@ -78,8 +77,6 @@
                         "config",
                         "usergrant_local.storage",
                         "ripple_context",
-                        "provider.pubsub",
-                        "listener.pubsub",
                         "privacy_local.storage",
                         "account.session",
                         "device_info",
@@ -100,8 +97,6 @@
                         "behavior_metrics",
                         "platform.session",
                         "usergrant_cloud.storage",
-                        "publish.pubsub",
-                        "provider.pubsub",
                         "app_catalog"
                     ],
                     "config": {
@@ -125,7 +120,6 @@
                         "rpc",
                         "ripple_context",
                         "operational_metric_listener",
-                        "listener.pubsub",
                         "metrics",
                         "observability"
                     ],
