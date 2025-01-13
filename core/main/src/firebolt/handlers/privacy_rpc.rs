@@ -27,6 +27,7 @@ use jsonrpsee::{
     types::error::CallError,
     RpcModule,
 };
+use ripple_sdk::utils::rpc_utils::rpc_error_with_code;
 use ripple_sdk::{
     api::{
         device::device_peristence::SetBoolProperty,
@@ -527,11 +528,12 @@ impl PrivacyImpl {
             debug!("Resolved property: {:?}", prop);
             Self::set_bool(platform_state, prop, set_request.value).await
         } else {
-            Err(jsonrpsee::core::Error::Call(CallError::Custom {
-                code: CAPABILITY_NOT_AVAILABLE,
-                message: format!("{} is not available", method),
-                data: None,
-            }))
+            rpc_error_with_code( format!("{} is not available", method), CAPABILITY_NOT_AVAILABLE)
+            // Err(jsonrpsee::core::Error::Call(CallError::Custom {
+            //     code: CAPABILITY_NOT_AVAILABLE,
+            //     message: format!("{} is not available", method),
+            //     data: None,
+            // }))
         }
     }
 

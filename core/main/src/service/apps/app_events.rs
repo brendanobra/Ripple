@@ -19,6 +19,7 @@ use jsonrpsee::{
     core::async_trait,
     types::{Id, Response, TwoPointZero},
 };
+use jsonrpsee_types::ResponsePayload;
 use ripple_sdk::{
     api::{
         apps::{AppEventRequest, EffectiveTransport},
@@ -264,16 +265,17 @@ impl AppEvents {
 
     pub async fn send_event(state: &PlatformState, listener: &EventListener, data: &Value) {
         let protocol = listener.call_ctx.protocol.clone();
-        let event = Response {
-            jsonrpc: TwoPointZero,
-            result: data,
-            id: Id::Number(listener.call_ctx.call_id),
-        };
+        // let event = Response {
+        //     jsonrpc: Some(TwoPointZero),
+        //     payload: ResponsePayload::Success(data.clone()),
+        //     id: Id::Number(listener.call_ctx.call_id),
+        // };
+        //let event = ResponsePayload::Success(data.clone()).into_owned();
 
         // Events are pass through no stats
         let api_message = ApiMessage::new(
             protocol,
-            json!(event).to_string(),
+            json!({"jsonrpc" : TwoPointZero,"data": data.to_string(), "id" : listener.call_ctx.call_id }).to_string(),
             listener.call_ctx.request_id.clone(),
         );
 

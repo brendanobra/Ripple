@@ -29,7 +29,7 @@ use jsonrpsee::{
     RpcModule,
 };
 
-use ripple_sdk::async_trait::async_trait;
+use ripple_sdk::{api::gateway::rpc_error, async_trait::async_trait, utils::rpc_utils::rpc_custom_error};
 use ripple_sdk::{
     api::{
         firebolt::{
@@ -188,17 +188,21 @@ impl CapabilityServer for CapabilityImpl {
         request: CapInfoRpcRequest,
     ) -> RpcResult<Vec<CapabilityInfo>> {
         if request.capabilities.is_empty() {
-            return Err(jsonrpsee::core::Error::Custom(String::from(
-                "Error invalid input capabilities are empty",
-            )));
+            return  rpc_custom_error("Error invalid input capabilities are empty")
+            //rpc_error_with_code("Error invalid input capabilities are empty", code)
+            
+            //return Err(jsonrpsee::core::Error::Custom(String::from(
+            //    "Error invalid input capabilities are empty",
+            //)));
         }
-        let cap_set = request.capabilities;
-        if let Ok(a) = CapState::get_cap_info(&self.state, ctx, &cap_set).await {
+        //let cap_set = request.capabilities;
+        if let Ok(a) = CapState::get_cap_info(&self.state, ctx, &request.capabilities).await {
             Ok(a)
         } else {
-            Err(jsonrpsee::core::Error::Custom(String::from(
-                "Error retreiving Capability Info TBD",
-            )))
+            rpc_custom_error("Error retreiving Capability Info TBD" )
+            // Err(jsonrpsee::core::Error::Custom(String::from(
+            //     "Error retreiving Capability Info TBD",
+            // )))
         }
     }
 

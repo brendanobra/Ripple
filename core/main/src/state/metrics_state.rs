@@ -38,7 +38,7 @@ use ripple_sdk::{
     chrono::{DateTime, Utc},
     extn::extn_client_message::ExtnResponse,
     log::{error, warn},
-    utils::error::RippleError,
+    utils::{error::RippleError, rpc_utils::rpc_error_with_code},
 };
 
 use rand::Rng;
@@ -267,15 +267,11 @@ impl MetricsState {
             BrokerUtils::process_internal_main_request(state, "localization.language", None)
                 .await
                 .and_then(|val| {
-                    from_value::<String>(val).map_err(|_| {
-                        jsonrpsee::core::Error::Call(CallError::Custom {
-                            code: -32100,
-                            message: "Failed to parse language".into(),
-                            data: None,
-                        })
-                    })
+                    Ok(from_value::<String>(val).map_err(|_| {
+                        rpc_error_with_code("Failed to parse language", -32100)
+                    }))
                 })
-                .unwrap_or_else(|_| Self::unset("language"));
+                .unwrap_or_else(|_| Ok(Self::unset("language")));
 
         let os_info = match Self::get_os_info_from_firebolt(state).await {
             Ok(info) => info,
@@ -292,18 +288,7 @@ impl MetricsState {
         )
         .unwrap_or(Self::unset("device.name"));
 
-        /* Removing the call to get timezone from Thunder as this is not used in ontology.
-        let mut timezone: Option<String> = None;
-        if let Ok(resp) = state
-            .get_client()
-            .send_extn_request(DeviceInfoRequest::GetTimezoneWithOffset)
-            .await
-        {
-            if let Some(ExtnResponse::TimezoneWithOffset(tz, offset)) = resp.payload.extract() {
-                timezone = Some(format!("{} {}", tz, offset));
-            }
-        }
-        */
+       
 
         let mut firmware = String::default();
         let mut env = None;
