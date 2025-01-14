@@ -18,7 +18,7 @@
 use std::{collections::HashMap, env};
 
 use crate::{
-    firebolt::rpc::RippleRPCProvider,
+    firebolt::rpc::{self, RippleRPCProvider},
     service::apps::app_events::AppEvents,
     state::platform_state::PlatformState,
     utils::rpc_utils::{rpc_add_event_listener, rpc_err},
@@ -46,7 +46,8 @@ use ripple_sdk::{
     },
     extn::extn_client_message::{ExtnMessage, ExtnResponse},
     log::error,
-    utils::error::RippleError,
+    utils::{error::RippleError, rpc_utils::rpc_custom_error},
+    JsonRpcErrorType,
 };
 use serde_json::json;
 
@@ -135,13 +136,9 @@ pub async fn get_ll_mac_addr(state: PlatformState) -> RpcResult<String> {
     match resp {
         Ok(response) => match response.payload.extract() {
             Some(ExtnResponse::String(value)) => Ok(filter_mac(value)),
-            _ => Err(jsonrpsee::core::Error::Custom(String::from(
-                "device.info.mac_address error",
-            ))),
+            _ => no_value_returned_error("mac_address"),
         },
-        Err(_e) => Err(jsonrpsee::core::Error::Custom(String::from(
-            "device.info.mac_address error",
-        ))),
+        Err(e) => invalid_device_response_error("mac_address", e),
     }
 }
 
@@ -159,15 +156,17 @@ impl DeviceImpl {
         {
             Ok(response) => match response.payload.extract() {
                 Some(DeviceResponse::FirmwareInfo(value)) => Ok(value),
-                _ => Err(jsonrpsee::core::Error::Custom(String::from(
-                    "device.hdcp error",
-                ))),
+                _ => return no_value_returned_error("hdcp"),
             },
-            Err(_e) => Err(jsonrpsee::core::Error::Custom(String::from(
-                "device.hdcp error",
-            ))),
+            Err(e) => invalid_device_response_error("hdcp", e),
         }
     }
+}
+fn no_value_returned_error(method: &str) -> Result<T, JsonRpcErrorType> {
+    rpc_custom_error(format!("device.{} error: no value returned", method))
+}
+fn invalid_device_response_error(method: &str, error: RippleError) -> Result<T, JsonRpcErrorType> {
+    rpc_custom_error(format!("device.{} error: {}", method, error))
 }
 
 #[async_trait]
@@ -250,13 +249,9 @@ impl DeviceServer for DeviceImpl {
         {
             Ok(response) => match response.payload.extract() {
                 Some(DeviceResponse::HdcpSupportResponse(value)) => Ok(value),
-                _ => Err(jsonrpsee::core::Error::Custom(String::from(
-                    "device.hdcp error",
-                ))),
+                _ => no_value_returned_error("hdcp"),
             },
-            Err(_e) => Err(jsonrpsee::core::Error::Custom(String::from(
-                "device.hdcp error",
-            ))),
+            Err(e) => invalid_device_response_error("hdcp", e),
         }
     }
 
@@ -310,13 +305,9 @@ impl DeviceServer for DeviceImpl {
                 Some(DeviceResponse::AudioProfileResponse(audio)) => {
                     return Ok(audio);
                 }
-                _ => Err(jsonrpsee::core::Error::Custom(String::from(
-                    "device.audio error",
-                ))),
+                _ => no_value_returned_error("audio"),
             },
-            Err(_e) => Err(jsonrpsee::core::Error::Custom(String::from(
-                "device.audio error",
-            ))),
+            Err(e) => invalid_device_response_error("audio", e),
         }
     }
 
@@ -428,9 +419,7 @@ impl DeviceServer for DeviceImpl {
         if let Some(session) = self.state.session_state.get_account_session() {
             Ok(session.id)
         } else {
-            Err(jsonrpsee::core::Error::Custom(String::from(
-                "Account session is not available",
-            )))
+            rpc_custom_error("Account session is not available")
         }
     }
 }

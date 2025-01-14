@@ -29,24 +29,11 @@ use crate::{
     },
 };
 use jsonrpsee::{
-    core::{async_trait, Error, RpcResult},
+    core::{async_trait, RpcResult},
     proc_macros::rpc,
-    types::error::CallError,
     RpcModule,
 };
 
-use ripple_sdk::api::{
-    account_link::WatchedRequest,
-    device::entertainment_data::*,
-    firebolt::{
-        fb_capabilities::JSON_RPC_STANDARD_ERROR_INVALID_PARAMS,
-        fb_discovery::{EVENT_ON_SIGN_IN, EVENT_ON_SIGN_OUT},
-        fb_general::{ListenRequest, ListenerResponse},
-        provider::ExternalProviderResponse,
-    },
-    gateway::rpc_gateway_api::CallContext,
-    manifest::device_manifest::IntentValidation,
-};
 use ripple_sdk::{
     api::{
         account_link::AccountLinkRequest,
@@ -64,8 +51,23 @@ use ripple_sdk::{
         },
     },
     extn::extn_client_message::ExtnResponse,
-    log::{error, info},
+    log::{debug, error, info},
     tokio::{sync::oneshot, time::timeout},
+};
+use ripple_sdk::{
+    api::{
+        account_link::WatchedRequest,
+        device::entertainment_data::*,
+        firebolt::{
+            fb_capabilities::JSON_RPC_STANDARD_ERROR_INVALID_PARAMS,
+            fb_discovery::{EVENT_ON_SIGN_IN, EVENT_ON_SIGN_OUT},
+            fb_general::{ListenRequest, ListenerResponse},
+            provider::ExternalProviderResponse,
+        },
+        gateway::rpc_gateway_api::CallContext,
+        manifest::device_manifest::IntentValidation,
+    },
+    utils::rpc_utils::{rpc_custom_error, rpc_error_with_code},
 };
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -590,10 +592,7 @@ impl DiscoveryServer for DiscoveryImpl {
         {
             return Ok(true);
         }
-
-        Err(jsonrpsee::core::Error::Custom(String::from(
-            "Discovery.launch: some failure",
-        )))
+        rpc_custom_error("Discovery.launch failure: app request failed or timed out")
     }
 
     async fn on_navigate_to(
@@ -657,11 +656,12 @@ impl DiscoveryServer for DiscoveryImpl {
             session_rx,
         )
         .await
-        .map_err(|_| Error::Custom(String::from("Didn't receive response within time")))?;
+        .map_err(|_| rpc_custom_error("Didn't receive response within timeout"))?;
         /*handle channel response*/
-        let result = channel_result.map_err(|_| {
-            Error::Custom(String::from(
-                "Error returning back from entity response provider",
+        let result = channel_result.map_err(|e| {
+            rpc_custom_error(format!(
+                "Error returned from entity response provider:{}",
+                e
             ))
         })?;
         match result.as_entity_info_result() {
@@ -669,9 +669,7 @@ impl DiscoveryServer for DiscoveryImpl {
                 provider: entity_request.provider.to_owned(),
                 data: res,
             }),
-            None => Err(Error::Custom(String::from(
-                "Invalid response back from provider",
-            ))),
+            None => rpc_custom_error("Invalid or empty response from provider"),
         }
     }
     async fn handle_entity_info_result(
@@ -737,11 +735,12 @@ impl DiscoveryServer for DiscoveryImpl {
             session_rx,
         )
         .await
-        .map_err(|_| Error::Custom(String::from("Didn't receive response within time")))?;
+        .map_err(|_| rpc_custom_error("Didn't receive response within time"))?;
         /*handle channel response*/
-        let result = channel_result.map_err(|_| {
-            Error::Custom(String::from(
-                "Error returning back from entity response provider",
+        let result = channel_result.map_err(|e| {
+            rpc_custom_error(format!(
+                "Error returned from entity response provider: {}",
+                e
             ))
         })?;
         match result.as_purchased_content_result() {
@@ -749,9 +748,7 @@ impl DiscoveryServer for DiscoveryImpl {
                 provider: entity_request.provider.to_owned(),
                 data: res,
             }),
-            None => Err(Error::Custom(String::from(
-                "Invalid response back from provider",
-            ))),
+            None => rpc_custom_error("Empty or missing response from provider"),
         }
     }
     async fn handle_purchased_content_result(
@@ -860,18 +857,17 @@ pub async fn validate_navigation_intent(
             let request_intent = serde_json::to_string(&intent).unwrap_or_default();
             if let Err(err) = serde_json::from_str::<NavigationIntentStrict>(&request_intent) {
                 if intent_validation_config == IntentValidation::Fail {
-                    return Err(jsonrpsee::core::Error::Call(CallError::Custom {
-                        code: JSON_RPC_STANDARD_ERROR_INVALID_PARAMS,
-                        message: format!("{:?} ", err),
-                        data: None,
-                    }));
+                    return rpc_error_with_code(
+                        format!("{:?} ", err),
+                        JSON_RPC_STANDARD_ERROR_INVALID_PARAMS,
+                    );
                 } else {
                     ripple_sdk::log::warn!("Intents do not match the spec : {:?} ", err);
                 }
             }
         }
         _ => {
-            info!(
+            debug!(
                 "Intents match the spec : {:?} ",
                 serde_json::to_string(&intent)
             );
