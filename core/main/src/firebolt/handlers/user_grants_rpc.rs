@@ -15,12 +15,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-use jsonrpsee::{
-    core::{Error, RpcResult},
-    proc_macros::rpc,
-    types::error::CallError,
-    RpcModule,
-};
+use jsonrpsee::{core::RpcResult, proc_macros::rpc, RpcModule};
 use ripple_sdk::{
     api::{
         apps::{AppManagerResponse, AppMethod, AppRequest, AppResponse},
@@ -37,7 +32,7 @@ use ripple_sdk::{
     chrono::{DateTime, Utc},
     log::debug,
     tokio::sync::oneshot,
-    utils::rpc_utils::rpc_error_with_code,
+    utils::rpc_utils::{rpc_custom_error, rpc_error_with_code},
 };
 
 use crate::{
@@ -268,7 +263,7 @@ impl UserGrantsServer for UserGrantsImpl {
             .cap_state
             .generic
             .check_supported(&fb_perms)
-            .map_err(|err| Error::Custom(format!("{:?} not supported", err.caps)))?;
+            .map_err(|err| rpc_custom_error(format!("{:?} not supported", err.caps)))?;
         let grant_entries = GrantState::check_with_roles(
             &self.platform_state,
             &ctx.clone().into(),
