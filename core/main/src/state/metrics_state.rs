@@ -267,11 +267,16 @@ impl MetricsState {
             BrokerUtils::process_internal_main_request(state, "localization.language", None)
                 .await
                 .and_then(|val| {
-                    Ok(from_value::<String>(val).map_err(|_| {
-                        rpc_error_with_code("Failed to parse language", -32100)
-                    }))
+                    from_value::<String>(val).map_err(|e| {
+                        //rpc_error_with_code("Failed to parse language", -32100)
+                        ripple_sdk::JsonRpcErrorType::owned(
+                            -32100,
+                            &format!("{}. error={}", "Failed to parse language", e),
+                            None::<&str>,
+                        )
+                    })
                 })
-                .unwrap_or_else(|_| Ok(Self::unset("language")));
+                .unwrap_or_else(|_| Self::unset("language"));
 
         let os_info = match Self::get_os_info_from_firebolt(state).await {
             Ok(info) => info,
@@ -287,8 +292,6 @@ impl MetricsState {
             Some(Self::unset("device.name")),
         )
         .unwrap_or(Self::unset("device.name"));
-
-       
 
         let mut firmware = String::default();
         let mut env = None;

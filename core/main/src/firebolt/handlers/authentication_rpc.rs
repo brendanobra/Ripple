@@ -22,7 +22,6 @@ use crate::{
 use jsonrpsee::{
     core::{async_trait, RpcResult},
     proc_macros::rpc,
-    types::error::CallError,
     RpcModule,
 };
 use ripple_sdk::{
@@ -39,6 +38,8 @@ use ripple_sdk::{
         session::{SessionTokenRequest, TokenContext, TokenType},
     },
     extn::extn_client_message::ExtnResponse,
+    utils::rpc_utils::{rpc_custom_error, rpc_error_with_code},
+    JsonRpcErrorType,
 };
 
 #[rpc(server)]
@@ -72,11 +73,10 @@ impl AuthenticationServer for AuthenticationImpl {
                 if supported_caps.contains(&cap) {
                     self.token(TokenType::Platform, ctx).await
                 } else {
-                    return Err(jsonrpsee::core::Error::Call(CallError::Custom {
-                        code: CAPABILITY_NOT_SUPPORTED,
-                        message: format!("{} is not supported", cap.as_str()),
-                        data: None,
-                    }));
+                    return rpc_error_with_code(
+                        format!("{} is not supported", cap.as_str()),
+                        CAPABILITY_NOT_SUPPORTED,
+                    );
                 }
             }
             TokenType::Root => self.get_root_token().await,
@@ -93,11 +93,10 @@ impl AuthenticationServer for AuthenticationImpl {
                 if supported_caps.contains(&cap) {
                     self.token(TokenType::Distributor, ctx).await
                 } else {
-                    return Err(jsonrpsee::core::Error::Call(CallError::Custom {
-                        code: CAPABILITY_NOT_SUPPORTED,
-                        message: format!("{} is not supported", cap.as_str()),
-                        data: None,
-                    }));
+                    return rpc_error_with_code(
+                        format!("{} is not supported", cap.as_str()),
+                        CAPABILITY_NOT_SUPPORTED,
+                    );
                 }
             }
         }
@@ -129,13 +128,11 @@ impl AuthenticationServer for AuthenticationImpl {
 }
 
 impl AuthenticationImpl {
-    fn send_dist_token_not_supported() -> jsonrpsee::core::Error {
-        jsonrpsee::core::Error::Call(CallError::Custom {
-            code: CAPABILITY_NOT_SUPPORTED,
-            message: "capability xrn:firebolt:capability:token:session is not supported"
-                .to_string(),
-            data: None,
-        })
+    fn send_dist_token_not_supported() -> JsonRpcErrorType {
+        rpc_error_with_code(
+            "capability xrn:firebolt:capability:token:session is not supported",
+            CAPABILITY_NOT_SUPPORTED,
+        )
     }
 
     async fn token(&self, token_type: TokenType, ctx: CallContext) -> RpcResult<TokenResult> {
@@ -157,11 +154,7 @@ impl AuthenticationImpl {
 
         let dist_session = match self.platform_state.session_state.get_account_session() {
             Some(session) => session,
-            None => {
-                return Err(jsonrpsee::core::Error::Custom(String::from(
-                    "Account session is not available",
-                )));
-            }
+            None => return rpc_custom_error("Account session is not available"),
         };
 
         let resp = match &token_type {
@@ -216,16 +209,17 @@ impl AuthenticationImpl {
                     expires_in: None,
                     token_type: None,
                 }),
-                e => Err(jsonrpsee::core::Error::Custom(format!(
+
+                e => rpc_custom_error(format!(
                     "unknown error getting {:?} token {:?}",
                     token_type, e
-                ))),
+                )),
             },
 
-            Err(_e) => Err(jsonrpsee::core::Error::Custom(format!(
-                "Ripple Error getting {:?} token",
-                token_type
-            ))),
+            Err(e) => rpc_custom_error(format!(
+                "Ripple Error: {} getting {:?} token",
+                e, token_type
+            )),
         }
     }
 
@@ -251,16 +245,13 @@ impl AuthenticationImpl {
                     expires_in: None,
                     token_type: None,
                 }),
-                e => Err(jsonrpsee::core::Error::Custom(format!(
+                e => rpc_custom_error(format!(
                     "unknown error getting {:?} token {:?}",
                     token_type, e
-                ))),
+                )),
             },
 
-            Err(_e) => Err(jsonrpsee::core::Error::Custom(format!(
-                "Ripple Error getting {:?} token",
-                token_type
-            ))),
+            Err(_e) => rpc_custom_error(format!("Ripple Error getting {:?} token", token_type)),
         }
     }
 }

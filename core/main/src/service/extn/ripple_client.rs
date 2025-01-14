@@ -40,6 +40,7 @@ use ripple_sdk::{
         sync::{mpsc::Sender, oneshot},
     },
     utils::error::RippleError,
+    JsonRpcErrorType,
 };
 
 use crate::{
@@ -123,7 +124,7 @@ impl RippleClient {
             error!("Send error for get_state {:?}", e);
             return Err(RippleError::SendFailure);
         }
-        let resp: Result<Result<AppManagerResponse, AppError>, jsonrpsee::core::Error> =
+        let resp: Result<Result<AppManagerResponse, AppError>, JsonRpcErrorType> =
             rpc_await_oneshot(app_resp_rx).await;
         if let Ok(Ok(AppManagerResponse::State(state))) = resp {
             return Ok(state.as_string().to_string());

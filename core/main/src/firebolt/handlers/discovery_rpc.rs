@@ -334,9 +334,9 @@ impl DiscoveryImpl {
             .await
         {
             Ok(_) => Ok(EmptyResult::default()),
-            Err(_) => rpc_downstream_service_err(
-                "Could not notify Content AccessList to the platform",
-            ),
+            Err(_) => {
+                rpc_downstream_service_err("Could not notify Content AccessList to the platform")
+            }
         }
     }
 
@@ -348,9 +348,9 @@ impl DiscoveryImpl {
             .await
         {
             Ok(_) => Ok(EmptyResult::default()),
-            Err(_) => rpc_downstream_service_err(
-                "Could not notify Content AccessList to the platform",
-            ),
+            Err(_) => {
+                rpc_downstream_service_err("Could not notify Content AccessList to the platform")
+            }
         }
     }
 }

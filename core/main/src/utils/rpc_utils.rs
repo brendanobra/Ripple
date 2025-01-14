@@ -22,11 +22,15 @@ use ripple_sdk::{
         firebolt::fb_general::{ListenRequest, ListenerResponse},
         gateway::rpc_gateway_api::CallContext,
     },
-    tokio::sync::oneshot, utils::rpc_utils::{rpc_custom_error, rpc_error_with_code}, JsonRpcErrorType,
+    tokio::sync::oneshot,
+    utils::rpc_utils::{rpc_custom_error, rpc_error_with_code},
+    JsonRpcErrorType,
 };
 
 use crate::{
-    firebolt::firebolt_gateway::JsonRpcError, service::apps::app_events::{AppEventDecorator, AppEvents}, state::platform_state::PlatformState
+    firebolt::firebolt_gateway::JsonRpcError,
+    service::apps::app_events::{AppEventDecorator, AppEvents},
+    state::platform_state::PlatformState,
 };
 
 pub use ripple_sdk::utils::rpc_utils::rpc_err;
@@ -40,7 +44,7 @@ pub const SESSION_NO_INTENT_ERROR_CODE: i32 = -40000;
 pub async fn rpc_await_oneshot<T>(rx: oneshot::Receiver<T>) -> RpcResult<T> {
     match rx.await {
         Ok(v) => Ok(v),
-        Err(e) => rpc_custom_error( format!("Internal failure: {:?}", e)),
+        Err(e) => rpc_custom_error(format!("Internal failure: {:?}", e)),
     }
 }
 
@@ -77,13 +81,13 @@ pub async fn rpc_add_event_listener_with_decorator(
     })
 }
 
-pub fn rpc_downstream_service_err<T>(msg: &str) -> Result<T,JsonRpcErrorType> {
+pub fn rpc_downstream_service_err<T>(msg: &str) -> Result<T, JsonRpcErrorType> {
     rpc_error_with_code(msg.to_string(), DOWNSTREAM_SERVICE_UNAVAILABLE_ERROR_CODE)
 }
-pub fn rpc_session_no_intent_err<T>(msg: &str) -> Result<T,JsonRpcErrorType>{
+pub fn rpc_session_no_intent_err<T>(msg: &str) -> Result<T, JsonRpcErrorType> {
     rpc_error_with_code(msg.to_string(), SESSION_NO_INTENT_ERROR_CODE)
 }
-pub fn rpc_navigate_reserved_app_err<T>(msg: &str) -> Result<T,JsonRpcErrorType> {
+pub fn rpc_navigate_reserved_app_err<T>(msg: &str) -> Result<T, JsonRpcErrorType> {
     rpc_error_with_code(msg.to_string(), FIRE_BOLT_DEEPLINK_ERROR_CODE)
 }
 

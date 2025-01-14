@@ -31,7 +31,8 @@ use ripple_sdk::{
         gateway::rpc_gateway_api::CallContext,
     },
     extn::extn_client_message::ExtnResponse,
-    utils::error::RippleError,
+    utils::{error::RippleError, rpc_utils::rpc_custom_error},
+    JsonRpcErrorType,
 };
 
 use crate::{firebolt::rpc::RippleRPCProvider, state::platform_state::PlatformState};
@@ -46,8 +47,8 @@ macro_rules! return_if_app_id_missing {
     };
 }
 
-fn get_err_msg(err: RippleError) -> jsonrpsee::core::Error {
-    jsonrpsee::core::Error::Custom(format!(
+fn get_err_msg(err: RippleError) -> JsonRpcErrorType {
+    rpc_custom_error(format!(
         "Error getting value {}",
         match err {
             RippleError::ExtnError => "(Server Error)",

@@ -45,10 +45,11 @@ use ripple_sdk::{
             fb_capabilities::JSON_RPC_STANDARD_ERROR_INVALID_PARAMS,
             fb_general::{ListenRequest, ListenerResponse},
         },
-        gateway::rpc_gateway_api::CallContext,
+        gateway::{rpc_error, rpc_gateway_api::CallContext},
     },
     extn::extn_client_message::ExtnResponse,
     log::error,
+    utils::rpc_utils::{rpc_custom_error, rpc_error_with_code},
 };
 use serde_json::{json, Value};
 
@@ -130,14 +131,13 @@ pub async fn voice_guidance_settings_enabled(state: &PlatformState) -> RpcResult
             if let Some(ExtnResponse::Boolean(v)) = value.payload.extract() {
                 Ok(v)
             } else {
-                Err(jsonrpsee::core::Error::Custom(String::from(
-                    "Voice guidance enabled error response TBD1",
-                )))
+                rpc_custom_error("voice guidance enabled failed with an extension error")
             }
         }
-        Err(_) => Err(jsonrpsee::core::Error::Custom(String::from(
-            "Voice guidance enabled error response TBD2",
-        ))),
+        Err(e) => rpc_custom_error(format!(
+            "Voice guidance enabled failed, due to an extension failure: {}",
+            e
+        )),
     }
 }
 
@@ -151,14 +151,10 @@ pub async fn voice_guidance_settings_speed(state: &PlatformState) -> RpcResult<f
             if let Some(ExtnResponse::Float(v)) = value.payload.extract() {
                 Ok(v)
             } else {
-                Err(jsonrpsee::core::Error::Custom(String::from(
-                    "Voice guidance enabled error response TBD1",
-                )))
+                rpc_custom_error("Voice guidance enabled error. invalid response from thunder")
             }
         }
-        Err(_) => Err(jsonrpsee::core::Error::Custom(String::from(
-            "Voice guidance enabled error response TBD2",
-        ))),
+        Err(e) => rpc_custom_error(format!("Voice guidance enabled error response={}", e)),
     }
 }
 
@@ -249,9 +245,10 @@ impl VoiceguidanceServer for VoiceguidanceImpl {
         if resp.is_ok() {
             Ok(())
         } else {
-            Err(jsonrpsee::core::Error::Custom(String::from(
-                "Voice guidance enabled error response TBD2",
-            )))
+            rpc_error_with_code(
+                "Invalid Repsponse for voice guidance set enabled",
+                JSON_RPC_STANDARD_ERROR_INVALID_PARAMS,
+            )
         }
     }
 
@@ -306,16 +303,16 @@ impl VoiceguidanceServer for VoiceguidanceImpl {
                 .await;
                 Ok(())
             } else {
-                Err(jsonrpsee::core::Error::Custom(String::from(
-                    "Voice guidance speed error response TBD2",
-                )))
+                rpc_error_with_code(
+                    "Invalid Repsponse for set speed",
+                    JSON_RPC_STANDARD_ERROR_INVALID_PARAMS,
+                )
             }
         } else {
-            Err(jsonrpsee::core::Error::Call(CallError::Custom {
-                code: JSON_RPC_STANDARD_ERROR_INVALID_PARAMS,
-                message: "Invalid Value for set speed".to_owned(),
-                data: None,
-            }))
+            rpc_error_with_code(
+                "Invalid Value for set speed",
+                JSON_RPC_STANDARD_ERROR_INVALID_PARAMS,
+            )
         }
     }
 

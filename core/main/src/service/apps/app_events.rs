@@ -31,6 +31,7 @@ use ripple_sdk::{
     serde_json::{json, Value},
     tokio::sync::mpsc,
     utils::channel_utils::mpsc_send_and_log,
+    JsonRpcErrorType,
 };
 
 use std::{
@@ -60,8 +61,8 @@ pub trait AppEventDecorator: Send + Sync {
     fn dec_clone(&self) -> Box<dyn AppEventDecorator + Send + Sync>;
 }
 
-impl From<jsonrpsee::core::error::Error> for AppEventDecorationError {
-    fn from(_: jsonrpsee::core::error::Error) -> Self {
+impl From<JsonRpcErrorType> for AppEventDecorationError {
+    fn from(_: JsonRpcErrorType) -> Self {
         AppEventDecorationError {}
     }
 }

@@ -23,7 +23,7 @@ use crate::{
 };
 use base64::{engine::general_purpose::STANDARD as base64, Engine};
 use jsonrpsee::{
-    core::{async_trait, Error, RpcResult},
+    core::{async_trait, RpcResult},
     proc_macros::rpc,
     RpcModule,
 };
@@ -40,6 +40,7 @@ use ripple_sdk::{
         storage_property::StorageProperty,
     },
     log::{debug, error},
+    utils::rpc_utils::{rpc_custom_error, rpc_error_with_code},
 };
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -194,7 +195,7 @@ impl AdvertisingServer for AdvertisingImpl {
                 self.state
                     .session_state
                     .get_account_session()
-                    .ok_or_else(|| Error::Custom(String::from("no session available")))?,
+                    .ok_or_else(|| rpc_custom_error("no session available"))?,
             ))
             .await
             .map(|_ok| ())
@@ -243,14 +244,9 @@ impl AdvertisingServer for AdvertisingImpl {
                     return Ok(ad_id);
                 }
             }
-
-            Err(jsonrpsee::core::Error::Custom(String::from(
-                "Failed to extract ad init object from response",
-            )))
+            rpc_custom_error("Failed to extract ad init object from response")
         } else {
-            Err(jsonrpsee::core::Error::Custom(String::from(
-                "Account session is not available",
-            )))
+            rpc_custom_error("Account session is not available")
         }
     }
 
@@ -305,7 +301,7 @@ impl AdvertisingServer for AdvertisingImpl {
             durable_app_id: durable_app_id.clone(),
             dist_session: session
                 .clone()
-                .ok_or_else(|| Error::Custom(String::from("no session available")))?,
+                .ok_or_else(|| rpc_custom_error("no session available"))?,
             environment: environment.to_string(),
             scope: get_scope_option_map(&None),
         });
@@ -394,10 +390,10 @@ impl AdvertisingServer for AdvertisingImpl {
 
                 match serde_json::from_str(b_string.as_str()) {
                     Ok(js) => Ok(js),
-                    Err(_e) => Err(Error::Custom(String::from("Invalid JSON"))),
+                    Err(_e) => rpc_custom_error("Invalid JSON in device attributes"),
                 }
             }
-            Err(_e) => Err(Error::Custom(String::from("Found invalid UTF-8"))),
+            Err(e) => rpc_custom_error(format!("Invalid UTF-8 parsing device attributes: {}", e)),
         }
     }
 

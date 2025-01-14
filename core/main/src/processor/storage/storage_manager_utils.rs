@@ -15,19 +15,22 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-use jsonrpsee::core::{Error, RpcResult};
+use jsonrpsee::core::RpcResult;
 use ripple_sdk::{
     api::device::device_peristence::StorageData,
     extn::extn_client_message::ExtnResponse,
     serde_json::{self, Value},
-    utils::error::RippleError,
+    utils::{error::RippleError, rpc_utils::rpc_custom_error},
+    JsonRpcErrorType,
 };
 
-fn storage_error() -> jsonrpsee::core::Error {
-    Error::Custom(String::from("error parsing response"))
+fn storage_error() -> JsonRpcErrorType {
+    rpc_custom_error("error parsing response")
 }
 
-fn get_storage_data(resp: Result<ExtnResponse, RippleError>) -> Result<Option<StorageData>, Error> {
+fn get_storage_data(
+    resp: Result<ExtnResponse, RippleError>,
+) -> Result<Option<StorageData>, JsonRpcErrorType> {
     match resp {
         Ok(response) => match response {
             ExtnResponse::StorageData(storage_data) => Ok(Some(storage_data)),
@@ -37,7 +40,7 @@ fn get_storage_data(resp: Result<ExtnResponse, RippleError>) -> Result<Option<St
     }
 }
 
-fn get_value(resp: Result<ExtnResponse, RippleError>) -> Result<Value, Error> {
+fn get_value(resp: Result<ExtnResponse, RippleError>) -> Result<Value, JsonRpcErrorType> {
     let has_storage_data = get_storage_data(resp.clone())?;
 
     if let Some(storage_data) = has_storage_data {
