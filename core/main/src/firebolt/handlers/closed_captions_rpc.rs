@@ -29,28 +29,31 @@ use jsonrpsee::{
     RpcModule,
 };
 
-use ripple_sdk::api::{
-    device::{
-        device_accessibility_data::{
-            ClosedCaptionStyle, ClosedCaptionsSettings, FONT_EDGE_LIST, FONT_FAMILY_LIST,
+use ripple_sdk::{
+    api::{
+        device::{
+            device_accessibility_data::{
+                ClosedCaptionStyle, ClosedCaptionsSettings, FONT_EDGE_LIST, FONT_FAMILY_LIST,
+            },
+            device_peristence::{SetProperty, SetPropertyOpt},
         },
-        device_peristence::{SetProperty, SetPropertyOpt},
+        firebolt::{
+            fb_general::{ListenRequest, ListenerResponse},
+            fb_localization::SetPreferredAudioLanguage,
+        },
+        gateway::rpc_gateway_api::CallContext,
+        storage_property::{
+            StorageProperty as SP, EVENT_CC_PREFERRED_LANGUAGES,
+            EVENT_CLOSED_CAPTIONS_BACKGROUND_COLOR, EVENT_CLOSED_CAPTIONS_BACKGROUND_OPACITY,
+            EVENT_CLOSED_CAPTIONS_ENABLED, EVENT_CLOSED_CAPTIONS_FONT_COLOR,
+            EVENT_CLOSED_CAPTIONS_FONT_EDGE, EVENT_CLOSED_CAPTIONS_FONT_EDGE_COLOR,
+            EVENT_CLOSED_CAPTIONS_FONT_FAMILY, EVENT_CLOSED_CAPTIONS_FONT_OPACITY,
+            EVENT_CLOSED_CAPTIONS_FONT_SIZE, EVENT_CLOSED_CAPTIONS_SETTINGS_CHANGED,
+            EVENT_CLOSED_CAPTIONS_TEXT_ALIGN, EVENT_CLOSED_CAPTIONS_TEXT_ALIGN_VERTICAL,
+            EVENT_CLOSED_CAPTIONS_WINDOW_COLOR, EVENT_CLOSED_CAPTIONS_WINDOW_OPACITY,
+        },
     },
-    firebolt::{
-        fb_general::{ListenRequest, ListenerResponse},
-        fb_localization::SetPreferredAudioLanguage,
-    },
-    gateway::rpc_gateway_api::CallContext,
-    storage_property::{
-        StorageProperty as SP, EVENT_CC_PREFERRED_LANGUAGES,
-        EVENT_CLOSED_CAPTIONS_BACKGROUND_COLOR, EVENT_CLOSED_CAPTIONS_BACKGROUND_OPACITY,
-        EVENT_CLOSED_CAPTIONS_ENABLED, EVENT_CLOSED_CAPTIONS_FONT_COLOR,
-        EVENT_CLOSED_CAPTIONS_FONT_EDGE, EVENT_CLOSED_CAPTIONS_FONT_EDGE_COLOR,
-        EVENT_CLOSED_CAPTIONS_FONT_FAMILY, EVENT_CLOSED_CAPTIONS_FONT_OPACITY,
-        EVENT_CLOSED_CAPTIONS_FONT_SIZE, EVENT_CLOSED_CAPTIONS_SETTINGS_CHANGED,
-        EVENT_CLOSED_CAPTIONS_TEXT_ALIGN, EVENT_CLOSED_CAPTIONS_TEXT_ALIGN_VERTICAL,
-        EVENT_CLOSED_CAPTIONS_WINDOW_COLOR, EVENT_CLOSED_CAPTIONS_WINDOW_OPACITY,
-    },
+    utils::rpc_utils::rpc_custom_error,
 };
 use serde_json::Value;
 
@@ -393,9 +396,7 @@ impl ClosedcaptionsImpl {
     ) -> RpcResult<()> {
         if let Some(value) = request.value {
             if value > 100 {
-                return Err(jsonrpsee::core::error::Error::Custom(
-                    "Invalid Value for opacity".to_owned(),
-                ));
+                return rpc_custom_error("Invalid Value for opacity".to_owned());
             }
         }
 
@@ -477,9 +478,7 @@ impl ClosedcaptionsServer for ClosedcaptionsImpl {
         if ClosedcaptionsImpl::is_font_family_supported(request.value.clone()) {
             ClosedcaptionsImpl::set_string(&self.state, SP::ClosedCaptionsFontFamily, request).await
         } else {
-            Err(jsonrpsee::core::Error::Custom(
-                "Font family not supported".to_owned(),
-            ))
+            return rpc_custom_error("Font family not supported".to_owned());
         }
     }
 
@@ -502,9 +501,7 @@ impl ClosedcaptionsServer for ClosedcaptionsImpl {
     ) -> RpcResult<()> {
         if let Some(value) = request.value {
             if !(0.5..=2.0).contains(&value) {
-                return Err(jsonrpsee::core::error::Error::Custom(
-                    "Invalid Value for set font".to_owned(),
-                ));
+                return rpc_custom_error("Invalid Value for set font".to_owned());
             }
         }
 
@@ -551,9 +548,7 @@ impl ClosedcaptionsServer for ClosedcaptionsImpl {
         if ClosedcaptionsImpl::is_font_edge_supported(request.value.clone()) {
             ClosedcaptionsImpl::set_string(&self.state, SP::ClosedCaptionsFontEdge, request).await
         } else {
-            Err(jsonrpsee::core::Error::Custom(
-                "Font edge not supported".to_owned(),
-            ))
+            rpc_custom_error("Font edge not supported")
         }
     }
 

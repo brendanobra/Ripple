@@ -16,18 +16,14 @@
 //
 
 use crate::{
-    firebolt::rpc::RippleRPCProvider,
+    firebolt::rpc::{self, RippleRPCProvider},
     service::user_grants::GrantState,
     state::{
         cap::{cap_state::CapState, permitted_state::PermissionHandler},
         platform_state::PlatformState,
     },
 };
-use jsonrpsee::{
-    core::{Error, RpcResult},
-    proc_macros::rpc,
-    RpcModule,
-};
+use jsonrpsee::{core::RpcResult, proc_macros::rpc, RpcModule};
 
 use ripple_sdk::{
     api::gateway::rpc_error, async_trait::async_trait, utils::rpc_utils::rpc_custom_error,
@@ -180,7 +176,7 @@ impl CapabilityServer for CapabilityImpl {
             Ok(grant) => Ok(Some(grant)),
             Err(RippleError::Permission(DenyReason::Ungranted)) => Ok(None),
             Err(RippleError::Permission(DenyReason::GrantDenied)) => Ok(Some(false)),
-            Err(_) => Err(Error::Custom("Unable to get user grants".to_owned())),
+            Err(e) => rpc_custom_error(format!("Unable to get user grants: {}", e)),
         }
     }
 
@@ -191,20 +187,12 @@ impl CapabilityServer for CapabilityImpl {
     ) -> RpcResult<Vec<CapabilityInfo>> {
         if request.capabilities.is_empty() {
             return rpc_custom_error("Error invalid input capabilities are empty");
-            //rpc_error_with_code("Error invalid input capabilities are empty", code)
-
-            //return Err(jsonrpsee::core::Error::Custom(String::from(
-            //    "Error invalid input capabilities are empty",
-            //)));
         }
-        //let cap_set = request.capabilities;
+
         if let Ok(a) = CapState::get_cap_info(&self.state, ctx, &request.capabilities).await {
             Ok(a)
         } else {
             rpc_custom_error("Error retreiving Capability Info TBD")
-            // Err(jsonrpsee::core::Error::Custom(String::from(
-            //     "Error retreiving Capability Info TBD",
-            // )))
         }
     }
 
@@ -286,9 +274,7 @@ impl CapabilityServer for CapabilityImpl {
             cap_info.extend(a);
             Ok(cap_info)
         } else {
-            Err(jsonrpsee::core::Error::Custom(String::from(
-                "Error retreiving Capability Info TBD",
-            )))
+            rpc_custom_error("Error retreiving Capability Info")
         }
     }
 }
