@@ -18,7 +18,10 @@
 use std::{collections::HashMap, env};
 
 use crate::{
-    firebolt::rpc::{self, RippleRPCProvider},
+    firebolt::{
+        invalid_device_response_error, no_value_returned_error,
+        rpc::{self, RippleRPCProvider},
+    },
     service::apps::app_events::AppEvents,
     state::platform_state::PlatformState,
     utils::rpc_utils::{rpc_add_event_listener, rpc_err},
@@ -136,9 +139,9 @@ pub async fn get_ll_mac_addr(state: PlatformState) -> RpcResult<String> {
     match resp {
         Ok(response) => match response.payload.extract() {
             Some(ExtnResponse::String(value)) => Ok(filter_mac(value)),
-            _ => no_value_returned_error("mac_address"),
+            _ => no_value_returned("mac_address"),
         },
-        Err(e) => invalid_device_response_error("mac_address", e),
+        Err(e) => invalid_device_response("mac_address", e),
     }
 }
 
@@ -156,17 +159,17 @@ impl DeviceImpl {
         {
             Ok(response) => match response.payload.extract() {
                 Some(DeviceResponse::FirmwareInfo(value)) => Ok(value),
-                _ => return no_value_returned_error("hdcp"),
+                _ => return no_value_returned("hdcp"),
             },
-            Err(e) => invalid_device_response_error("hdcp", e),
+            Err(e) => invalid_device_response("hdcp", e),
         }
     }
 }
-fn no_value_returned_error(method: &str) -> Result<T, JsonRpcErrorType> {
-    rpc_custom_error(format!("device.{} error: no value returned", method))
+fn no_value_returned<T>(method: &str) -> Result<T, JsonRpcErrorType> {
+    no_value_returned_error("device", method)
 }
-fn invalid_device_response_error(method: &str, error: RippleError) -> Result<T, JsonRpcErrorType> {
-    rpc_custom_error(format!("device.{} error: {}", method, error))
+fn invalid_device_response<T>(method: &str, error: RippleError) -> Result<T, JsonRpcErrorType> {
+    invalid_device_response_error("device", method, error)
 }
 
 #[async_trait]
@@ -249,9 +252,9 @@ impl DeviceServer for DeviceImpl {
         {
             Ok(response) => match response.payload.extract() {
                 Some(DeviceResponse::HdcpSupportResponse(value)) => Ok(value),
-                _ => no_value_returned_error("hdcp"),
+                _ => no_value_returned("hdcp"),
             },
-            Err(e) => invalid_device_response_error("hdcp", e),
+            Err(e) => invalid_device_response("hdcp", e),
         }
     }
 
@@ -305,9 +308,9 @@ impl DeviceServer for DeviceImpl {
                 Some(DeviceResponse::AudioProfileResponse(audio)) => {
                     return Ok(audio);
                 }
-                _ => no_value_returned_error("audio"),
+                _ => no_value_returned("audio"),
             },
-            Err(e) => invalid_device_response_error("audio", e),
+            Err(e) => invalid_device_response("audio", e),
         }
     }
 

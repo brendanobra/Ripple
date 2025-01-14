@@ -48,3 +48,16 @@ pub mod firebolt_gateway;
 pub mod firebolt_ws;
 pub mod rpc;
 pub mod rpc_router;
+
+use ripple_sdk::utils::error::RippleError;
+use ripple_sdk::{utils::rpc_utils::rpc_custom_error, JsonRpcErrorType};
+fn no_value_returned_error<T>(module: &str, method: &str) -> Result<T, JsonRpcErrorType> {
+    rpc_custom_error(format!("device.{} error: no value returned", method))
+}
+fn invalid_device_response_error<T>(
+    module: &str,
+    method: &str,
+    error: RippleError,
+) -> Result<T, JsonRpcErrorType> {
+    rpc_custom_error(format!("device.{} error: {}", method, error))
+}

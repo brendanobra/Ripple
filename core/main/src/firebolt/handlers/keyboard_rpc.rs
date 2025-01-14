@@ -16,15 +16,11 @@
 //
 
 use crate::{
-    firebolt::rpc::RippleRPCProvider,
+    firebolt::{invalid_device_response_error, no_value_returned_error, rpc::RippleRPCProvider},
     service::apps::provider_broker::{ProviderBroker, ProviderBrokerRequest},
     state::platform_state::PlatformState,
 };
-use jsonrpsee::{
-    core::{Error, RpcResult},
-    proc_macros::rpc,
-    RpcModule,
-};
+use jsonrpsee::{core::RpcResult, proc_macros::rpc, RpcModule};
 use ripple_sdk::{api::firebolt::fb_keyboard::KeyboardRequestEmail, async_trait::async_trait};
 use ripple_sdk::{
     api::{
@@ -278,13 +274,9 @@ impl KeyboardImpl {
         match session_rx.await {
             Ok(result) => match result.as_keyboard_result() {
                 Some(res) => Ok(res),
-                None => Err(Error::Custom(String::from(
-                    "Invalid response back from provider",
-                ))),
+                None => no_value_returned_error("keyboard", "call_keyboard_provider"),
             },
-            Err(_) => Err(Error::Custom(String::from(
-                "Error returning back from keyboard provider",
-            ))),
+            Err(e) => invalid_device_response_error("keyboard", "call_keyboard_provider", e),
         }
     }
 
