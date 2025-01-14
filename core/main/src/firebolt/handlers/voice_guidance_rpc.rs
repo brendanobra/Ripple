@@ -25,7 +25,6 @@ use crate::{
 use jsonrpsee::{
     core::{async_trait, RpcResult},
     proc_macros::rpc,
-    types::error::CallError,
     RpcModule,
 };
 
@@ -45,7 +44,7 @@ use ripple_sdk::{
             fb_capabilities::JSON_RPC_STANDARD_ERROR_INVALID_PARAMS,
             fb_general::{ListenRequest, ListenerResponse},
         },
-        gateway::{rpc_error, rpc_gateway_api::CallContext},
+        gateway::rpc_gateway_api::CallContext,
     },
     extn::extn_client_message::ExtnResponse,
     log::error,
