@@ -39,12 +39,16 @@ use ripple_sdk::{
         storage_property::{StorageProperty, KEY_POSTAL_CODE},
     },
     extn::extn_client_message::ExtnResponse,
+    utils::rpc_utils::rpc_custom_error,
 };
 
-use crate::utils::rpc_utils::{rpc_add_event_listener, rpc_err};
 use crate::{
     firebolt::rpc::RippleRPCProvider, processor::storage::storage_manager::StorageManager,
     service::apps::provider_broker::ProviderBroker, state::platform_state::PlatformState,
+};
+use crate::{
+    firebolt::{invalid_device_response_error, no_value_returned_error},
+    utils::rpc_utils::{rpc_add_event_listener, rpc_err},
 };
 use serde::Deserialize;
 
@@ -368,9 +372,7 @@ impl LocalizationServer for LocalizationImpl {
             Ok(r) => r,
             Err(e) => {
                 error!("timezone_set: error response TBD: {:?}", e);
-                return Err(jsonrpsee::core::Error::Custom(String::from(
-                    "timezone_set: error response TBD",
-                )));
+                return invalid_device_response_error("localization", "timezone_set", e.into());
             }
         };
         if let Some(ExtnResponse::AvailableTimezones(timezones)) = resp.payload.extract() {
@@ -379,15 +381,13 @@ impl LocalizationServer for LocalizationImpl {
                     "timezone_set: Unsupported timezone: tz={}",
                     set_request.value
                 );
-                return Err(jsonrpsee::core::Error::Custom(format!(
-                    "timezone_set: Unsupported timezone: tz={0}",
+                return rpc_custom_error(&format!(
+                    "timezone_set: Unsupported timezone: tz={}",
                     set_request.value
-                )));
+                ));
             }
         } else {
-            return Err(jsonrpsee::core::Error::Custom(String::from(
-                "timezone_set: error response TBD",
-            )));
+            return no_value_returned_error("localization", "timezone_set");
         }
 
         if self

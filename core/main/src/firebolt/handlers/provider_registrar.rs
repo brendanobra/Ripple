@@ -26,10 +26,11 @@ use crate::{
     state::{openrpc_state::ProviderRelationSet, platform_state::PlatformState},
 };
 use jsonrpsee::{
-    core::{server::rpc_module::Methods, Error, RpcResult},
-    types::{error::CallError, Params, ParamsSequence},
+    core::RpcResult,
+    types::{Params, ParamsSequence},
     RpcModule,
 };
+use jsonrpsee_ws_server::types::error::CallError;
 use ripple_sdk::{
     api::{
         firebolt::{
@@ -46,6 +47,8 @@ use ripple_sdk::{
     },
     log::{error, info},
     tokio::{sync::oneshot, time::timeout},
+    utils::rpc_utils::{rpc_custom_error, rpc_error_with_code},
+    JsonRpcErrorType,
 };
 use serde_json::{Map, Value};
 
@@ -199,7 +202,7 @@ impl ProviderRegistrar {
     async fn callback_app_event_listener(
         params: Params<'static>,
         context: Arc<RpcModuleContext>,
-    ) -> Result<ListenerResponse, Error> {
+    ) -> Result<ListenerResponse, JsonRpcErrorType> {
         info!("callback_app_event_listener: method={}", context.method);
 
         let mut params_sequence = params.sequence();
@@ -208,7 +211,7 @@ impl ProviderRegistrar {
             Ok(context) => context,
             Err(e) => {
                 error!("callback_app_event_listener: Error: {:?}", e);
-                return Err(Error::Custom("Missing call context".to_string()));
+                return rpc_custom_error("Missing call context");
             }
         };
 
@@ -216,7 +219,7 @@ impl ProviderRegistrar {
             Ok(r) => r,
             Err(e) => {
                 error!("callback_app_event_listener: Error: {:?}", e);
-                return Err(Error::Custom("Missing request".to_string()));
+                return rpc_custom_error("Missing request");
             }
         };
 
@@ -237,7 +240,7 @@ impl ProviderRegistrar {
     async fn callback_register_provider(
         params: Params<'static>,
         context: Arc<RpcModuleContext>,
-    ) -> Result<ListenerResponse, Error> {
+    ) -> Result<ListenerResponse, JsonRpcErrorType> {
         info!("callback_register_provider: method={}", context.method);
 
         if let Some(capability) = &context.provider_relation_set.capability {
@@ -247,7 +250,7 @@ impl ProviderRegistrar {
                 Ok(context) => context,
                 Err(e) => {
                     error!("callback_register_provider: Error: {:?}", e);
-                    return Err(Error::Custom("Missing call context".to_string()));
+                    return rpc_custom_error("Missing call context");
                 }
             };
 
@@ -255,7 +258,7 @@ impl ProviderRegistrar {
                 Ok(r) => r,
                 Err(e) => {
                     error!("callback_register_provider: Error: {:?}", e);
-                    return Err(Error::Custom("Missing request".to_string()));
+                    return rpc_custom_error("Missing request");
                 }
             };
 
@@ -276,14 +279,14 @@ impl ProviderRegistrar {
                 event: context.method.clone(),
             })
         } else {
-            Err(Error::Custom("Missing provides attribute".to_string()))
+            rpc_custom_error("Missing provides attribute")
         }
     }
 
     async fn callback_app_event_emitter(
         params: Params<'static>,
         context: Arc<RpcModuleContext>,
-    ) -> Result<Option<()>, Error> {
+    ) -> Result<Option<()>, JsonRpcErrorType> {
         info!(
             "callback_app_event_emitter: method={}, event={:?}",
             context.method, &context.provider_relation_set.provides_to
@@ -296,7 +299,7 @@ impl ProviderRegistrar {
                 Ok(r) => r,
                 Err(e) => {
                     error!("callback_app_event_emitter: Error: {:?}", e);
-                    return Err(Error::Custom("Missing event_data".to_string()));
+                    return rpc_custom_error("Missing event_data");
                 }
             };
 
@@ -346,9 +349,7 @@ impl ProviderRegistrar {
             )
             .await;
         } else {
-            return Err(Error::Custom(String::from(
-                "Unexpected schema configuration",
-            )));
+            return rpc_custom_error("Unexpected schema configuration");
         }
 
         Ok(None)
@@ -357,7 +358,7 @@ impl ProviderRegistrar {
     async fn callback_error(
         params: Params<'static>,
         context: Arc<RpcModuleContext>,
-    ) -> Result<Option<()>, Error> {
+    ) -> Result<Option<()>, JsonRpcErrorType> {
         info!("callback_error: method={}", context.method);
         let params_sequence = params.sequence();
 
@@ -378,7 +379,7 @@ impl ProviderRegistrar {
                 "callback_error: NO Valid ATTRIBUTES: context.method={}",
                 context.method
             );
-            return Err(Error::Custom(String::from("Missing provider attributes")));
+            return rpc_custom_error("Missing provider attributes");
         }
 
         Ok(None) as RpcResult<Option<()>>
@@ -387,13 +388,13 @@ impl ProviderRegistrar {
     async fn callback_provider_invoker(
         params: Params<'static>,
         context: Arc<RpcModuleContext>,
-    ) -> Result<Value, Error> {
+    ) -> Result<Value, JsonRpcErrorType> {
         let mut params_sequence = params.sequence();
         let call_context: CallContext = match params_sequence.next() {
             Ok(context) => context,
             Err(e) => {
                 error!("callback_provider_invoker: Error: {:?}", e);
-                return Err(Error::Custom("Missing call context".to_string()));
+                return rpc_custom_error("Missing call context");
             }
         };
 
@@ -401,7 +402,7 @@ impl ProviderRegistrar {
             Ok(p) => p,
             Err(e) => {
                 error!("callback_provider_invoker: Error: {:?}", e);
-                return Err(Error::Custom("Missing params".to_string()));
+                return rpc_custom_error("Missing params");
             }
         };
 
@@ -486,37 +487,29 @@ impl ProviderRegistrar {
                                     }
                                 }
                                 ProviderResponsePayload::GenericError(e) => {
-                                    return Err(Error::Call(CallError::Custom {
-                                        code: e.code,
-                                        message: e.message,
-                                        data: None,
-                                    }));
+                                    return rpc_error_with_code(&e.message, e.code);
                                 }
                                 _ => {
                                     return Ok(provider_response_payload.as_value());
                                 }
                             }
                         } else {
-                            return Err(Error::Custom(String::from(
-                                "Error returning from provider",
-                            )));
+                            return rpc_custom_error("Unknown error returned from provider");
                         }
                     } else {
-                        return Err(Error::Custom(String::from("Provider response timeout")));
+                        return rpc_custom_error("Provider response timeout");
                     }
                 }
             }
         }
 
-        Err(Error::Custom(String::from(
-            "Unexpected schema configuration",
-        )))
+        rpc_custom_error("Unexpected schema configuration")
     }
 
     async fn callback_focus(
         params: Params<'static>,
         context: Arc<RpcModuleContext>,
-    ) -> Result<Option<()>, Error> {
+    ) -> Result<Option<()>, JsonRpcErrorType> {
         info!("callback_focus: method={}", context.method);
 
         if let Some(capability) = &context.provider_relation_set.capability {
@@ -526,7 +519,7 @@ impl ProviderRegistrar {
                 Ok(context) => context,
                 Err(e) => {
                     error!("callback_focus: Error: {:?}", e);
-                    return Err(Error::Custom("Missing call context".to_string()));
+                    return rpc_custom_error("Missing call context");
                 }
             };
 
@@ -534,7 +527,7 @@ impl ProviderRegistrar {
                 Ok(r) => r,
                 Err(e) => {
                     error!("callback_focus: Error: {:?}", e);
-                    return Err(Error::Custom("Missing request".to_string()));
+                    return rpc_custom_error("Missing request");
                 }
             };
 
@@ -548,14 +541,14 @@ impl ProviderRegistrar {
 
             Ok(None) as RpcResult<Option<()>>
         } else {
-            Err(Error::Custom("Missing provides attribute".to_string()))
+            rpc_custom_error("Missing provides attribute")
         }
     }
 
     async fn callback_response(
         params: Params<'static>,
         context: Arc<RpcModuleContext>,
-    ) -> Result<Option<()>, Error> {
+    ) -> Result<Option<()>, JsonRpcErrorType> {
         info!("callback_response: method={}", context.method);
 
         let params_sequence = params.sequence();
@@ -574,12 +567,10 @@ impl ProviderRegistrar {
                 "callback_response: Could not resolve response payload type: context.method={}",
                 context.method
             );
-            return Err(Error::Custom(String::from(
-                "Couldn't resolve response payload type",
-            )));
+            return rpc_custom_error("Couldn't resolve response payload type");
         }
 
-        Ok(None)
+        Ok(None) as RpcResult<Option<()>>
     }
 
     pub fn register_methods(platform_state: &PlatformState, methods: &mut Methods) -> u32 {
