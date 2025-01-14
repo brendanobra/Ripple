@@ -15,8 +15,28 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-use jsonrpsee::core::Error;
+use crate::{JsonRpcErrorCode, JsonRpcErrorType};
 
-pub fn rpc_err(msg: impl Into<String>) -> Error {
-    Error::Custom(msg.into())
+pub fn rpc_err(msg: impl Into<String>) -> JsonRpcErrorType {
+    let msg_str = msg.into();
+    JsonRpcErrorType::owned(
+        JsonRpcErrorCode::InternalError.code(),
+        &msg_str,
+        None::<&str>,
+    )
+}
+pub fn rpc_error_with_code<T>(msg: impl Into<String>, code: i32) -> Result<T, JsonRpcErrorType> {
+    let msg_str = msg.into();
+    Err(JsonRpcErrorType::owned(code, &msg_str, None::<&str>))
+}
+/*
+Legacy function - used to minimally disrupt existing code
+*/
+pub fn rpc_custom_error<T>(msg: impl Into<String>) -> Result<T, JsonRpcErrorType> {
+    let msg_str = msg.into();
+    Err(JsonRpcErrorType::owned(
+        JsonRpcErrorCode::InternalError.code(),
+        &msg_str,
+        None::<&str>,
+    ))
 }

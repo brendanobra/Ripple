@@ -15,7 +15,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-use jsonrpsee::{core::RpcResult, types::error::CallError};
+use jsonrpsee::core::RpcResult;
 use ripple_sdk::{
     api::{
         device::device_peristence::{
@@ -35,7 +35,6 @@ use ripple_sdk::{
 use std::collections::HashMap;
 
 use crate::{
-    firebolt::rpc,
     processor::storage::storage_manager_utils::{
         storage_to_bool_rpc_result, storage_to_f32_rpc_result, storage_to_string_rpc_result,
         storage_to_u32_rpc_result,

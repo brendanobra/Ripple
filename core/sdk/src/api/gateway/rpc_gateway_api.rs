@@ -27,6 +27,8 @@ use crate::{
     },
     extn::extn_client_message::{ExtnPayload, ExtnPayloadProvider, ExtnRequest},
     framework::ripple_contract::RippleContract,
+    utils::rpc_utils,
+    JsonRpcErrorType,
 };
 
 #[derive(Debug, Clone, Default)]
@@ -254,13 +256,9 @@ impl JsonRpcApiError {
         JsonRpcApiResponse::error(self)
     }
 }
-impl From<JsonRpcApiError> for jsonrpsee::core::Error {
+impl From<JsonRpcApiError> for JsonRpcErrorType {
     fn from(error: JsonRpcApiError) -> Self {
-        jsonrpsee::core::Error::Call(jsonrpsee::types::error::CallError::Custom {
-            code: error.code,
-            message: error.message,
-            data: None,
-        })
+        JsonRpcErrorType::owned(error.code, &error.message, None::<&str>)
     }
 }
 impl From<JsonRpcApiError> for JsonRpcApiResponse {
