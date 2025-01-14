@@ -276,7 +276,7 @@ impl KeyboardImpl {
                 Some(res) => Ok(res),
                 None => no_value_returned_error("keyboard", "call_keyboard_provider"),
             },
-            Err(e) => invalid_device_response_error("keyboard", "call_keyboard_provider", e),
+            Err(e) => invalid_device_response_error("keyboard", "call_keyboard_provider", e.into()),
         }
     }
 
