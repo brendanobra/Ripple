@@ -20,7 +20,6 @@ use std::{
     sync::{Arc, RwLock},
 };
 
-use jsonrpsee::{tracing::debug, types::error::CallError};
 use ripple_sdk::{
     api::{
         context::RippleContextUpdateRequest,

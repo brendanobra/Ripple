@@ -63,6 +63,7 @@ openrpc_validator = { path = "../../openrpc_validator" }
 jsonrpsee = { version="0.24.7" , features = ["server", "http-client", "ws-client", "macros", "client-ws-transport-tls"] }
 jsonrpsee-ws-server = "0.15.1"
 jsonrpsee-types = "0.24.7"
+jsonrpsee-core = "0.24.7"
 
 [build-dependencies]
 vergen = "1"

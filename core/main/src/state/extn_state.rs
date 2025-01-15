@@ -21,7 +21,7 @@ use std::{
     thread,
 };
 
-use jsonrpsee::core::server::rpc_module::Methods;
+use jsonrpsee::Methods;
 use ripple_sdk::{
     api::{
         manifest::extn_manifest::{ExtnManifest, ExtnManifestEntry, ExtnSymbol},

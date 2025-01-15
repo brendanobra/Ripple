@@ -20,12 +20,15 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 use jsonrpsee::core::client::{Client, ClientT, SubscriptionClientT};
-use jsonrpsee::ws_client::WsClientBuilder;
 
-use jsonrpsee::core::{async_trait, error::Error as JsonRpcError};
-use jsonrpsee::types::ParamsSer;
+use jsonrpsee::core::async_trait;
+use jsonrpsee::rpc_params;
+use jsonrpsee::types::Params;
+use jsonrpsee::ws_client::WsClientBuilder;
+use jsonrpsee_core::client::error::Error;
 use regex::Regex;
 use ripple_sdk::serde_json::json;
+use ripple_sdk::JsonRpcErrorType;
 use ripple_sdk::{
     api::device::device_operator::DeviceResponseMessage,
     tokio::sync::mpsc::{self, Sender as MpscSender},
@@ -495,7 +498,7 @@ impl ThunderClientBuilder {
     async fn create_client(
         url: Url,
         thunder_connection_state: Arc<ThunderConnectionState>,
-    ) -> Result<Client, JsonRpcError> {
+    ) -> Result<Client, Error> {
         // Ensure that only one connection attempt is made at a time
         {
             let mut is_connecting = thunder_connection_state.conn_status_mutex.lock().await;
@@ -510,7 +513,7 @@ impl ThunderClientBuilder {
             }
         } // Lock is released here
 
-        let mut client: Result<Client, JsonRpcError>;
+        let mut client: Result<Client, Error>;
         let mut delay_duration = tokio::time::Duration::from_millis(50);
         loop {
             // get the token from the environment anew each time
@@ -722,7 +725,7 @@ pub struct ThunderNoParamRequest {
 
 impl ThunderNoParamRequest {
     async fn send_request(self: Box<Self>, client: &Client) -> Value {
-        let result = client.request(&self.method, None).await;
+        let result = client.request(&self.method, rpc_params!({})).await;
         if let Err(e) = result {
             error!("send_request: Error: e={}", e);
             return get_error_value(&e);
@@ -739,7 +742,7 @@ pub struct ThunderParamRequest<'a> {
 
 impl<'a> ThunderParamRequest<'a> {
     async fn send_request(self: Box<Self>, client: &Client) -> Value {
-        let result = client.request(self.method, self.get_params()).await;
+        let result = client.request(self.method, rpc_params!(self.params)).await;
         if let Err(e) = result {
             error!("send_request: Error: e={}", e);
             return get_error_value(&e);
@@ -747,20 +750,34 @@ impl<'a> ThunderParamRequest<'a> {
         result.unwrap()
     }
 
-    fn get_params(self) -> Option<ParamsSer<'a>> {
-        match self.json_based {
-            true => {
-                let r: Result<BTreeMap<&'a str, Value>, _> = serde_json::from_str(self.params);
-                match r {
-                    Ok(v_tree_map) => Some(ParamsSer::from(v_tree_map)),
-                    Err(_e) => None,
-                }
-            }
-            false => Some(ParamsSer::Array(
-                [Value::String(String::from(self.params))].to_vec(),
-            )),
-        }
-    }
+    // fn get_params(self) -> Params<'a> {
+
+    //     let f = Params::new(Some(self.params));
+    //     let f = rpc_params!(self.params);
+
+    //     if self.json_based {
+    //         let r: Result<BTreeMap<&'a str, Value>, _> = serde_json::from_str(self.params);
+    //         match r {
+    //             Ok(v_tree_map) => Some(Params::Map(v_tree_map)),
+    //             Err(_e) => None,
+    //         }
+    //     } else {
+    //         Some(f)
+    //     }
+
+    //     match self.json_based {
+    //         true => {
+    //             let r: Result<BTreeMap<&'a str, Value>, _> = serde_json::from_str(self.params);
+    //             match r {
+    //                 Ok(v_tree_map) => Some(ParamsSer::from(v_tree_map)),
+    //                 Err(_e) => None,
+    //             }
+    //         }
+    //         false => Some(ParamsSer::Array(
+    //             [Value::String(String::from(self.params))].to_vec(),
+    //         )),
+    //     }
+    // }
 }
 
 fn return_message(callback: OneShotSender<DeviceResponseMessage>, response: Value) {

@@ -17,16 +17,11 @@
 
 use futures::{future::join_all, StreamExt};
 use jsonrpsee::{
-    core::{
-        server::{
-            helpers::MethodSink,
-            resource_limiting::Resources,
-            rpc_module::{MethodKind, Methods},
-        },
-        TEN_MB_SIZE_BYTES,
-    },
-    types::{error::ErrorCode, Id, Params},
+    core::{server::types::ErrorCode, TEN_MB_SIZE_BYTES},
+    MethodCallback, MethodKind, MethodSink, Methods,
 };
+
+use jsonrpsee_types::{Id, Params};
 use ripple_sdk::{
     api::{
         firebolt::fb_metrics::Timer,
@@ -39,6 +34,7 @@ use ripple_sdk::{
     utils::error::RippleError,
 };
 use std::sync::{Arc, RwLock};
+use tokio_tungstenite::tungstenite::http::method;
 
 use crate::{
     firebolt::firebolt_gateway::JsonRpcMessage,
@@ -99,8 +95,8 @@ async fn resolve_route(
         None => {
             sink.send_error(id, ErrorCode::MethodNotFound.into());
         }
-        Some((name, method)) => match &method.inner() {
-            MethodKind::Sync(callback) => match method.claim(name, &resources) {
+        Some((name, method)) => match &method {
+            MethodCallback::Sync(callback) => match method.claim(name, &resources) {
                 Ok(_guard) => {
                     (callback)(id, params, &sink);
                 }
@@ -108,7 +104,7 @@ async fn resolve_route(
                     sink.send_error(id, ErrorCode::MethodNotFound.into());
                 }
             },
-            MethodKind::Async(callback) => match method.claim(name, &resources) {
+            MethodCallback::Async(callback) => match method.claim(name, &resources) {
                 Ok(guard) => {
                     let sink = sink.clone();
                     let id = id.into_owned();
@@ -123,9 +119,6 @@ async fn resolve_route(
                     sink.send_error(id, ErrorCode::MethodNotFound.into());
                 }
             },
-            _ => {
-                error!("Unsupported method call");
-            }
         },
     }
 
