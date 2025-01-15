@@ -96,7 +96,7 @@ async fn resolve_route(
             sink.send_error(id, ErrorCode::MethodNotFound.into());
         }
         Some((name, method)) => match &method {
-            MethodCallback::Sync(callback) => match method.claim(name, &resources) {
+            MethodCallback::Sync(callback) => match method(name, &resources) {
                 Ok(_guard) => {
                     (callback)(id, params, &sink);
                 }
