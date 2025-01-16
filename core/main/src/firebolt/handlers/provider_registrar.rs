@@ -28,9 +28,9 @@ use crate::{
 use jsonrpsee::{
     core::RpcResult,
     types::{Params, ParamsSequence},
-    Methods, RpcModule,
+    Extensions, Methods, RpcModule,
 };
-use jsonrpsee_ws_server::types::error::CallError;
+
 use ripple_sdk::{
     api::{
         firebolt::{
@@ -99,7 +99,7 @@ impl ProviderRegistrar {
             ProviderResponsePayloadType::ChallengeResponse => {
                 let external_provider_response: Result<
                     ExternalProviderResponse<ChallengeResponse>,
-                    CallError,
+                    JsonRpcErrorType,
                 > = params_sequence.next();
 
                 if let Ok(r) = external_provider_response {
@@ -112,7 +112,7 @@ impl ProviderRegistrar {
             ProviderResponsePayloadType::PinChallengeResponse => {
                 let external_provider_response: Result<
                     ExternalProviderResponse<PinChallengeResponse>,
-                    CallError,
+                    JsonRpcErrorType,
                 > = params_sequence.next();
 
                 if let Ok(r) = external_provider_response {
@@ -123,7 +123,7 @@ impl ProviderRegistrar {
                 }
             }
             ProviderResponsePayloadType::GenericError => {
-                let external_provider_error: Result<ExternalProviderError, CallError> =
+                let external_provider_error: Result<ExternalProviderError, JsonRpcErrorType> =
                     params_sequence.next();
                 match external_provider_error {
                     Ok(r) => {
@@ -138,7 +138,7 @@ impl ProviderRegistrar {
             ProviderResponsePayloadType::GenericResponse => {
                 let external_provider_response: Result<
                     ExternalProviderResponse<Option<Value>>,
-                    CallError,
+                    JsonRpcErrorType,
                 > = params_sequence.next();
 
                 if let Ok(r) = external_provider_response {
@@ -202,6 +202,7 @@ impl ProviderRegistrar {
     async fn callback_app_event_listener(
         params: Params<'static>,
         context: Arc<RpcModuleContext>,
+        extensions: Extensions,
     ) -> Result<ListenerResponse, JsonRpcErrorType> {
         info!("callback_app_event_listener: method={}", context.method);
 
@@ -240,6 +241,7 @@ impl ProviderRegistrar {
     async fn callback_register_provider(
         params: Params<'static>,
         context: Arc<RpcModuleContext>,
+        extensions: Extensions,
     ) -> Result<ListenerResponse, JsonRpcErrorType> {
         info!("callback_register_provider: method={}", context.method);
 
@@ -286,6 +288,7 @@ impl ProviderRegistrar {
     async fn callback_app_event_emitter(
         params: Params<'static>,
         context: Arc<RpcModuleContext>,
+        extensions: Extensions,
     ) -> Result<Option<()>, JsonRpcErrorType> {
         info!(
             "callback_app_event_emitter: method={}, event={:?}",
@@ -358,6 +361,7 @@ impl ProviderRegistrar {
     async fn callback_error(
         params: Params<'static>,
         context: Arc<RpcModuleContext>,
+        extensions: Extensions,
     ) -> Result<Option<()>, JsonRpcErrorType> {
         info!("callback_error: method={}", context.method);
         let params_sequence = params.sequence();
@@ -388,6 +392,7 @@ impl ProviderRegistrar {
     async fn callback_provider_invoker(
         params: Params<'static>,
         context: Arc<RpcModuleContext>,
+        extensions: Extensions,
     ) -> Result<Value, JsonRpcErrorType> {
         let mut params_sequence = params.sequence();
         let call_context: CallContext = match params_sequence.next() {
@@ -509,6 +514,7 @@ impl ProviderRegistrar {
     async fn callback_focus(
         params: Params<'static>,
         context: Arc<RpcModuleContext>,
+        extensions: Extensions,
     ) -> Result<Option<()>, JsonRpcErrorType> {
         info!("callback_focus: method={}", context.method);
 
@@ -548,6 +554,7 @@ impl ProviderRegistrar {
     async fn callback_response(
         params: Params<'static>,
         context: Arc<RpcModuleContext>,
+        extensions: Extensions,
     ) -> Result<Option<()>, JsonRpcErrorType> {
         info!("callback_response: method={}", context.method);
 
