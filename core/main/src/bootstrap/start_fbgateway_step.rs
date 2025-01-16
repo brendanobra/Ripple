@@ -41,7 +41,8 @@ use crate::{
     service::telemetry_builder::TelemetryBuilder,
     state::{bootstrap_state::BootstrapState, platform_state::PlatformState},
 };
-use jsonrpsee::core::{async_trait, server::rpc_module::Methods};
+use jsonrpsee::core::async_trait;
+use jsonrpsee::Methods;
 use ripple_sdk::log::{debug, info};
 use ripple_sdk::{framework::bootstrap::Bootstep, utils::error::RippleError};
 pub struct FireboltGatewayStep;

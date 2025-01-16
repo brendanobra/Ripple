@@ -97,36 +97,36 @@ async fn resolve_route(
         }
     }
 
-    // match methods.method_with_name(&req.method) {
-    //     None => {
-    //         sink.send_error(id, ErrorCode::MethodNotFound.into());
-    //     }
-    //     Some((name, method)) => match &method {
-    //         MethodCallback::Sync(callback) => match method(name, &resources) {
-    //             Ok(_guard) => {
-    //                 (callback)(id, params, &sink);
-    //             }
-    //             Err(_) => {
-    //                 sink.send_error(id, ErrorCode::MethodNotFound.into());
-    //             }
-    //         },
-    //         MethodCallback::Async(callback) => match method.claim(name, &resources) {
-    //             Ok(guard) => {
-    //                 let sink = sink.clone();
-    //                 let id = id.into_owned();
-    //                 let params = params.into_owned();
-    //                 let fut = async move {
-    //                     (callback)(id, params, sink, 1, Some(guard)).await;
-    //                 };
-    //                 method_executors.push(fut);
-    //             }
-    //             Err(e) => {
-    //                 error!("{:?}", e);
-    //                 sink.send_error(id, ErrorCode::MethodNotFound.into());
-    //             }
-    //         },
-    //     },
-    // }
+    match methods.method_with_name(&req.method) {
+        None => {
+            sink.send_error(id, ErrorCode::MethodNotFound.into());
+        }
+        Some((name, method)) => match &method {
+            MethodCallback::Sync(callback) => match method(name, &resources) {
+                Ok(_guard) => {
+                    (callback)(id, params, &sink);
+                }
+                Err(_) => {
+                    sink.send_error(id, ErrorCode::MethodNotFound.into());
+                }
+            },
+            MethodCallback::Async(callback) => match method.claim(name, &resources) {
+                Ok(guard) => {
+                    let sink = sink.clone();
+                    let id = id.into_owned();
+                    let params = params.into_owned();
+                    let fut = async move {
+                        (callback)(id, params, sink, 1, Some(guard)).await;
+                    };
+                    method_executors.push(fut);
+                }
+                Err(e) => {
+                    error!("{:?}", e);
+                    sink.send_error(id, ErrorCode::MethodNotFound.into());
+                }
+            },
+        },
+    }
 
     let f = sink_rx.next().await;
 

@@ -32,7 +32,7 @@ use crate::state::{
     bootstrap_state::{BootstrapState, ChannelsState},
     extn_state::PreLoadedExtnChannel,
 };
-use jsonrpsee::core::server::rpc_module::Methods;
+use jsonrpsee::Methods;
 
 /// Actual bootstep which loads the extensions into the ExtnState.
 /// Currently this step loads
