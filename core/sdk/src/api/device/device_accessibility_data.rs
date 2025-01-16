@@ -17,7 +17,7 @@
 
 use serde::{Deserialize, Serialize, Serializer};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ClosedCaptionsSettings {
     pub enabled: bool,
@@ -43,7 +43,7 @@ pub const FONT_EDGE_LIST: [&str; 6] = [
     "drop_shadow_right",
 ];
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ClosedCaptionStyle {
     #[serde(skip_serializing_if = "Option::is_none")]

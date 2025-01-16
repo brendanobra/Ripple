@@ -48,7 +48,7 @@ use ripple_sdk::{
     },
     extn::extn_client_message::ExtnResponse,
     log::error,
-    utils::rpc_utils::{rpc_custom_error, rpc_error_with_code},
+    utils::rpc_utils::{rpc_custom_error_result, rpc_error_with_code, rpc_error_with_code_result},
 };
 use serde_json::{json, Value};
 
@@ -130,10 +130,10 @@ pub async fn voice_guidance_settings_enabled(state: &PlatformState) -> RpcResult
             if let Some(ExtnResponse::Boolean(v)) = value.payload.extract() {
                 Ok(v)
             } else {
-                rpc_custom_error("voice guidance enabled failed with an extension error")
+                rpc_custom_error_result("voice guidance enabled failed with an extension error")
             }
         }
-        Err(e) => rpc_custom_error(format!(
+        Err(e) => rpc_custom_error_result(format!(
             "Voice guidance enabled failed, due to an extension failure: {}",
             e
         )),
@@ -150,10 +150,12 @@ pub async fn voice_guidance_settings_speed(state: &PlatformState) -> RpcResult<f
             if let Some(ExtnResponse::Float(v)) = value.payload.extract() {
                 Ok(v)
             } else {
-                rpc_custom_error("Voice guidance enabled error. invalid response from thunder")
+                rpc_custom_error_result(
+                    "Voice guidance enabled error. invalid response from thunder",
+                )
             }
         }
-        Err(e) => rpc_custom_error(format!("Voice guidance enabled error response={}", e)),
+        Err(e) => rpc_custom_error_result(format!("Voice guidance enabled error response={}", e)),
     }
 }
 
@@ -244,7 +246,7 @@ impl VoiceguidanceServer for VoiceguidanceImpl {
         if resp.is_ok() {
             Ok(())
         } else {
-            rpc_error_with_code(
+            rpc_error_with_code_result(
                 "Invalid Repsponse for voice guidance set enabled",
                 JSON_RPC_STANDARD_ERROR_INVALID_PARAMS,
             )
@@ -302,13 +304,13 @@ impl VoiceguidanceServer for VoiceguidanceImpl {
                 .await;
                 Ok(())
             } else {
-                rpc_error_with_code(
+                rpc_error_with_code_result(
                     "Invalid Repsponse for set speed",
                     JSON_RPC_STANDARD_ERROR_INVALID_PARAMS,
                 )
             }
         } else {
-            rpc_error_with_code(
+            rpc_error_with_code_result(
                 "Invalid Value for set speed",
                 JSON_RPC_STANDARD_ERROR_INVALID_PARAMS,
             )

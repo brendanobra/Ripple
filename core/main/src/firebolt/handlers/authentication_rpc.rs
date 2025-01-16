@@ -38,7 +38,9 @@ use ripple_sdk::{
         session::{SessionTokenRequest, TokenContext, TokenType},
     },
     extn::extn_client_message::ExtnResponse,
-    utils::rpc_utils::{rpc_custom_error, rpc_error_with_code},
+    utils::rpc_utils::{
+        rpc_custom_error, rpc_custom_error_result, rpc_error_with_code, rpc_error_with_code_result,
+    },
     JsonRpcErrorType,
 };
 
@@ -73,7 +75,7 @@ impl AuthenticationServer for AuthenticationImpl {
                 if supported_caps.contains(&cap) {
                     self.token(TokenType::Platform, ctx).await
                 } else {
-                    return rpc_error_with_code(
+                    return rpc_error_with_code_result(
                         format!("{} is not supported", cap.as_str()),
                         CAPABILITY_NOT_SUPPORTED,
                     );
@@ -93,7 +95,7 @@ impl AuthenticationServer for AuthenticationImpl {
                 if supported_caps.contains(&cap) {
                     self.token(TokenType::Distributor, ctx).await
                 } else {
-                    return rpc_error_with_code(
+                    return rpc_error_with_code_result(
                         format!("{} is not supported", cap.as_str()),
                         CAPABILITY_NOT_SUPPORTED,
                     );
@@ -129,7 +131,7 @@ impl AuthenticationServer for AuthenticationImpl {
 
 impl AuthenticationImpl {
     fn send_dist_token_not_supported() -> JsonRpcErrorType {
-        rpc_error_with_code(
+        rpc_error_with_code::<()>(
             "capability xrn:firebolt:capability:token:session is not supported",
             CAPABILITY_NOT_SUPPORTED,
         )
@@ -154,7 +156,7 @@ impl AuthenticationImpl {
 
         let dist_session = match self.platform_state.session_state.get_account_session() {
             Some(session) => session,
-            None => return rpc_custom_error("Account session is not available"),
+            None => return rpc_custom_error_result("Account session is not available"),
         };
 
         let resp = match &token_type {
@@ -210,13 +212,13 @@ impl AuthenticationImpl {
                     token_type: None,
                 }),
 
-                e => rpc_custom_error(format!(
+                e => rpc_custom_error_result(format!(
                     "unknown error getting {:?} token {:?}",
                     token_type, e
                 )),
             },
 
-            Err(e) => rpc_custom_error(format!(
+            Err(e) => rpc_custom_error_result(format!(
                 "Ripple Error: {} getting {:?} token",
                 e, token_type
             )),
@@ -245,13 +247,15 @@ impl AuthenticationImpl {
                     expires_in: None,
                     token_type: None,
                 }),
-                e => rpc_custom_error(format!(
+                e => rpc_custom_error_result(format!(
                     "unknown error getting {:?} token {:?}",
                     token_type, e
                 )),
             },
 
-            Err(_e) => rpc_custom_error(format!("Ripple Error getting {:?} token", token_type)),
+            Err(_e) => {
+                rpc_custom_error_result(format!("Ripple Error getting {:?} token", token_type))
+            }
         }
     }
 }

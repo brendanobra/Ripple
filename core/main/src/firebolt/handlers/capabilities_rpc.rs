@@ -26,7 +26,9 @@ use crate::{
 use jsonrpsee::{core::RpcResult, proc_macros::rpc, RpcModule};
 
 use ripple_sdk::{
-    api::gateway::rpc_error, async_trait::async_trait, utils::rpc_utils::rpc_custom_error,
+    api::gateway::rpc_error,
+    async_trait::async_trait,
+    utils::rpc_utils::{rpc_custom_error, rpc_custom_error_result},
 };
 use ripple_sdk::{
     api::{
@@ -176,7 +178,7 @@ impl CapabilityServer for CapabilityImpl {
             Ok(grant) => Ok(Some(grant)),
             Err(RippleError::Permission(DenyReason::Ungranted)) => Ok(None),
             Err(RippleError::Permission(DenyReason::GrantDenied)) => Ok(Some(false)),
-            Err(e) => rpc_custom_error(format!("Unable to get user grants: {}", e)),
+            Err(e) => rpc_custom_error_result(format!("Unable to get user grants: {}", e)),
         }
     }
 
@@ -186,13 +188,13 @@ impl CapabilityServer for CapabilityImpl {
         request: CapInfoRpcRequest,
     ) -> RpcResult<Vec<CapabilityInfo>> {
         if request.capabilities.is_empty() {
-            return rpc_custom_error("Error invalid input capabilities are empty");
+            return rpc_custom_error_result("Error invalid input capabilities are empty");
         }
 
         if let Ok(a) = CapState::get_cap_info(&self.state, ctx, &request.capabilities).await {
             Ok(a)
         } else {
-            rpc_custom_error("Error retreiving Capability Info TBD")
+            rpc_custom_error_result("Error retreiving Capability Info TBD")
         }
     }
 
@@ -274,7 +276,7 @@ impl CapabilityServer for CapabilityImpl {
             cap_info.extend(a);
             Ok(cap_info)
         } else {
-            rpc_custom_error("Error retreiving Capability Info")
+            rpc_custom_error_result("Error retreiving Capability Info")
         }
     }
 }

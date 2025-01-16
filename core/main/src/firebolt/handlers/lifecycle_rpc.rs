@@ -18,7 +18,7 @@
 use jsonrpsee::core::RpcResult;
 use jsonrpsee::proc_macros::rpc;
 use jsonrpsee::{core::async_trait, RpcModule};
-use ripple_sdk::utils::rpc_utils::rpc_custom_error;
+use ripple_sdk::utils::rpc_utils::{rpc_custom_error, rpc_custom_error_result};
 use ripple_sdk::{
     api::{
         apps::{AppManagerResponse, AppMethod, AppRequest, AppResponse},
@@ -142,7 +142,7 @@ impl LifecycleServer for LifecycleImpl {
         if let AppManagerResponse::State(state) = resp? {
             return Ok(state.as_string().to_string());
         }
-        rpc_custom_error("Internal Error")
+        rpc_custom_error_result("Internal Error")
     }
 
     async fn close(&self, ctx: CallContext, request: CloseRequest) -> RpcResult<()> {

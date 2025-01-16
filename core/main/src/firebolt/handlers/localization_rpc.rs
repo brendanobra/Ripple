@@ -39,7 +39,7 @@ use ripple_sdk::{
         storage_property::{StorageProperty, KEY_POSTAL_CODE},
     },
     extn::extn_client_message::ExtnResponse,
-    utils::rpc_utils::rpc_custom_error,
+    utils::rpc_utils::rpc_custom_error_result,
 };
 
 use crate::{
@@ -235,9 +235,7 @@ impl LocalizationServer for LocalizationImpl {
     async fn postal_code(&self, ctx: CallContext) -> RpcResult<String> {
         match LocalizationImpl::postal_code(&self.platform_state, ctx.app_id).await {
             Some(postal_code) => Ok(postal_code),
-            None => Err(StorageManager::get_firebolt_error(
-                &StorageProperty::PostalCode,
-            )),
+            None => StorageManager::get_firebolt_error(&StorageProperty::PostalCode),
         }
     }
 
@@ -381,7 +379,7 @@ impl LocalizationServer for LocalizationImpl {
                     "timezone_set: Unsupported timezone: tz={}",
                     set_request.value
                 );
-                return rpc_custom_error(&format!(
+                return rpc_custom_error_result(&format!(
                     "timezone_set: Unsupported timezone: tz={}",
                     set_request.value
                 ));

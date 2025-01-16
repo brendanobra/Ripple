@@ -28,7 +28,7 @@ use ripple_sdk::{
     },
     log::error,
     tokio::sync::oneshot,
-    utils::rpc_utils::rpc_custom_error,
+    utils::rpc_utils::rpc_custom_error_result,
 };
 use serde::{Deserialize, Serialize};
 
@@ -114,14 +114,16 @@ impl ParametersServer for ParametersImpl {
                     "Unexpected response from app manager in  parameters.initialization: {:?}",
                     other
                 );
-                return rpc_custom_error("Internal Error: Unexpected response from app manager");
+                return rpc_custom_error_result(
+                    "Internal Error: Unexpected response from app manager",
+                );
             }
             Err(app_error) => {
                 error!(
                     "AppManager returned an error: {:?} in parameters.initialization",
                     app_error
                 );
-                return rpc_custom_error("Internal Error: AppManager encountered an error");
+                return rpc_custom_error_result("Internal Error: AppManager encountered an error");
             }
         }
     }

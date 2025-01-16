@@ -49,7 +49,10 @@ use ripple_sdk::{
     },
     extn::extn_client_message::{ExtnMessage, ExtnResponse},
     log::error,
-    utils::{error::RippleError, rpc_utils::rpc_custom_error},
+    utils::{
+        error::RippleError,
+        rpc_utils::{rpc_custom_error, rpc_custom_error_result},
+    },
     JsonRpcErrorType,
 };
 use serde_json::json;
@@ -422,7 +425,7 @@ impl DeviceServer for DeviceImpl {
         if let Some(session) = self.state.session_state.get_account_session() {
             Ok(session.id)
         } else {
-            rpc_custom_error("Account session is not available")
+            rpc_custom_error_result("Account session is not available")
         }
     }
 }

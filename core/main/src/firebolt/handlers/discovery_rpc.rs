@@ -53,6 +53,7 @@ use ripple_sdk::{
     extn::extn_client_message::ExtnResponse,
     log::{debug, error, info},
     tokio::{sync::oneshot, time::timeout},
+    utils::rpc_utils::rpc_custom_error_result,
 };
 use ripple_sdk::{
     api::{
@@ -67,7 +68,7 @@ use ripple_sdk::{
         gateway::rpc_gateway_api::CallContext,
         manifest::device_manifest::IntentValidation,
     },
-    utils::rpc_utils::{rpc_custom_error, rpc_error_with_code},
+    utils::rpc_utils::rpc_error_with_code_result,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -430,7 +431,7 @@ impl DiscoveryServer for DiscoveryImpl {
         if sign_in_resp.is_ok() && resp.is_ok() {
             sign_in_resp = Ok(true);
         } else {
-            sign_in_resp = Err(rpc_downstream_service_err("Received error from Server"));
+            sign_in_resp = rpc_downstream_service_err("Received error from Server");
         }
         sign_in_resp
     }
@@ -543,13 +544,13 @@ impl DiscoveryServer for DiscoveryImpl {
             app_defaults_configuration.get_reserved_application_id(&request.app_id)
         {
             if reserved_app_id.is_empty() {
-                return Err(rpc_navigate_reserved_app_err(
+                return rpc_navigate_reserved_app_err(
                     format!(
                         "Discovery.launch: Cannot find a valid reserved app id for {}",
                         request.app_id
                     )
                     .as_str(),
-                ));
+                );
             }
 
             // Not validating the intent, pass-through to app as is.
@@ -558,10 +559,10 @@ impl DiscoveryServer for DiscoveryImpl {
                 reserved_app_id.to_string(),
                 DISCOVERY_EVENT_ON_NAVIGATE_TO,
             ) {
-                return Err(rpc_navigate_reserved_app_err(
+                return rpc_navigate_reserved_app_err(
                     format!("Discovery.launch: reserved app id {} is not registered for discovery.onNavigateTo event",
                     reserved_app_id).as_str(),
-                ));
+                );
             }
             // emit EVENT_ON_NAVIGATE_TO to the reserved app.
             AppEvents::emit_to_app(
@@ -592,7 +593,7 @@ impl DiscoveryServer for DiscoveryImpl {
         {
             return Ok(true);
         }
-        rpc_custom_error("Discovery.launch failure: app request failed or timed out")
+        rpc_custom_error_result("Discovery.launch failure: app request failed or timed out")
     }
 
     async fn on_navigate_to(
@@ -656,10 +657,10 @@ impl DiscoveryServer for DiscoveryImpl {
             session_rx,
         )
         .await
-        .map_err(|_| rpc_custom_error("Didn't receive response within timeout"))?;
+        .map_err(|_| rpc_custom_error_result("Didn't receive response within timeout"))?;
         /*handle channel response*/
         let result = channel_result.map_err(|e| {
-            rpc_custom_error(format!(
+            rpc_custom_error_result(format!(
                 "Error returned from entity response provider:{}",
                 e
             ))
@@ -669,7 +670,7 @@ impl DiscoveryServer for DiscoveryImpl {
                 provider: entity_request.provider.to_owned(),
                 data: res,
             }),
-            None => rpc_custom_error("Invalid or empty response from provider"),
+            None => rpc_custom_error_result("Invalid or empty response from provider"),
         }
     }
     async fn handle_entity_info_result(
@@ -735,10 +736,10 @@ impl DiscoveryServer for DiscoveryImpl {
             session_rx,
         )
         .await
-        .map_err(|_| rpc_custom_error("Didn't receive response within time"))?;
+        .map_err(|_| rpc_custom_error_result::<()>("Didn't receive response within time"))?;
         /*handle channel response*/
         let result = channel_result.map_err(|e| {
-            rpc_custom_error(format!(
+            rpc_custom_error_result::<()>(format!(
                 "Error returned from entity response provider: {}",
                 e
             ))
@@ -748,7 +749,7 @@ impl DiscoveryServer for DiscoveryImpl {
                 provider: entity_request.provider.to_owned(),
                 data: res,
             }),
-            None => rpc_custom_error("Empty or missing response from provider"),
+            None => rpc_custom_error_result("Empty or missing response from provider"),
         }
     }
     async fn handle_purchased_content_result(
@@ -857,7 +858,7 @@ pub async fn validate_navigation_intent(
             let request_intent = serde_json::to_string(&intent).unwrap_or_default();
             if let Err(err) = serde_json::from_str::<NavigationIntentStrict>(&request_intent) {
                 if intent_validation_config == IntentValidation::Fail {
-                    return rpc_error_with_code(
+                    return rpc_error_with_code_result(
                         format!("{:?} ", err),
                         JSON_RPC_STANDARD_ERROR_INVALID_PARAMS,
                     );

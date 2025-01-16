@@ -36,7 +36,7 @@ use ripple_sdk::{
     },
     chrono::{DateTime, Utc},
     extn::extn_client_message::ExtnResponse,
-    log::{error, warn},
+    log::{debug, error, warn},
     utils::{error::RippleError, rpc_utils::rpc_error_with_code},
 };
 

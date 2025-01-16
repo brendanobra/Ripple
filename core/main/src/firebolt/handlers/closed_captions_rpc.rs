@@ -53,7 +53,7 @@ use ripple_sdk::{
             EVENT_CLOSED_CAPTIONS_WINDOW_COLOR, EVENT_CLOSED_CAPTIONS_WINDOW_OPACITY,
         },
     },
-    utils::rpc_utils::rpc_custom_error,
+    utils::rpc_utils::rpc_custom_error_result,
 };
 use serde_json::Value;
 
@@ -396,7 +396,7 @@ impl ClosedcaptionsImpl {
     ) -> RpcResult<()> {
         if let Some(value) = request.value {
             if value > 100 {
-                return rpc_custom_error("Invalid Value for opacity".to_owned());
+                return rpc_custom_error_result("Invalid Value for opacity".to_owned());
             }
         }
 
@@ -478,7 +478,7 @@ impl ClosedcaptionsServer for ClosedcaptionsImpl {
         if ClosedcaptionsImpl::is_font_family_supported(request.value.clone()) {
             ClosedcaptionsImpl::set_string(&self.state, SP::ClosedCaptionsFontFamily, request).await
         } else {
-            return rpc_custom_error("Font family not supported".to_owned());
+            return rpc_custom_error_result("Font family not supported".to_owned());
         }
     }
 
@@ -501,7 +501,7 @@ impl ClosedcaptionsServer for ClosedcaptionsImpl {
     ) -> RpcResult<()> {
         if let Some(value) = request.value {
             if !(0.5..=2.0).contains(&value) {
-                return rpc_custom_error("Invalid Value for set font".to_owned());
+                return rpc_custom_error_result("Invalid Value for set font".to_owned());
             }
         }
 
@@ -548,7 +548,7 @@ impl ClosedcaptionsServer for ClosedcaptionsImpl {
         if ClosedcaptionsImpl::is_font_edge_supported(request.value.clone()) {
             ClosedcaptionsImpl::set_string(&self.state, SP::ClosedCaptionsFontEdge, request).await
         } else {
-            rpc_custom_error("Font edge not supported")
+            rpc_custom_error_result("Font edge not supported")
         }
     }
 

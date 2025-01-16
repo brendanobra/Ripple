@@ -28,7 +28,7 @@ use crate::{
 use jsonrpsee::{
     core::RpcResult,
     types::{Params, ParamsSequence},
-    RpcModule,
+    Methods, RpcModule,
 };
 use jsonrpsee_ws_server::types::error::CallError;
 use ripple_sdk::{
@@ -47,7 +47,7 @@ use ripple_sdk::{
     },
     log::{error, info},
     tokio::{sync::oneshot, time::timeout},
-    utils::rpc_utils::{rpc_custom_error, rpc_error_with_code},
+    utils::rpc_utils::{rpc_custom_error_result, rpc_error_with_code, rpc_error_with_code_result},
     JsonRpcErrorType,
 };
 use serde_json::{Map, Value};
@@ -211,7 +211,7 @@ impl ProviderRegistrar {
             Ok(context) => context,
             Err(e) => {
                 error!("callback_app_event_listener: Error: {:?}", e);
-                return rpc_custom_error("Missing call context");
+                return rpc_custom_error_result("Missing call context");
             }
         };
 
@@ -219,7 +219,7 @@ impl ProviderRegistrar {
             Ok(r) => r,
             Err(e) => {
                 error!("callback_app_event_listener: Error: {:?}", e);
-                return rpc_custom_error("Missing request");
+                return rpc_custom_error_result("Missing request");
             }
         };
 
@@ -250,7 +250,7 @@ impl ProviderRegistrar {
                 Ok(context) => context,
                 Err(e) => {
                     error!("callback_register_provider: Error: {:?}", e);
-                    return rpc_custom_error("Missing call context");
+                    return rpc_custom_error_result("Missing call context");
                 }
             };
 
@@ -258,7 +258,7 @@ impl ProviderRegistrar {
                 Ok(r) => r,
                 Err(e) => {
                     error!("callback_register_provider: Error: {:?}", e);
-                    return rpc_custom_error("Missing request");
+                    return rpc_custom_error_result("Missing request");
                 }
             };
 
@@ -279,7 +279,7 @@ impl ProviderRegistrar {
                 event: context.method.clone(),
             })
         } else {
-            rpc_custom_error("Missing provides attribute")
+            rpc_custom_error_result("Missing provides attribute")
         }
     }
 
@@ -299,7 +299,7 @@ impl ProviderRegistrar {
                 Ok(r) => r,
                 Err(e) => {
                     error!("callback_app_event_emitter: Error: {:?}", e);
-                    return rpc_custom_error("Missing event_data");
+                    return rpc_custom_error_result("Missing event_data");
                 }
             };
 
@@ -349,7 +349,7 @@ impl ProviderRegistrar {
             )
             .await;
         } else {
-            return rpc_custom_error("Unexpected schema configuration");
+            return rpc_custom_error_result("Unexpected schema configuration");
         }
 
         Ok(None)
@@ -379,7 +379,7 @@ impl ProviderRegistrar {
                 "callback_error: NO Valid ATTRIBUTES: context.method={}",
                 context.method
             );
-            return rpc_custom_error("Missing provider attributes");
+            return rpc_custom_error_result("Missing provider attributes");
         }
 
         Ok(None) as RpcResult<Option<()>>
@@ -394,7 +394,7 @@ impl ProviderRegistrar {
             Ok(context) => context,
             Err(e) => {
                 error!("callback_provider_invoker: Error: {:?}", e);
-                return rpc_custom_error("Missing call context");
+                return rpc_custom_error_result("Missing call context");
             }
         };
 
@@ -402,7 +402,7 @@ impl ProviderRegistrar {
             Ok(p) => p,
             Err(e) => {
                 error!("callback_provider_invoker: Error: {:?}", e);
-                return rpc_custom_error("Missing params");
+                return rpc_custom_error_result("Missing params");
             }
         };
 
@@ -487,23 +487,23 @@ impl ProviderRegistrar {
                                     }
                                 }
                                 ProviderResponsePayload::GenericError(e) => {
-                                    return rpc_error_with_code(&e.message, e.code);
+                                    return rpc_error_with_code_result(&e.message, e.code);
                                 }
                                 _ => {
                                     return Ok(provider_response_payload.as_value());
                                 }
                             }
                         } else {
-                            return rpc_custom_error("Unknown error returned from provider");
+                            return rpc_custom_error_result("Unknown error returned from provider");
                         }
                     } else {
-                        return rpc_custom_error("Provider response timeout");
+                        return rpc_custom_error_result("Provider response timeout");
                     }
                 }
             }
         }
 
-        rpc_custom_error("Unexpected schema configuration")
+        rpc_custom_error_result("Unexpected schema configuration")
     }
 
     async fn callback_focus(
@@ -519,7 +519,7 @@ impl ProviderRegistrar {
                 Ok(context) => context,
                 Err(e) => {
                     error!("callback_focus: Error: {:?}", e);
-                    return rpc_custom_error("Missing call context");
+                    return rpc_custom_error_result("Missing call context");
                 }
             };
 
@@ -527,7 +527,7 @@ impl ProviderRegistrar {
                 Ok(r) => r,
                 Err(e) => {
                     error!("callback_focus: Error: {:?}", e);
-                    return rpc_custom_error("Missing request");
+                    return rpc_custom_error_result("Missing request");
                 }
             };
 
@@ -541,7 +541,7 @@ impl ProviderRegistrar {
 
             Ok(None) as RpcResult<Option<()>>
         } else {
-            rpc_custom_error("Missing provides attribute")
+            rpc_custom_error_result("Missing provides attribute")
         }
     }
 
@@ -567,7 +567,7 @@ impl ProviderRegistrar {
                 "callback_response: Could not resolve response payload type: context.method={}",
                 context.method
             );
-            return rpc_custom_error("Couldn't resolve response payload type");
+            return rpc_custom_error_result("Couldn't resolve response payload type");
         }
 
         Ok(None) as RpcResult<Option<()>>
@@ -662,7 +662,7 @@ mod tests {
     use crate::{state::openrpc_state::OpenRpcState, utils::test_utils};
 
     use super::*;
-    use jsonrpsee::core::server::rpc_module::Methods;
+    use jsonrpsee::Methods;
     use ripple_sdk::{tokio, Mockable};
 
     #[tokio::test]

@@ -16,12 +16,9 @@
 //
 
 use futures::{future::join_all, StreamExt};
-use jsonrpsee::{
-    core::{server::types::ErrorCode, TEN_MB_SIZE_BYTES},
-    MethodCallback, MethodKind, MethodSink, Methods,
-};
+use jsonrpsee::{core::TEN_MB_SIZE_BYTES, MethodCallback, MethodKind, MethodSink, Methods};
 
-use jsonrpsee_types::{Id, Params};
+use jsonrpsee_types::{ErrorCode, Id, Params};
 use ripple_sdk::{
     api::{
         firebolt::fb_metrics::Timer,
@@ -51,20 +48,18 @@ pub struct RpcRouter;
 #[derive(Debug, Clone)]
 pub struct RouterState {
     methods: Arc<RwLock<Methods>>,
-    resources: Resources,
 }
 
 impl RouterState {
     pub fn new() -> RouterState {
         RouterState {
             methods: Arc::new(RwLock::new(Methods::new())),
-            resources: Resources::default(),
         }
     }
 
     pub fn update_methods(&self, methods: Methods) {
         let mut methods_state = self.methods.write().unwrap();
-        let _ = methods_state.merge(methods.initialize_resources(&self.resources).unwrap());
+        let _ = methods_state.merge(methods);
     }
 
     fn get_methods(&self) -> Methods {
@@ -81,77 +76,89 @@ impl Default for RouterState {
 async fn resolve_route(
     platform_state: &mut PlatformState,
     methods: Methods,
-    resources: Resources,
     req: RpcRequest,
 ) -> Result<ApiMessage, RippleError> {
     info!("Routing {}", req.method);
     let id = Id::Number(req.ctx.call_id);
     let request_c = req.clone();
-    let (sink_tx, mut sink_rx) = futures_channel::mpsc::unbounded::<String>();
+    let (sink_tx, sink_rx) = ripple_sdk::tokio::sync::mpsc::channel::<String>(100);
+    let mut sink_rx = tokio_stream::wrappers::ReceiverStream::new(sink_rx);
     let sink = MethodSink::new_with_limit(sink_tx, TEN_MB_SIZE_BYTES);
-    let mut method_executors = Vec::new();
+    //let mut method_executors:Vec<_>  = Vec::new();
     let params = Params::new(Some(req.params_json.as_str()));
     match methods.method_with_name(&req.method) {
+        Some((method_name, method_callback)) => {
+            let sink = sink.clone();
+            let id = id.into_owned();
+            let params = params.into_owned();
+        }
         None => {
             sink.send_error(id, ErrorCode::MethodNotFound.into());
         }
-        Some((name, method)) => match &method {
-            MethodCallback::Sync(callback) => match method(name, &resources) {
-                Ok(_guard) => {
-                    (callback)(id, params, &sink);
-                }
-                Err(_) => {
-                    sink.send_error(id, ErrorCode::MethodNotFound.into());
-                }
-            },
-            MethodCallback::Async(callback) => match method.claim(name, &resources) {
-                Ok(guard) => {
-                    let sink = sink.clone();
-                    let id = id.into_owned();
-                    let params = params.into_owned();
-                    let fut = async move {
-                        (callback)(id, params, sink, 1, Some(guard)).await;
-                    };
-                    method_executors.push(fut);
-                }
-                Err(e) => {
-                    error!("{:?}", e);
-                    sink.send_error(id, ErrorCode::MethodNotFound.into());
-                }
-            },
-        },
     }
 
-    join_all(method_executors).await;
-    if let Some(r) = sink_rx.next().await {
-        let rpc_header = get_rpc_header(&req);
-        let protocol = req.ctx.protocol.clone();
-        let request_id = req.ctx.request_id;
+    // match methods.method_with_name(&req.method) {
+    //     None => {
+    //         sink.send_error(id, ErrorCode::MethodNotFound.into());
+    //     }
+    //     Some((name, method)) => match &method {
+    //         MethodCallback::Sync(callback) => match method(name, &resources) {
+    //             Ok(_guard) => {
+    //                 (callback)(id, params, &sink);
+    //             }
+    //             Err(_) => {
+    //                 sink.send_error(id, ErrorCode::MethodNotFound.into());
+    //             }
+    //         },
+    //         MethodCallback::Async(callback) => match method.claim(name, &resources) {
+    //             Ok(guard) => {
+    //                 let sink = sink.clone();
+    //                 let id = id.into_owned();
+    //                 let params = params.into_owned();
+    //                 let fut = async move {
+    //                     (callback)(id, params, sink, 1, Some(guard)).await;
+    //                 };
+    //                 method_executors.push(fut);
+    //             }
+    //             Err(e) => {
+    //                 error!("{:?}", e);
+    //                 sink.send_error(id, ErrorCode::MethodNotFound.into());
+    //             }
+    //         },
+    //     },
+    // }
 
-        let status_code = if let Ok(r) = serde_json::from_str::<JsonRpcMessage>(&r) {
-            if let Some(ec) = r.error {
-                ec.code
-            } else {
-                1
-            }
-        } else {
-            1
-        };
+    let f = sink_rx.next().await;
 
-        capture_stage(&platform_state.metrics, &request_c, "routing");
+    // if let Some(r) = sink_rx.next().await {
+    //     let rpc_header = get_rpc_header(&req);
+    //     let protocol = req.ctx.protocol.clone();
+    //     let request_id = req.ctx.request_id;
 
-        platform_state.metrics.update_api_stats_ref(
-            &request_id,
-            add_telemetry_status_code(&rpc_header, status_code.to_string().as_str()),
-        );
+    //     let status_code = if let Ok(r) = serde_json::from_str::<JsonRpcMessage>(&r) {
+    //         if let Some(ec) = r.error {
+    //             ec.code
+    //         } else {
+    //             1
+    //         }
+    //     } else {
+    //         1
+    //     };
 
-        let mut msg = ApiMessage::new(protocol, r, request_id.clone());
-        if let Some(api_stats) = platform_state.metrics.get_api_stats(&request_id) {
-            msg.stats = Some(api_stats);
-        }
+    //     capture_stage(&platform_state.metrics, &request_c, "routing");
 
-        return Ok(msg);
-    }
+    //     platform_state.metrics.update_api_stats_ref(
+    //         &request_id,
+    //         add_telemetry_status_code(&rpc_header, status_code.to_string().as_str()),
+    //     );
+
+    //     let mut msg = ApiMessage::new(protocol, r, request_id.clone());
+    //     if let Some(api_stats) = platform_state.metrics.get_api_stats(&request_id) {
+    //         msg.stats = Some(api_stats);
+    //     }
+
+    //     return Ok(msg);
+    // }
     Err(RippleError::InvalidOutput)
 }
 
@@ -163,15 +170,13 @@ impl RpcRouter {
         timer: Option<Timer>,
     ) {
         let methods = state.router_state.get_methods();
-        let resources = state.router_state.resources.clone();
-
         if let Some(overridden_method) = state.get_manifest().has_rpc_override_method(&req.method) {
             req.method = overridden_method;
         }
 
         tokio::spawn(async move {
             let start = Utc::now().timestamp_millis();
-            let resp = resolve_route(&mut state, methods, resources, req.clone()).await;
+            let resp = resolve_route(&mut state, methods, req.clone()).await;
 
             let status = match resp.clone() {
                 Ok(msg) => {
@@ -202,11 +207,11 @@ impl RpcRouter {
         extn_msg: ExtnMessage,
     ) {
         let methods = state.router_state.get_methods();
-        let resources = state.router_state.resources.clone();
+        //let resources = state.router_state.resources.clone();
 
         let mut platform_state = state.clone();
         tokio::spawn(async move {
-            if let Ok(msg) = resolve_route(&mut platform_state, methods, resources, req).await {
+            if let Ok(msg) = resolve_route(&mut platform_state, methods, req).await {
                 return_extn_response(msg, extn_msg);
             }
         });

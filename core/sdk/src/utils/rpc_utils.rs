@@ -25,18 +25,29 @@ pub fn rpc_err(msg: impl Into<String>) -> JsonRpcErrorType {
         None::<&str>,
     )
 }
-pub fn rpc_error_with_code<T>(msg: impl Into<String>, code: i32) -> Result<T, JsonRpcErrorType> {
+pub fn rpc_error_with_code<T>(msg: impl Into<String>, code: i32) -> JsonRpcErrorType {
     let msg_str = msg.into();
-    Err(JsonRpcErrorType::owned(code, &msg_str, None::<&str>))
+    JsonRpcErrorType::owned(code, &msg_str, None::<&str>)
+}
+
+pub fn rpc_error_with_code_result<T>(
+    msg: impl Into<String>,
+    code: i32,
+) -> Result<T, JsonRpcErrorType> {
+    let msg_str = msg.into();
+    Err(rpc_error_with_code::<T>(msg_str, code))
 }
 /*
 Legacy function - used to minimally disrupt existing code
 */
-pub fn rpc_custom_error<T>(msg: impl Into<String>) -> Result<T, JsonRpcErrorType> {
+pub fn rpc_custom_error_result<T>(msg: impl Into<String>) -> Result<T, JsonRpcErrorType> {
+    Err::<T, _>(rpc_custom_error::<T>(msg))
+}
+pub fn rpc_custom_error<T>(msg: impl Into<String>) -> JsonRpcErrorType {
     let msg_str = msg.into();
-    Err(JsonRpcErrorType::owned(
+    JsonRpcErrorType::owned(
         JsonRpcErrorCode::InternalError.code(),
         &msg_str,
         None::<&str>,
-    ))
+    )
 }

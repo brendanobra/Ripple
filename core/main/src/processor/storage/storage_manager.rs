@@ -29,10 +29,10 @@ use ripple_sdk::{
     log::trace,
     serde_json::{json, Value},
     tokio,
-    utils::{error::RippleError, rpc_utils::rpc_error_with_code},
+    utils::{error::RippleError, rpc_utils::rpc_error_with_code_result},
     JsonRpcErrorType,
 };
-use std::collections::HashMap;
+use std::{collections::HashMap, f64::consts::E};
 
 use crate::{
     processor::storage::storage_manager_utils::{
@@ -94,7 +94,7 @@ impl StorageManager {
                 Ok(value)
             }
             Ok(StorageManagerResponse::Default(value)) => Ok(value),
-            Err(_) => Err(StorageManager::get_firebolt_error(&property)),
+            Err(_) => StorageManager::get_firebolt_error(&property),
         }
     }
 
@@ -132,7 +132,7 @@ impl StorageManager {
                 Ok(())
             }
             Ok(StorageManagerResponse::Default(_)) => Ok(()),
-            Err(_) => Err(StorageManager::get_firebolt_error(&property)),
+            Err(_) => StorageManager::get_firebolt_error(&property),
         }
     }
 
@@ -147,7 +147,7 @@ impl StorageManager {
         .await
         {
             Ok(resp) => Ok(resp.as_value()),
-            Err(_) => Err(StorageManager::get_firebolt_error(&property)),
+            Err(_) => StorageManager::get_firebolt_error(&property),
         }
     }
 
@@ -157,11 +157,10 @@ impl StorageManager {
     ) -> RpcResult<String> {
         let namespace = data.namespace.clone();
         let scope = data.scope.clone();
-
-        StorageManager::get_string_from_namespace(state, namespace, data.key, scope)
-            .await
-            .map(|resp| resp.as_value())
-            .map_err(|_| StorageManager::get_firebolt_error_namespace(&data.namespace, data.key))
+        match StorageManager::get_string_from_namespace(state, namespace, data.key, scope).await {
+            Ok(resp) => Ok(resp.as_value()),
+            Err(_) => StorageManager::get_firebolt_error_namespace(&data.namespace, data.key),
+        }
     }
 
     pub async fn get_map(
@@ -174,9 +173,9 @@ impl StorageManager {
                     let the_map: HashMap<String, serde_json::Value> = raw_map;
                     Ok(the_map)
                 }
-                Err(_) => Err(StorageManager::get_firebolt_error(&property)),
+                Err(_) => StorageManager::get_firebolt_error(&property),
             },
-            Err(_) => Err(StorageManager::get_firebolt_error(&property)),
+            Err(_) => StorageManager::get_firebolt_error(&property),
         }
     }
 
@@ -199,7 +198,7 @@ impl StorageManager {
                 .await
                 {
                     Ok(_) => Ok(()),
-                    Err(_) => Err(StorageManager::get_firebolt_error(&property)),
+                    Err(_) => StorageManager::get_firebolt_error(&property),
                 }
             }
             Err(_) => {
@@ -214,7 +213,7 @@ impl StorageManager {
                 .await
                 {
                     Ok(_) => Ok(()),
-                    Err(_) => Err(StorageManager::get_firebolt_error(&property)),
+                    Err(_) => StorageManager::get_firebolt_error(&property),
                 }
             }
         }
@@ -238,10 +237,10 @@ impl StorageManager {
                 .await
                 {
                     Ok(_) => Ok(()),
-                    Err(_) => Err(StorageManager::get_firebolt_error(&property)),
+                    Err(_) => StorageManager::get_firebolt_error(&property),
                 }
             }
-            Err(_) => Err(StorageManager::get_firebolt_error(&property)),
+            Err(_) => StorageManager::get_firebolt_error(&property),
         }
     }
 
@@ -264,7 +263,7 @@ impl StorageManager {
         .await
         .is_err()
         {
-            Err(StorageManager::get_firebolt_error(&property))
+            StorageManager::get_firebolt_error(&property)
         } else {
             Ok(())
         }
@@ -291,9 +290,7 @@ impl StorageManager {
         .await
         .is_err()
         {
-            Err(StorageManager::get_firebolt_error_namespace(
-                &namespace, data.key,
-            ))
+            StorageManager::get_firebolt_error_namespace(&namespace, data.key)
         } else {
             Ok(())
         }
@@ -312,7 +309,7 @@ impl StorageManager {
         .await
         {
             Ok(resp) => Ok(resp.as_value()),
-            Err(_) => Err(StorageManager::get_firebolt_error(&property)),
+            Err(_) => StorageManager::get_firebolt_error(&property),
         }
     }
 
@@ -327,7 +324,7 @@ impl StorageManager {
             data.key,
         )
         .await
-        .map_or(Err(StorageManager::get_firebolt_error(&property)), |resp| {
+        .map_or(StorageManager::get_firebolt_error(&property), |resp| {
             Ok(resp.as_value())
         })
     }
@@ -351,7 +348,7 @@ impl StorageManager {
         .await
         .is_err()
         {
-            return Err(StorageManager::get_firebolt_error(&property));
+            return StorageManager::get_firebolt_error(&property);
         }
         Ok(())
     }
@@ -375,7 +372,7 @@ impl StorageManager {
         .await
         .is_err()
         {
-            return Err(StorageManager::get_firebolt_error(&property));
+            return StorageManager::get_firebolt_error(&property);
         }
         Ok(())
     }
@@ -540,7 +537,7 @@ impl StorageManager {
                     StorageManager::notify(state, Value::Null, data.event_names, None).await;
                     Ok(())
                 }
-                Err(_) => Err(StorageManager::get_firebolt_error(&property)),
+                Err(_) => StorageManager::get_firebolt_error(&property),
             }
         }
 
@@ -604,16 +601,19 @@ impl StorageManager {
         }
     }
 
-    pub fn get_firebolt_error(property: &StorageProperty) -> JsonRpcErrorType {
+    pub fn get_firebolt_error<T>(property: &StorageProperty) -> Result<T, JsonRpcErrorType> {
         let data = property.as_data();
-        rpc_error_with_code(
+        rpc_error_with_code_result(
             format!("{}.{} is not available", data.namespace, data.key),
             CAPABILITY_NOT_AVAILABLE,
         )
     }
 
-    pub fn get_firebolt_error_namespace(namespace: &String, key: &'static str) -> JsonRpcErrorType {
-        rpc_error_with_code(
+    pub fn get_firebolt_error_namespace<T>(
+        namespace: &String,
+        key: &'static str,
+    ) -> Result<T, JsonRpcErrorType> {
+        rpc_error_with_code_result(
             format!("{}.{} is not available", namespace, key),
             CAPABILITY_NOT_AVAILABLE,
         )
@@ -638,7 +638,7 @@ impl StorageManager {
         .await
         .is_err()
         {
-            return Err(StorageManager::get_firebolt_error(&property));
+            return StorageManager::get_firebolt_error(&property);
         }
         Ok(())
     }

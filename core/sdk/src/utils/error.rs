@@ -94,8 +94,8 @@ impl From<RippleError> for JsonRpcErrorType {
 #[cfg(all(test, feature = "rpc"))]
 mod tests {
     use super::*;
-    fn custom_error_match(expected: &str, error: jsonrpsee::core::Error) {
-        if let jsonrpsee::core::Error::Custom(e) = error {
+    fn custom_error_match(expected: &str, error: JsonRpcErrorType) {
+        if let JsonRpcErrorType(e) = error {
             assert_eq!(expected, e);
         } else {
             unreachable!("{}", " non error passed");

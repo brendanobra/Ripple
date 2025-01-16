@@ -27,7 +27,9 @@ use jsonrpsee::{
     proc_macros::rpc,
     RpcModule,
 };
-use ripple_sdk::utils::rpc_utils::{rpc_custom_error, rpc_error_with_code};
+use ripple_sdk::utils::rpc_utils::{
+    rpc_custom_error_result, rpc_error_with_code, rpc_error_with_code_result,
+};
 use ripple_sdk::{
     api::{
         device::device_peristence::SetBoolProperty,
@@ -510,7 +512,7 @@ impl PrivacyImpl {
         if let Some(prop) = property_opt {
             Self::get_bool(platform_state, prop).await
         } else {
-            rpc_error_with_code(
+            rpc_error_with_code_result(
                 format!("{} is not available", method),
                 CAPABILITY_NOT_AVAILABLE,
             )
@@ -527,15 +529,10 @@ impl PrivacyImpl {
             debug!("Resolved property: {:?}", prop);
             Self::set_bool(platform_state, prop, set_request.value).await
         } else {
-            rpc_error_with_code(
+            rpc_error_with_code_result(
                 format!("{} is not available", method),
                 CAPABILITY_NOT_AVAILABLE,
             )
-            // Err(jsonrpsee::core::Error::Call(CallError::Custom {
-            //     code: CAPABILITY_NOT_AVAILABLE,
-            //     message: format!("{} is not available", method),
-            //     data: None,
-            // }))
         }
     }
 
@@ -562,12 +559,12 @@ impl PrivacyImpl {
                     match extn_msg.payload {
                         ExtnPayload::Response(res) => match res {
                             ExtnResponse::Boolean(val) => RpcResult::Ok(val),
-                            _ => rpc_custom_error("Unable to fetch"),
+                            _ => rpc_custom_error_result("Unable to fetch"),
                         },
-                        _ => rpc_custom_error("Unexpected response received from Extn"),
+                        _ => rpc_custom_error_result("Unexpected response received from Extn"),
                     }
                 } else {
-                    rpc_custom_error("Error in getting response from Extn")
+                    rpc_custom_error_result("Error in getting response from Extn")
                 }
             }
             PrivacySettingsStorageType::Cloud => {
@@ -575,7 +572,7 @@ impl PrivacyImpl {
                     let setting = match property.as_privacy_setting() {
                         Some(s) => s,
                         None => {
-                            return rpc_custom_error("Property is not a privacy setting");
+                            return rpc_custom_error_result("Property is not a privacy setting");
                             // return Err(jsonrpsee::core::Error::Custom(
                             //     "Property is not a privacy setting".to_owned(),
                             // ))
@@ -590,9 +587,9 @@ impl PrivacyImpl {
                             return Ok(b);
                         }
                     }
-                    rpc_custom_error("PrivacySettingsStorageType::Cloud: Not Available")
+                    rpc_custom_error_result("PrivacySettingsStorageType::Cloud: Not Available")
                 } else {
-                    rpc_custom_error("Account session is not available")
+                    rpc_custom_error_result("Account session is not available")
                 }
             }
         }
@@ -618,12 +615,12 @@ impl PrivacyImpl {
                     match extn_msg.payload {
                         ExtnPayload::Response(res) => match res {
                             ExtnResponse::None(_) => RpcResult::Ok(()),
-                            _ => rpc_custom_error("Unable to fetch"),
+                            _ => rpc_custom_error_result("Unable to fetch"),
                         },
-                        _ => rpc_custom_error("Unexpected response received from Extn"),
+                        _ => rpc_custom_error_result("Unexpected response received from Extn"),
                     }
                 } else {
-                    rpc_custom_error("Error in getting response from Extn")
+                    rpc_custom_error_result("Error in getting response from Extn")
                 }
             }
             PrivacySettingsStorageType::Cloud | PrivacySettingsStorageType::Sync => {
@@ -646,7 +643,7 @@ impl PrivacyImpl {
                         }
                     }
                 }
-                rpc_custom_error(format!("{}: Not Available", privacy_settings_storage_type))
+                rpc_custom_error_result(format!("{}: Not Available", privacy_settings_storage_type))
             }
         }
     }
@@ -1072,9 +1069,9 @@ impl PrivacyServer for PrivacyImpl {
                             return Ok(b);
                         }
                     }
-                    rpc_custom_error("PrivacySettingsStorageType::Cloud: Not Available")
+                    rpc_custom_error_result("PrivacySettingsStorageType::Cloud: Not Available")
                 } else {
-                    rpc_custom_error("Account session is not available")
+                    rpc_custom_error_result("Account session is not available")
                 }
             }
         }

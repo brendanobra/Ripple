@@ -23,7 +23,7 @@ use ripple_sdk::{
         gateway::rpc_gateway_api::CallContext,
     },
     tokio::sync::oneshot,
-    utils::rpc_utils::{rpc_custom_error, rpc_error_with_code},
+    utils::rpc_utils::{rpc_custom_error, rpc_custom_error_result, rpc_error_with_code_result},
     JsonRpcErrorType,
 };
 
@@ -44,7 +44,7 @@ pub const SESSION_NO_INTENT_ERROR_CODE: i32 = -40000;
 pub async fn rpc_await_oneshot<T>(rx: oneshot::Receiver<T>) -> RpcResult<T> {
     match rx.await {
         Ok(v) => Ok(v),
-        Err(e) => rpc_custom_error(format!("Internal failure: {:?}", e)),
+        Err(e) => rpc_custom_error_result(format!("Internal failure: {:?}", e)),
     }
 }
 
@@ -82,13 +82,13 @@ pub async fn rpc_add_event_listener_with_decorator(
 }
 
 pub fn rpc_downstream_service_err<T>(msg: &str) -> Result<T, JsonRpcErrorType> {
-    rpc_error_with_code(msg.to_string(), DOWNSTREAM_SERVICE_UNAVAILABLE_ERROR_CODE)
+    rpc_error_with_code_result(msg.to_string(), DOWNSTREAM_SERVICE_UNAVAILABLE_ERROR_CODE)
 }
 pub fn rpc_session_no_intent_err<T>(msg: &str) -> Result<T, JsonRpcErrorType> {
-    rpc_error_with_code(msg.to_string(), SESSION_NO_INTENT_ERROR_CODE)
+    rpc_error_with_code_result(msg.to_string(), SESSION_NO_INTENT_ERROR_CODE)
 }
 pub fn rpc_navigate_reserved_app_err<T>(msg: &str) -> Result<T, JsonRpcErrorType> {
-    rpc_error_with_code(msg.to_string(), FIRE_BOLT_DEEPLINK_ERROR_CODE)
+    rpc_error_with_code_result(msg.to_string(), FIRE_BOLT_DEEPLINK_ERROR_CODE)
 }
 
 pub fn get_base_method(method: &str) -> String {
