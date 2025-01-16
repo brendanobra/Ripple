@@ -32,7 +32,7 @@ use ripple_sdk::{
     chrono::{DateTime, Utc},
     log::debug,
     tokio::sync::oneshot,
-    utils::rpc_utils::{rpc_custom_error_result, rpc_error_with_code_result},
+    utils::rpc_utils::{rpc_custom_error, rpc_custom_error_result, rpc_error_with_code_result},
 };
 
 use crate::{
@@ -263,7 +263,7 @@ impl UserGrantsServer for UserGrantsImpl {
             .cap_state
             .generic
             .check_supported(&fb_perms)
-            .map_err(|err| rpc_custom_error_result(format!("{:?} not supported", err.caps)))?;
+            .map_err(|err| rpc_custom_error::<String>(format!("{:?} not supported", err.caps)))?;
         let grant_entries = GrantState::check_with_roles(
             &self.platform_state,
             &ctx.clone().into(),

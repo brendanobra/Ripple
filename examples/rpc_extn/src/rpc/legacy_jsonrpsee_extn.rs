@@ -21,7 +21,10 @@ use ripple_sdk::{
     async_trait::async_trait,
     extn::{client::extn_client::ExtnClient, extn_client_message::ExtnResponse},
     tokio::runtime::Runtime,
-    utils::{extn_utils::ExtnUtils, rpc_utils::rpc_custom_error},
+    utils::{
+        extn_utils::ExtnUtils,
+        rpc_utils::{rpc_custom_error, rpc_custom_error_result},
+    },
 };
 
 pub struct LegacyImpl {
@@ -68,7 +71,7 @@ impl LegacyServer for LegacyImpl {
                 return Ok(v.into());
             }
         }
-        rpc_custom_error("device.make not available")
+        rpc_custom_error_result("device.make not available")
     }
 
     async fn model(&self, ctx: CallContext) -> RpcResult<String> {
@@ -88,6 +91,6 @@ impl LegacyServer for LegacyImpl {
                 }
             }
         }
-        rpc_custom_error("device.model not aviailable")
+        rpc_custom_error_result("device.model not aviailable")
     }
 }

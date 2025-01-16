@@ -53,7 +53,7 @@ use ripple_sdk::{
     extn::extn_client_message::ExtnResponse,
     log::{debug, error, info},
     tokio::{sync::oneshot, time::timeout},
-    utils::rpc_utils::rpc_custom_error_result,
+    utils::rpc_utils::{rpc_custom_error, rpc_custom_error_result},
 };
 use ripple_sdk::{
     api::{
@@ -657,10 +657,12 @@ impl DiscoveryServer for DiscoveryImpl {
             session_rx,
         )
         .await
-        .map_err(|_| rpc_custom_error_result("Didn't receive response within timeout"))?;
+        .map_err(|_| {
+            rpc_custom_error::<ContentEntityResponse>("Didn't receive response within timeout")
+        })?;
         /*handle channel response*/
         let result = channel_result.map_err(|e| {
-            rpc_custom_error_result(format!(
+            rpc_custom_error::<ContentEntityResponse>(format!(
                 "Error returned from entity response provider:{}",
                 e
             ))
@@ -736,10 +738,10 @@ impl DiscoveryServer for DiscoveryImpl {
             session_rx,
         )
         .await
-        .map_err(|_| rpc_custom_error_result::<()>("Didn't receive response within time"))?;
+        .map_err(|_| rpc_custom_error::<()>("Didn't receive response within time"))?;
         /*handle channel response*/
         let result = channel_result.map_err(|e| {
-            rpc_custom_error_result::<()>(format!(
+            rpc_custom_error::<()>(format!(
                 "Error returned from entity response provider: {}",
                 e
             ))
