@@ -19,6 +19,7 @@ use ripple_sdk::{
     async_trait::async_trait, framework::bootstrap::Bootstep, tokio, utils::error::RippleError,
 };
 
+use crate::firebolt::firebolt_middleware_service;
 use crate::state::bootstrap_state::BootstrapState;
 
 use crate::firebolt::firebolt_ws::FireboltWs;
@@ -41,7 +42,22 @@ impl Bootstep<BootstrapState> for StartWsStep {
             let ws_addr = manifest.get_ws_gateway_host();
             let state_for_ws = state.platform_state.clone();
             tokio::spawn(async move {
-                FireboltWs::start(ws_addr.as_str(), state_for_ws, true, iai.clone()).await;
+                // FireboltWs::start(ws_addr.as_str(), state_for_ws, true, iai.clone()).await;
+                match firebolt_middleware_service::start(
+                    ws_addr.as_str(),
+                    state_for_ws,
+                    true,
+                    iai.clone(),
+                )
+                .await
+                {
+                    Ok(_) => {
+                        println!("FireboltWs::start() completed successfully");
+                    }
+                    Err(e) => {
+                        println!("FireboltWs::start() failed: {:?}", e);
+                    }
+                }
             });
         }
 

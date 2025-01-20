@@ -43,8 +43,13 @@ tokio = { workspace = true, features = [
     "time",
 ] }
 futures.workspace = true
-jsonrpsee = { workspace = true,optional = true }
-jsonrpsee-types = { workspace = true,optional = true }
+#jsonrpsee = { workspace = true,optional = true }
+#jsonrpsee-types = { workspace = true,optional = true }
+#jsonrpsee-types = "0.24.7"
+jsonrpsee = { version="0.24.7" , features = ["server", "macros","ws-client"],optional= true }
+jsonrpsee-types = "0.24.7"
+jsonrpsee-core = "0.24.7"
+tokio-stream = "0.1.17"
 
 
 regex.workspace = true

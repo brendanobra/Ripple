@@ -47,7 +47,7 @@ use tokio_tungstenite::{
 #[allow(dead_code)]
 pub struct FireboltWs {}
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub struct ClientIdentity {
     session_id: String,
@@ -90,7 +90,30 @@ fn get_query(
     }
     Ok(found_q.map(|q| String::from(q.1)))
 }
+enum SessionError {
+    NoSessionFound,
+    NoAppIdFound,
+    NoSessionOrAppIdFound,
+}
 
+fn get_session(app_manager: &AppManagerState, session_id: &str) -> Result<String, SessionError> {
+    match app_manager.get_app_id_from_session_id(session_id) {
+        Some(app_id) => Ok(app_id),
+        None => Err(SessionError::NoAppIdFound),
+    }
+}
+/*
+1)
+if secure==true, then app_id is not required
+if secure==false, then app_id is required - get it from query or internal_app_id
+2) if session is not given, then error
+3) if app_id is not given, then get it from session
+4) if app_id is given, then use it
+5) if app_id is not given and session is not found, then error
+6) use the session id and app id to create a client identity
+7) send the client identity to the next step
+
+*/
 impl tungstenite::handshake::server::Callback for ConnectionCallback {
     fn on_request(
         self,
@@ -206,10 +229,10 @@ impl FireboltWs {
         state: PlatformState,
         gateway_secure: bool,
     ) {
-        let identity = connect_rx.await.unwrap();
+        let identity: ClientIdentity = connect_rx.await.unwrap();
         let client = state.get_client();
         let app_id = identity.app_id.clone();
-        let (session_tx, mut resp_rx) = mpsc::channel(32);
+        let (session_tx, mut session_rx) = mpsc::channel(32);
         let ctx = ClientContext {
             session_id: identity.session_id.clone(),
             app_id: app_id.clone(),
@@ -253,8 +276,11 @@ impl FireboltWs {
 
         let (mut sender, mut receiver) = ws_stream.split();
         let mut platform_state = state.clone();
+        /*
+        interago with firebolt gateway and downstream broker(s) starts here
+        */
         tokio::spawn(async move {
-            while let Some(rs) = resp_rx.recv().await {
+            while let Some(rs) = session_rx.recv().await {
                 let send_result = sender.send(Message::Text(rs.jsonrpc_msg.clone())).await;
                 match send_result {
                     Ok(_) => {

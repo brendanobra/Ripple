@@ -16,6 +16,7 @@
 //
 
 use futures::{future::join_all, StreamExt};
+use jsonrpsee::server::MethodResponseFuture;
 use jsonrpsee::{core::TEN_MB_SIZE_BYTES, MethodCallback, MethodKind, MethodSink, Methods};
 
 use jsonrpsee_types::{ErrorCode, Id, Params};
@@ -31,7 +32,10 @@ use ripple_sdk::{
     utils::error::RippleError,
 };
 use std::sync::{Arc, RwLock};
-use tokio_tungstenite::tungstenite::http::method;
+use tokio_tungstenite::tungstenite::{
+    handshake::server::{Callback, NoCallback},
+    http::method,
+};
 
 use crate::{
     firebolt::firebolt_gateway::JsonRpcMessage,
@@ -72,7 +76,10 @@ impl Default for RouterState {
         Self::new()
     }
 }
-
+/*
+Reference:
+https://github.com/paritytech/jsonrpsee/blob/master/server/src/middleware/rpc/layer/rpc_service.rs
+*/
 async fn resolve_route(
     platform_state: &mut PlatformState,
     methods: Methods,
@@ -84,51 +91,56 @@ async fn resolve_route(
     let (sink_tx, sink_rx) = ripple_sdk::tokio::sync::mpsc::channel::<String>(100);
     let mut sink_rx = tokio_stream::wrappers::ReceiverStream::new(sink_rx);
     let sink = MethodSink::new_with_limit(sink_tx, TEN_MB_SIZE_BYTES);
-    //let mut method_executors:Vec<_>  = Vec::new();
+    //let mut method_executors  = Vec::new();
     let params = Params::new(Some(req.params_json.as_str()));
-    match methods.method_with_name(&req.method) {
-        Some((method_name, method_callback)) => {
-            let sink = sink.clone();
-            let id = id.into_owned();
-            let params = params.into_owned();
-        }
-        None => {
-            sink.send_error(id, ErrorCode::MethodNotFound.into());
-        }
-    }
+    // match methods.method_with_name(&req.method) {
+    //     Some((method_name, method)) => match method {
+    //         MethodCallback::Sync(callback) => {
+    //             let params = params.into_owned();
+    // 			let id = id.into_owned();
 
-    match methods.method_with_name(&req.method) {
-        None => {
-            sink.send_error(id, ErrorCode::MethodNotFound.into());
-        }
-        Some((name, method)) => match &method {
-            MethodCallback::Sync(callback) => match method(name, &resources) {
-                Ok(_guard) => {
-                    (callback)(id, params, &sink);
-                }
-                Err(_) => {
-                    sink.send_error(id, ErrorCode::MethodNotFound.into());
-                }
-            },
-            MethodCallback::Async(callback) => match method.claim(name, &resources) {
-                Ok(guard) => {
-                    let sink = sink.clone();
-                    let id = id.into_owned();
-                    let params = params.into_owned();
-                    let fut = async move {
-                        (callback)(id, params, sink, 1, Some(guard)).await;
-                    };
-                    method_executors.push(fut);
-                }
-                Err(e) => {
-                    error!("{:?}", e);
-                    sink.send_error(id, ErrorCode::MethodNotFound.into());
-                }
-            },
-        },
-    }
+    // 			let fut = (callback)(id, params, conn_id, max_response_body_size, extensions);
+    // 			ResponseFuture::future(fut)
+    //         },
+    //         MethodCallback::Async(_) => todo!(),
+    //         MethodCallback::Subscription(_) => todo!(),
+    //         MethodCallback::Unsubscription(_) => todo!(),
+    //     }
+    //     None => {
+    //         sink.send_error(id, ErrorCode::MethodNotFound.into());
+    //     }
+    // }
 
-    let f = sink_rx.next().await;
+    // match methods.method_with_name(&req.method) {
+    //     None => {
+    //         sink.send_error(id, ErrorCode::MethodNotFound.into());
+    //     }
+    //     Some((name, method)) => match &method {
+    //         MethodCallback::Sync(callback) => match method(name, &resources) {
+    //             Ok(_guard) => {
+    //                 (callback)(id, params, &sink);
+    //             }
+    //             Err(_) => {
+    //                 sink.send_error(id, ErrorCode::MethodNotFound.into());
+    //             }
+    //         },
+    //         MethodCallback::Async(callback) => match method.claim(name, &resources) {
+    //             Ok(guard) => {
+    //                 let sink = sink.clone();
+    //                 let id = id.into_owned();
+    //                 let params = params.into_owned();
+    //                 let fut = async move {
+    //                     (callback)(id, params, sink, 1, Some(guard)).await;
+    //                 };
+    //                 method_executors.push(fut);
+    //             }
+    //             Err(e) => {
+    //                 error!("{:?}", e);
+    //                 sink.send_error(id, ErrorCode::MethodNotFound.into());
+    //             }
+    //         },
+    //     },
+    // }
 
     // if let Some(r) = sink_rx.next().await {
     //     let rpc_header = get_rpc_header(&req);

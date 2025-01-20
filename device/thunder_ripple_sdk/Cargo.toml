@@ -40,7 +40,7 @@ contract_tests = [
 ripple_tdk = { path = "../../core/tdk" }
 ripple_sdk.workspace = true
 regex.workspace = true
-jsonrpsee = { version="0.24.7" , features = ["server","server-core","client-core",  "http-client", "ws-client", "macros", "client-ws-transport-tls"] }
+jsonrpsee = { version="0.24.7" , features = ["server", "macros"] }
 jsonrpsee-core = {version="0.24.7"}
 serde.workspace = true
 url.workspace = true
