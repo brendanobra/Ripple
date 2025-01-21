@@ -42,31 +42,31 @@ impl Bootstep<BootstrapState> for StartWsStep {
             let ws_addr = manifest.get_ws_gateway_host();
             let state_for_ws = state.platform_state.clone();
             tokio::spawn(async move {
-                // FireboltWs::start(ws_addr.as_str(), state_for_ws, true, iai.clone()).await;
-                match firebolt_middleware_service::start(
-                    ws_addr.as_str(),
-                    state_for_ws,
-                    true,
-                    iai.clone(),
-                )
-                .await
-                {
-                    Ok(_) => {
-                        println!("FireboltWs::start() completed successfully");
-                    }
-                    Err(e) => {
-                        println!("FireboltWs::start() failed: {:?}", e);
-                    }
-                }
+                FireboltWs::start(ws_addr.as_str(), state_for_ws, true, iai.clone()).await;
             });
         }
 
         if internal_ws_enabled {
             let ws_addr = manifest.get_internal_gateway_host();
             let state_for_ws = state.platform_state;
-            tokio::spawn(async move {
-                FireboltWs::start(ws_addr.as_str(), state_for_ws, false, iai_c).await;
-            });
+            match firebolt_middleware_service::start(
+                ws_addr.as_str(),
+                state_for_ws,
+                false,
+                iai_c.clone(),
+            )
+            .await
+            {
+                Ok(_) => {
+                    println!("FireboltWs::start() completed successfully");
+                }
+                Err(e) => {
+                    println!("FireboltWs::start() failed: {:?}", e);
+                }
+            }
+            //tokio::spawn(async move {
+            //    FireboltWs::start(ws_addr.as_str(), state_for_ws, false, iai_c).await;
+            //});
         }
 
         Ok(())

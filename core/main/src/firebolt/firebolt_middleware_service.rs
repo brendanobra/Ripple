@@ -4,9 +4,13 @@ use std::sync::Arc;
 
 use futures::future::BoxFuture;
 use futures::FutureExt;
+use http::request;
 use http_body::Frame;
 use jsonrpsee::core::client::ClientT;
 use jsonrpsee::rpc_params;
+use jsonrpsee::tokio::sync::mpsc;
+use ripple_sdk::api::gateway::rpc_gateway_api::{ApiMessage, ClientContext};
+use ripple_sdk::uuid::Uuid;
 
 use super::firebolt_gateway::FireboltGatewayCommand;
 use super::firebolt_ws::ClientIdentity;
@@ -23,27 +27,19 @@ use futures_util::{Future, TryFutureExt};
 use jsonrpsee::server::middleware::rpc::{RpcServiceBuilder, RpcServiceT};
 use jsonrpsee::server::{HttpRequest, MethodResponse, RpcModule, Server, TowerServiceBuilder};
 use jsonrpsee::types::Request;
-use jsonrpsee::ws_client::WsClientBuilder;
 use jsonrpsee_core::BoxError;
 use jsonrpsee_types::{ErrorCode, ErrorObject};
 use ripple_sdk::log::{error, info};
-use ripple_sdk::utils::error;
-use ripple_sdk::uuid::timestamp::UUID_TICKS_BETWEEN_EPOCHS;
-use ripple_sdk::uuid::Uuid;
-use serde_json::to_writer_pretty;
+
 use tower::Layer;
 
-fn get_query_param<B>(query_string: &str, key: &str) -> Option<String> {
-    querystring::querify(query_string)
-        .iter()
-        .find(|(k, _)| *k == key)
-        .map(|(_, v)| v.to_string())
-}
 #[derive(Debug, Clone)]
-pub struct FireboltSessionAuthenticator<S> {
+pub struct FireboltSessionValidator<S> {
     inner: S,
     platform_state: PlatformState,
     default_app_id: Option<String>,
+    internal_app_id: Option<String>,
+    secure: bool,
 }
 #[derive(Debug, Clone)]
 enum FireboltSessionId {
@@ -60,25 +56,132 @@ impl std::fmt::Display for FireboltSessionId {
 }
 #[derive(Debug, Clone)]
 enum FireboltAppId {
+    Secure,
     AppProvided(String),
-    SessionProvided(String),
     InternalProvided(String),
 }
+impl std::fmt::Display for FireboltAppId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            FireboltAppId::Secure => write!(f, "secure"),
+            FireboltAppId::AppProvided(app_id) => write!(f, "{}", app_id),
+            FireboltAppId::InternalProvided(app_id) => write!(f, "{}", app_id),
+        }
+    }
+}
 
+enum FireboltGatewayError {
+    QueryParamMissing(String),
+    NoSessionFound,
+}
 #[derive(Debug, Clone)]
 pub struct FireboltSession {
     pub session_id: FireboltSessionId,
     pub app_id: FireboltAppId,
+    pub secure: bool,
 }
-impl FireboltSession {
-    pub fn new(session_id: FireboltSessionId, app_id: FireboltAppId) -> Self {
-        FireboltSession {
-            session_id: session_id,
-            app_id: app_id,
+impl From<&FireboltSession> for ClientContext {
+    fn from(firebolt_session: &FireboltSession) -> Self {
+        ClientContext {
+            session_id: firebolt_session.session_id.to_string(),
+            app_id: firebolt_session.app_id.to_string(),
+            gateway_secure: firebolt_session.secure,
         }
     }
 }
-impl<S, B> tower::Service<HttpRequest<B>> for FireboltSessionAuthenticator<S>
+impl FireboltSession {
+    pub fn new(session_id: FireboltSessionId, app_id: FireboltAppId, secure: bool) -> Self {
+        FireboltSession {
+            session_id: session_id,
+            app_id: app_id,
+            secure: secure,
+        }
+    }
+}
+
+fn get_query_param<B>(
+    query_string: &str,
+    key: &str,
+    required: bool,
+) -> Result<Option<String>, FireboltGatewayError> {
+    let query_item = querystring::querify(query_string)
+        .iter()
+        .find(|(k, _)| *k == key)
+        .map(|(_, v)| v.to_string());
+    if required && query_item.is_none() {
+        let err_msg = format!("{} query parameter missing", key);
+        error!("{}", err_msg);
+        return Err(FireboltGatewayError::QueryParamMissing(err_msg));
+    } else {
+        return Ok(query_item);
+    }
+}
+fn get_app_id<B>(
+    secure: bool,
+    query_string: &str,
+    internal_app_id: Option<String>,
+) -> Result<FireboltAppId, FireboltGatewayError> {
+    match secure {
+        true => Ok(FireboltAppId::Secure),
+        false => match get_query_param::<B>(query_string, "appId", false)? {
+            Some(a) => Ok(FireboltAppId::AppProvided(a)),
+            None => match internal_app_id {
+                Some(a) => Ok(FireboltAppId::InternalProvided(a)),
+                None => Ok(FireboltAppId::Secure),
+            },
+        },
+    }
+}
+
+fn get_firebolt_session<B>(
+    secure: bool,
+    query_string: &str,
+    internal_app_id: Option<String>,
+    platform_state: &PlatformState,
+) -> Result<FireboltSession, FireboltGatewayError> {
+    let app_id = get_app_id::<B>(secure, query_string, internal_app_id)?;
+    let session_id = match app_id.clone() {
+        FireboltAppId::Secure => match get_query_param::<B>(query_string, "session", false)? {
+            Some(a) => FireboltSessionId::AppProvided(a),
+            None => {
+                return Err(FireboltGatewayError::QueryParamMissing(
+                    "session".to_string(),
+                ))
+            }
+        },
+        FireboltAppId::AppProvided(provided) | FireboltAppId::InternalProvided(provided) => {
+            match get_query_param::<B>(query_string, "session", true)? {
+                Some(a) => FireboltSessionId::AppProvided(provided),
+                None => {
+                    return Err(FireboltGatewayError::QueryParamMissing(
+                        "session".to_string(),
+                    ))
+                }
+            }
+        }
+    };
+    match app_id.clone() {
+        FireboltAppId::Secure => {
+            //talk to appmanager to get the session
+            match platform_state
+                .app_manager_state
+                .get_app_id_from_session_id(&session_id.to_string())
+            {
+                Some(retrieved_app_id) => Ok(FireboltSession::new(
+                    session_id,
+                    FireboltAppId::AppProvided(retrieved_app_id),
+                    secure,
+                )),
+                None => Err(FireboltGatewayError::NoSessionFound),
+            }
+        }
+        FireboltAppId::AppProvided(provided) | FireboltAppId::InternalProvided(provided) => Ok(
+            FireboltSession::new(FireboltSessionId::AppProvided(provided), app_id, secure),
+        ),
+    }
+}
+
+impl<S, B> tower::Service<HttpRequest<B>> for FireboltSessionValidator<S>
 where
     S: tower::Service<HttpRequest, Response = jsonrpsee::server::HttpResponse>,
     S::Response: 'static,
@@ -102,28 +205,29 @@ where
     }
 
     fn call(&mut self, req: HttpRequest<B>) -> Self::Future {
-        let firebolt_session_id = match req.uri().query() {
-            Some(q) => match get_query_param::<B>(q, "session_id") {
-                Some(session_id) => FireboltSessionId::AppProvided(session_id),
-                None => FireboltSessionId::Generated(Uuid::new_v4().to_string()),
-            },
-            None => FireboltSessionId::Generated(Uuid::new_v4().to_string()),
-        };
-        let firebolt_app_id = match req.uri().query() {
-            Some(q) => match get_query_param::<B>(q, "appId") {
-                Some(app_id) => FireboltAppId::AppProvided(app_id),
-                None => FireboltAppId::InternalProvided("internal".to_string()),
-            },
-            None => FireboltAppId::InternalProvided("internal".to_string()),
-        };
-
-        let firebolt_session = FireboltSession::new(firebolt_session_id, firebolt_app_id);
+        let platform_state = self.platform_state.clone();
+        let session = get_firebolt_session::<B>(
+            self.secure,
+            req.uri().query().unwrap_or_default(),
+            self.internal_app_id.clone(),
+            &platform_state,
+        );
 
         let mut req = req.map(jsonrpsee::server::HttpBody::new);
-
-        req.extensions_mut().insert(firebolt_session);
-        //self.inner.call(req)
-        Box::pin(self.inner.call(req).map_err(Into::into))
+        match session {
+            Ok(firebolt_session) => {
+                req.extensions_mut().insert(firebolt_session);
+                Box::pin(self.inner.call(req).map_err(Into::into))
+            }
+            Err(e) => match e {
+                FireboltGatewayError::QueryParamMissing(msg) => {
+                    Box::pin(self.inner.call(req).map_err(Into::into))
+                }
+                FireboltGatewayError::NoSessionFound => {
+                    Box::pin(self.inner.call(req).map_err(Into::into))
+                }
+            },
+        }
     }
 }
 
@@ -148,13 +252,15 @@ impl FireboltSessionAuthenticatorLayer {
 }
 
 impl<S> Layer<S> for FireboltSessionAuthenticatorLayer {
-    type Service = FireboltSessionAuthenticator<S>;
+    type Service = FireboltSessionValidator<S>;
 
     fn layer(&self, inner: S) -> Self::Service {
-        FireboltSessionAuthenticator {
+        FireboltSessionValidator {
             inner: inner,
             platform_state: self.platform_state.clone(),
             default_app_id: self.internal_app_id.clone(),
+            secure: self.secure,
+            internal_app_id: self.internal_app_id.clone(),
         }
     }
 }
@@ -188,12 +294,12 @@ where
 }
 
 #[derive(Clone)]
-pub struct RippleGatewayLayer<S> {
+pub struct FireboltAuthLayer<S> {
     service: S,
     platform_state: PlatformState,
 }
 
-impl<'a, S> RpcServiceT<'a> for RippleGatewayLayer<S>
+impl<'a, S> RpcServiceT<'a> for FireboltAuthLayer<S>
 where
     S: RpcServiceT<'a> + Send + Sync + Clone + 'static,
 {
@@ -211,11 +317,7 @@ where
                         .app_manager_state
                         .get_app_id_from_session_id(&firebolt_session.session_id.to_string())
                     {
-                        Some(app_id) => {
-                            let response = service.call(req.clone()).await;
-                            service.call(req).await;
-                            response
-                        }
+                        Some(_) => service.call(req.clone()).await,
                         None => {
                             error!(
                                 "no app id found in session manager for session id: {}",
@@ -225,7 +327,7 @@ where
                                 jsonrpsee_types::Id::Number(403),
                                 ErrorObject::owned(
                                     ErrorCode::InternalError.code(),
-                                    "no session found in app manager",
+                                    "invalid session",
                                     None::<()>,
                                 ),
                             )
@@ -234,11 +336,85 @@ where
                 }
                 None => MethodResponse::error(
                     jsonrpsee_types::Id::Number(403),
-                    ErrorObject::owned(
-                        ErrorCode::InternalError.code(),
-                        "no session found in extensions",
-                        None::<()>,
-                    ),
+                    ErrorObject::owned(ErrorCode::InternalError.code(), "no session", None::<()>),
+                ),
+            }
+        }
+        .boxed()
+    }
+}
+
+pub struct FireboltDispatchLayer<S> {
+    service: S,
+    platform_state: PlatformState,
+}
+impl<'a, S> RpcServiceT<'a> for FireboltDispatchLayer<S>
+where
+    S: RpcServiceT<'a> + Send + Sync + Clone + 'static,
+{
+    type Future = BoxFuture<'a, MethodResponse>;
+
+    fn call(&self, req: Request<'a>) -> Self::Future {
+        let service = self.service.clone();
+        let platform_state = self.platform_state.clone();
+        let ripple_client = platform_state.get_client();
+
+        async move {
+            match req.extensions.get::<FireboltSession>() {
+                Some(firebolt_session) => {
+                    let client_context: ClientContext = firebolt_session.into();
+
+                    let (session_tx, mut session_rx) = mpsc::channel::<ApiMessage>(32);
+                    let app_id = client_context.app_id.clone();
+                    let session_id = client_context.session_id.clone();
+                    let gateway_secure = firebolt_session.secure;
+                    let session = Session::new(
+                        client_context.app_id.clone(),
+                        Some(session_tx.clone()),
+                        ripple_sdk::api::apps::EffectiveTransport::Websocket,
+                    );
+
+                    let app_id_c = app_id.clone();
+                    let session_id_c = session_id.clone();
+
+                    let connection_id = Uuid::new_v4().to_string();
+                    info!(
+                        "Creating new connection_id={} app_id={} session_id={}, gateway_secure={}",
+                        connection_id, app_id_c, session_id_c, gateway_secure
+                    );
+
+                    let connection_id_c = connection_id.clone();
+
+                    let msg = FireboltGatewayCommand::RegisterSession {
+                        session_id: connection_id.clone(),
+                        session,
+                    };
+                    if let Err(e) = ripple_client.send_gateway_command(msg) {
+                        error!("Error registering the connection {:?}", e);
+                        return MethodResponse::error(
+                            jsonrpsee_types::Id::Number(403),
+                            ErrorObject::owned(
+                                ErrorCode::InternalError.code(),
+                                "no session",
+                                None::<()>,
+                            ),
+                        );
+                    }
+                    if !gateway_secure
+                        && PermissionHandler::fetch_and_store(&platform_state, &app_id, false)
+                            .await
+                            .is_err()
+                    {
+                        error!("Couldnt pre cache permissions");
+                    }
+
+                    // let (mut sender, mut receiver) = ws_stream.split();
+
+                    service.call(req.clone()).await
+                }
+                None => MethodResponse::error(
+                    jsonrpsee_types::Id::Number(403),
+                    ErrorObject::owned(ErrorCode::InternalError.code(), "no session", None::<()>),
                 ),
             }
         }
@@ -252,25 +428,27 @@ pub async fn start(
     secure: bool,
     internal_app_id: Option<String>,
 ) -> anyhow::Result<SocketAddr> {
-    let http_middleware = tower::ServiceBuilder::new().layer(
-        FireboltSessionAuthenticatorLayer::new(internal_app_id, secure, platform_state.clone()),
-    );
+    let http_middleware =
+        tower::ServiceBuilder::new().layer(FireboltSessionAuthenticatorLayer::new(
+            internal_app_id.clone(),
+            secure,
+            platform_state.clone(),
+        ));
 
-    let rpc_middleware = RpcServiceBuilder::new().layer_fn(move |service| RippleGatewayLayer {
+    let rpc_middleware = RpcServiceBuilder::new().layer_fn(move |service| FireboltAuthLayer {
         service,
         platform_state: platform_state.clone(),
     });
-    // let http_middleware = HttpSe QueryExtractorLayer::new();
-    // let server = Server::builder()
-    // .set_http_middleware(http_middleware)
-    // .set_rpc_middleware(rpc_middleware).build(server_addr).await?;
+
     let server = jsonrpsee::server::Server::builder()
         .set_http_middleware(http_middleware)
         .set_rpc_middleware(rpc_middleware)
         .build(server_addr)
         .await?;
+    /*
+    TODO: bolt up to registrar
+    */
     let mut module = RpcModule::new(());
-    //ProviderRegistrar::register_method(platform_state, methods)
 
     /*
     need to:
@@ -286,7 +464,10 @@ pub async fn start(
 
     // In this example we don't care about doing shutdown so let's it run forever.
     // You may use the `ServerHandle` to shut it down or manage it yourself.
-    info!("Listening on: {} secure={}", server_addr, secure);
+    info!(
+        "Listening on: {} secure={} with internal_app_id={:?}",
+        server_addr, secure, internal_app_id
+    );
     ripple_sdk::tokio::spawn(handle.stopped());
 
     Ok(addr)
