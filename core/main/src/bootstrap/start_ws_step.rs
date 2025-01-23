@@ -41,17 +41,9 @@ impl Bootstep<BootstrapState> for StartWsStep {
         if ws_enabled {
             let ws_addr = manifest.get_ws_gateway_host();
             let state_for_ws = state.platform_state.clone();
-            tokio::spawn(async move {
-                FireboltWs::start(ws_addr.as_str(), state_for_ws, true, iai.clone()).await;
-            });
-        }
-
-        if internal_ws_enabled {
-            let ws_addr = manifest.get_internal_gateway_host();
-            let state_for_ws = state.platform_state;
             match firebolt_middleware_service::start(
-                ws_addr.as_str(),
-                state_for_ws,
+                "127.0.0.1:3476",
+                state_for_ws.clone(),
                 false,
                 iai_c.clone(),
             )
@@ -64,9 +56,32 @@ impl Bootstep<BootstrapState> for StartWsStep {
                     println!("FireboltWs::start() failed: {:?}", e);
                 }
             }
-            // tokio::spawn(async move {
-            //     FireboltWs::start(ws_addr.as_str(), state_for_ws, false, iai_c).await;
-            // });
+            tokio::spawn(async move {
+                FireboltWs::start(ws_addr.as_str(), state_for_ws, true, iai.clone()).await;
+            });
+        }
+
+        if internal_ws_enabled {
+            let ws_addr = manifest.get_internal_gateway_host();
+            let state_for_ws = state.platform_state;
+            match firebolt_middleware_service::start(
+                "127.0.0.1:3475",
+                state_for_ws.clone(),
+                false,
+                iai_c.clone(),
+            )
+            .await
+            {
+                Ok(_) => {
+                    println!("FireboltWs::start() completed successfully");
+                }
+                Err(e) => {
+                    println!("FireboltWs::start() failed: {:?}", e);
+                }
+            }
+            tokio::spawn(async move {
+                FireboltWs::start(ws_addr.as_str(), state_for_ws, false, iai_c).await;
+            });
         }
 
         Ok(())

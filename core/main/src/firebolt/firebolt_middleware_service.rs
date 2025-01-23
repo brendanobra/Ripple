@@ -8,14 +8,17 @@ use http::request;
 use http_body::Frame;
 use jsonrpsee::core::client::ClientT;
 use jsonrpsee::rpc_params;
-use jsonrpsee::tokio::sync::mpsc;
-use ripple_sdk::api::gateway::rpc_gateway_api::{ApiMessage, ClientContext};
+use jsonrpsee::tokio::sync::{mpsc, oneshot};
+use ripple_sdk::api::gateway::rpc_gateway_api::{ApiMessage, ClientContext, RpcRequest};
+use ripple_sdk::utils::channel_utils::oneshot_send_and_log;
 use ripple_sdk::uuid::Uuid;
 
 use super::firebolt_gateway::FireboltGatewayCommand;
 use super::firebolt_ws::ClientIdentity;
+use crate::firebolt::firebolt_ws::ConnectionCallbackConfig;
 use crate::firebolt::handlers::provider_registrar::ProviderRegistrar;
 use crate::state::platform_state;
+use crate::utils::rpc_utils::get_base_method;
 use crate::{
     service::apps::delegated_launcher_handler::AppManagerState,
     state::{
@@ -28,7 +31,7 @@ use jsonrpsee::server::middleware::rpc::{RpcServiceBuilder, RpcServiceT};
 use jsonrpsee::server::{HttpRequest, MethodResponse, RpcModule, Server, TowerServiceBuilder};
 use jsonrpsee::types::Request;
 use jsonrpsee_core::BoxError;
-use jsonrpsee_types::{ErrorCode, ErrorObject};
+use jsonrpsee_types::{ErrorCode, ErrorObject, RequestSer};
 use ripple_sdk::log::{error, info};
 
 use tower::Layer;
@@ -139,7 +142,18 @@ fn get_app_id<B>(
         },
     }
 }
-
+fn get_firebolt_session_unauthenticated<B>(
+    query_string: &str,
+    internal_app_id: Option<String>,
+    platform_state: &PlatformState,
+) -> Result<FireboltSession, FireboltGatewayError> {
+    let app_id = get_app_id::<B>(false, query_string, internal_app_id)?;
+    Ok(FireboltSession::new(
+        FireboltSessionId::Generated(Uuid::new_v4().to_string()),
+        app_id,
+        false,
+    ))
+}
 fn get_firebolt_session<B>(
     secure: bool,
     query_string: &str,
@@ -160,11 +174,7 @@ fn get_firebolt_session<B>(
         FireboltAppId::AppProvided(_) | FireboltAppId::InternalProvided(_) => {
             match get_query_param::<B>(query_string, "session", true)? {
                 Some(session) => FireboltSessionId::AppProvided(session),
-                None => {
-                    return Err(FireboltGatewayError::QueryParamMissing(
-                        "session".to_string(),
-                    ))
-                }
+                None => FireboltSessionId::Generated(Uuid::new_v4().to_string()),
             }
         }
     };
@@ -214,12 +224,20 @@ where
 
     fn call(&mut self, req: HttpRequest<B>) -> Self::Future {
         let platform_state = self.platform_state.clone();
-        let session = get_firebolt_session::<B>(
-            self.secure,
-            req.uri().query().unwrap_or_default(),
-            self.internal_app_id.clone(),
-            &platform_state,
-        );
+        let session = if self.secure {
+            get_firebolt_session::<B>(
+                self.secure,
+                req.uri().query().unwrap_or_default(),
+                self.internal_app_id.clone(),
+                &platform_state,
+            )
+        } else {
+            get_firebolt_session_unauthenticated::<B>(
+                req.uri().query().unwrap_or_default(),
+                self.internal_app_id.clone(),
+                &platform_state,
+            )
+        };
 
         let mut req = req.map(jsonrpsee::server::HttpBody::new);
         match session {
@@ -315,8 +333,77 @@ where
     fn call(&self, request: Request<'a>) -> Self::Future {
         let service = self.service.clone();
         let platform_state = self.platform_state.clone();
+        let default_app_id = self.default_app_id.clone();
         println!("UnauthenticatedFireboltLayer: method `{:?}`", request);
-        async move { service.call(request.clone()).await }.boxed()
+        async move {
+            let ripple_client = platform_state.get_client();
+            //let session_id = get_firebolt_session(&request);
+            //let app_id = get_app_id(&request, &self.default_app_id);
+            let app_state = platform_state.app_manager_state.clone();
+            let (connect_tx, connect_rx) = oneshot::channel::<ClientIdentity>();
+            let cfg = ConnectionCallbackConfig {
+                next: connect_tx,
+                app_state: app_state.clone(),
+                secure: false,
+                internal_app_id: default_app_id.clone(),
+            };
+            let (session_tx, mut session_rx) = mpsc::channel::<ApiMessage>(32);
+            match request.extensions.get::<FireboltSession>() {
+                Some(firebolt_session) => {
+                    println!("session found: {:?}", firebolt_session);
+                    
+
+                    let app_id = firebolt_session.app_id.clone().to_string();
+                    let session_id = firebolt_session.session_id.clone().to_string();
+                    let request_id = Uuid::new_v4().to_string();
+                    let connection_id = Uuid::new_v4().to_string();
+                    let cid = ClientIdentity {
+                        session_id: session_id.clone(),
+                        app_id: app_id.clone(),
+                    };
+                    oneshot_send_and_log(cfg.next, cid, "ResolveClientIdentity");
+                    let session = Session::new(
+                        app_id.clone(),
+                        Some(session_tx.clone()),
+                        ripple_sdk::api::apps::EffectiveTransport::Websocket,
+                    );
+                    let msg = FireboltGatewayCommand::RegisterSession {
+                        session_id: firebolt_session.session_id.to_string(),
+                        session,
+                    };
+                    if let Err(e) = ripple_client.send_gateway_command(msg) {
+                        error!("Error registering the connection {:?}", e);
+                        // return;
+                    }
+                    let _ =
+                        PermissionHandler::fetch_and_store(&platform_state, &app_id, false).await;
+                    
+                    let request_downstream = request.clone();
+                    
+                    let json = serde_json::to_string(&RequestSer::owned(request_downstream.id, request_downstream.method, request_downstream.params.map(|p| p.into_owned()))).unwrap();
+
+                    let request = RpcRequest::parse(json, app_id, session_id, request_id, Some(connection_id), false).unwrap();
+                    
+                    let msg = FireboltGatewayCommand::HandleRpc { request };
+                    if let Err(e) = ripple_client.clone().send_gateway_command(msg) {
+                        error!("failed to send request {:?}", e);
+                    }
+                }
+                None => {
+                    error!("no app id found in session manager for session",);
+                    return MethodResponse::error(
+                        jsonrpsee_types::Id::Number(403),
+                        ErrorObject::owned(
+                            ErrorCode::InternalError.code(),
+                            "invalid session",
+                            None::<()>,
+                        ),
+                    );
+                }
+            }
+            service.call(request.clone()).await
+        }
+        .boxed()
     }
 }
 
@@ -460,15 +547,14 @@ pub async fn start(
     internal_app_id: Option<String>,
 ) -> anyhow::Result<SocketAddr> {
     let mut module = RpcModule::new(());
+    let http_middleware =
+        tower::ServiceBuilder::new().layer(FireboltSessionAuthenticatorLayer::new(
+            internal_app_id.clone(),
+            secure,
+            platform_state.clone(),
+        ));
 
     let addr = if secure {
-        let http_middleware =
-            tower::ServiceBuilder::new().layer(FireboltSessionAuthenticatorLayer::new(
-                internal_app_id.clone(),
-                secure,
-                platform_state.clone(),
-            ));
-
         let rpc_middleware =
             RpcServiceBuilder::new().layer_fn(move |service| AuthenticatedFireboltLayer {
                 service,
@@ -498,7 +584,7 @@ pub async fn start(
                 default_app_id: internal_app_id.clone(),
             });
         let server = jsonrpsee::server::Server::builder()
-            //.set_http_middleware(http_middleware)
+            .set_http_middleware(http_middleware)
             .set_rpc_middleware(rpc_middleware)
             .build(server_addr)
             .await?;

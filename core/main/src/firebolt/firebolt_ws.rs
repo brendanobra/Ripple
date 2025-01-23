@@ -50,11 +50,11 @@ pub struct FireboltWs {}
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub struct ClientIdentity {
-    session_id: String,
-    app_id: String,
+    pub session_id: String,
+    pub app_id: String,
 }
 
-struct ConnectionCallbackConfig {
+pub struct ConnectionCallbackConfig {
     pub next: oneshot::Sender<ClientIdentity>,
     pub app_state: AppManagerState,
     pub secure: bool,
