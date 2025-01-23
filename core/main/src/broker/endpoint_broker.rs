@@ -17,7 +17,9 @@
 
 use ripple_sdk::{
     api::{
-        firebolt::fb_capabilities::JSON_RPC_STANDARD_ERROR_INVALID_PARAMS,
+        firebolt::fb_capabilities::{
+            FireboltPermission, CAPABILITY_NOT_AVAILABLE, JSON_RPC_STANDARD_ERROR_INVALID_PARAMS,
+        },
         gateway::rpc_gateway_api::{
             ApiMessage, ApiProtocol, CallContext, JsonRpcApiRequest, JsonRpcApiResponse, RpcRequest,
         },
@@ -46,7 +48,7 @@ use crate::{
     broker::broker_utils::BrokerUtils,
     firebolt::firebolt_gateway::{FireboltGatewayCommand, JsonRpcError},
     service::extn::ripple_client::RippleClient,
-    state::{metrics_state::MetricsState, platform_state::PlatformState},
+    state::{metrics_state::MetricsState, platform_state::PlatformState, session_state::Session},
     utils::router_utils::{
         add_telemetry_status_code, capture_stage, get_rpc_header, return_api_message_for_transport,
         return_extn_response,
@@ -56,6 +58,7 @@ use crate::{
 use super::{
     event_management_utility::EventManagementUtility,
     http_broker::HttpBroker,
+    provider_broker_state::{ProvideBrokerState, ProviderResult},
     rules_engine::{jq_compile, Rule, RuleEndpoint, RuleEndpointProtocol, RuleEngine},
     thunder_broker::ThunderBroker,
     websocket_broker::WebsocketBroker,
@@ -310,6 +313,7 @@ pub struct EndpointBrokerState {
     rule_engine: RuleEngine,
     cleaner_list: Arc<RwLock<Vec<BrokerCleaner>>>,
     reconnect_tx: Sender<BrokerConnectRequest>,
+    provider_broker_state: ProvideBrokerState,
     metrics_state: MetricsState,
 }
 impl Default for EndpointBrokerState {
@@ -322,6 +326,7 @@ impl Default for EndpointBrokerState {
             rule_engine: RuleEngine::default(),
             cleaner_list: Arc::new(RwLock::new(Vec::new())),
             reconnect_tx: mpsc::channel(2).0,
+            provider_broker_state: ProvideBrokerState::default(),
             metrics_state: MetricsState::default(),
         }
     }
@@ -343,6 +348,7 @@ impl EndpointBrokerState {
             rule_engine,
             cleaner_list: Arc::new(RwLock::new(Vec::new())),
             reconnect_tx,
+            provider_broker_state: ProvideBrokerState::default(),
             metrics_state,
         };
         state.reconnect_thread(rec_tr, ripple_client);
@@ -547,6 +553,74 @@ impl EndpointBrokerState {
         tokio::spawn(async move { callback.sender.send(output).await });
     }
 
+    fn handle_provided_request(
+        &self,
+        rpc_request: &RpcRequest,
+        rule: Rule,
+        callback: BrokerCallback,
+        permission: Vec<FireboltPermission>,
+        session: Option<Session>,
+    ) {
+        let (id, request) = self.update_request(rpc_request, rule, None, None);
+        match self.provider_broker_state.check_provider_request(
+            rpc_request,
+            &permission,
+            session.clone(),
+        ) {
+            Some(ProviderResult::Registered) => {
+                // return empty result and handle the rest with jq rule
+                let data = JsonRpcApiResponse {
+                    id: Some(id),
+                    jsonrpc: "2.0".to_string(),
+                    result: Some(Value::Null),
+                    error: None,
+                    method: None,
+                    params: None,
+                };
+
+                let output = BrokerOutput { data };
+                tokio::spawn(async move { callback.sender.send(output).await });
+            }
+            Some(ProviderResult::Session(s)) => {
+                ProvideBrokerState::send_to_provider(request, id, s);
+            }
+            Some(ProviderResult::NotAvailable(p)) => {
+                // Not Available
+                let data = JsonRpcApiResponse {
+                    jsonrpc: "2.0".to_string(),
+                    id: Some(id),
+                    result: None,
+                    error: Some(json!({
+                        "error": CAPABILITY_NOT_AVAILABLE,
+                        "messsage": format!("{} not available", p)
+                    })),
+                    method: None,
+                    params: None,
+                };
+
+                let output = BrokerOutput { data };
+                tokio::spawn(async move { callback.sender.send(output).await });
+            }
+            None => {
+                // Not Available
+                let data = JsonRpcApiResponse {
+                    jsonrpc: "2.0".to_string(),
+                    id: Some(id),
+                    result: None,
+                    error: Some(json!({
+                        "error": CAPABILITY_NOT_AVAILABLE,
+                        "messsage": "capability not available".to_string()
+                    })),
+                    method: None,
+                    params: None,
+                };
+
+                let output = BrokerOutput { data };
+                tokio::spawn(async move { callback.sender.send(output).await });
+            }
+        }
+    }
+
     fn get_sender(&self, hash: &str) -> Option<BrokerSender> {
         self.endpoint_map.read().unwrap().get(hash).cloned()
     }
@@ -558,6 +632,8 @@ impl EndpointBrokerState {
         rpc_request: RpcRequest,
         extn_message: Option<ExtnMessage>,
         requestor_callback: Option<BrokerCallback>,
+        permissions: Vec<FireboltPermission>,
+        session: Option<Session>,
     ) -> bool {
         let mut handled: bool = true;
         let callback = self.callback.clone();
@@ -588,6 +664,8 @@ impl EndpointBrokerState {
                     callback,
                     requestor_callback,
                 );
+            } else if rule.alias.eq_ignore_ascii_case("provided") {
+                self.handle_provided_request(&rpc_request, rule, callback, permissions, session);
             } else if broker_sender.is_some() {
                 trace!("handling not static request for {:?}", rpc_request);
                 let broker_sender = broker_sender.unwrap();
@@ -623,6 +701,12 @@ impl EndpointBrokerState {
         }
 
         handled
+    }
+
+    pub fn handle_broker_response(&self, data: JsonRpcApiResponse) {
+        if let Err(e) = self.callback.sender.try_send(BrokerOutput { data }) {
+            error!("Cannot forward broker response {:?}", e)
+        }
     }
 
     pub fn get_rule(&self, rpc_request: &RpcRequest) -> Option<Rule> {
@@ -900,6 +984,11 @@ impl BrokerOutputForwarder {
                                 .await;
                         } else {
                             let tm_str = get_rpc_header(&rpc_request);
+
+                            if is_event {
+                                response.update_event_message(&rpc_request);
+                            }
+
                             // Step 2: Create the message
                             let mut message = ApiMessage::new(
                                 rpc_request.ctx.protocol.clone(),
