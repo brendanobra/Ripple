@@ -27,9 +27,13 @@ use crate::{
 };
 use futures::SinkExt;
 use futures::StreamExt;
-use jsonrpsee::types::{error::ErrorCode, Id};
+use jsonrpsee::types::error::ErrorCode;
+use jsonrpsee::types::error::ErrorObject;
 use ripple_sdk::{
-    api::gateway::rpc_gateway_api::{ApiMessage, ApiProtocol, ClientContext, RpcRequest},
+    api::{
+        gateway::rpc_gateway_api::{ApiMessage, ApiProtocol, ClientContext, RpcRequest},
+        observability::log_signal::LogSignal,
+    },
     log::{error, info, trace},
     tokio::{
         net::{TcpListener, TcpStream},
@@ -41,7 +45,7 @@ use ripple_sdk::{
 };
 use ripple_sdk::{log::debug, tokio};
 use tokio_tungstenite::{
-    tungstenite::{self, Message},
+    tungstenite::{self, handshake::server::ErrorResponse, Message},
     WebSocketStream,
 };
 #[allow(dead_code)]
@@ -90,30 +94,7 @@ fn get_query(
     }
     Ok(found_q.map(|q| String::from(q.1)))
 }
-enum SessionError {
-    NoSessionFound,
-    NoAppIdFound,
-    NoSessionOrAppIdFound,
-}
 
-fn get_session(app_manager: &AppManagerState, session_id: &str) -> Result<String, SessionError> {
-    match app_manager.get_app_id_from_session_id(session_id) {
-        Some(app_id) => Ok(app_id),
-        None => Err(SessionError::NoAppIdFound),
-    }
-}
-/*
-1)
-if secure==true, then app_id is not required
-if secure==false, then app_id is required - get it from query or internal_app_id
-2) if session is not given, then error
-3) if app_id is not given, then get it from session
-4) if app_id is given, then use it
-5) if app_id is not given and session is not found, then error
-6) use the session id and app id to create a client identity
-7) send the client identity to the next step
-
-*/
 impl tungstenite::handshake::server::Callback for ConnectionCallback {
     fn on_request(
         self,
@@ -229,10 +210,10 @@ impl FireboltWs {
         state: PlatformState,
         gateway_secure: bool,
     ) {
-        let identity: ClientIdentity = connect_rx.await.unwrap();
+        let identity = connect_rx.await.unwrap();
         let client = state.get_client();
         let app_id = identity.app_id.clone();
-        let (session_tx, mut session_rx) = mpsc::channel(32);
+        let (session_tx, mut resp_rx) = mpsc::channel(32);
         let ctx = ClientContext {
             session_id: identity.session_id.clone(),
             app_id: app_id.clone(),
@@ -276,19 +257,30 @@ impl FireboltWs {
 
         let (mut sender, mut receiver) = ws_stream.split();
         let mut platform_state = state.clone();
-        /*
-        interago with firebolt gateway and downstream broker(s) starts here
-        */
+        let context_clone = ctx.clone();
+
         tokio::spawn(async move {
-            while let Some(rs) = session_rx.recv().await {
-                let send_result = sender.send(Message::Text(rs.jsonrpc_msg.clone())).await;
+            while let Some(api_message) = resp_rx.recv().await {
+                let send_result = sender
+                    .send(Message::Text(api_message.jsonrpc_msg.clone()))
+                    .await;
                 match send_result {
                     Ok(_) => {
                         platform_state
                             .metrics
-                            .update_api_stage(&rs.request_id, "response");
+                            .update_api_stage(&api_message.request_id, "response");
 
-                        if let Some(stats) = platform_state.metrics.get_api_stats(&rs.request_id) {
+                        LogSignal::new(
+                            "sent_firebolt_response".to_string(),
+                            "firebolt message sent".to_string(),
+                            context_clone.clone(),
+                        )
+                        .with_diagnostic_context_item("cid", &connection_id_c.clone())
+                        .emit_debug();
+                        if let Some(stats) = platform_state
+                            .metrics
+                            .get_api_stats(&api_message.request_id)
+                        {
                             info!(
                                 "Sending Firebolt response: {:?},{}",
                                 stats.stats_ref,
@@ -299,11 +291,15 @@ impl FireboltWs {
                                 stats.stats_ref,
                                 stats.stats.get_stage_durations()
                             );
-                            platform_state.metrics.remove_api_stats(&rs.request_id);
+                            platform_state
+                                .metrics
+                                .remove_api_stats(&api_message.request_id);
                         }
+
                         info!(
                             "Sent Firebolt response cid={} msg={}",
-                            connection_id_c, rs.jsonrpc_msg
+                            connection_id_c.clone(),
+                            api_message.jsonrpc_msg
                         );
                     }
                     Err(err) => error!("{:?}", err),
@@ -311,9 +307,14 @@ impl FireboltWs {
             }
             debug!(
                 "api msg rx closed {} {} {}",
-                app_id_c, session_id_c, connection_id_c
+                app_id_c.clone(),
+                session_id_c.clone(),
+                connection_id_c.clone()
             );
         });
+
+        let session_id_c = identity.session_id.clone();
+        let app_id_c = identity.app_id.clone();
         while let Some(msg) = receiver.next().await {
             match msg {
                 Ok(msg) => {
@@ -322,11 +323,11 @@ impl FireboltWs {
                         let req_id = Uuid::new_v4().to_string();
                         if let Ok(request) = RpcRequest::parse(
                             req_text.clone(),
-                            ctx.app_id.clone(),
-                            ctx.session_id.clone(),
+                            app_id_c.clone(),
+                            session_id_c.clone(),
                             req_id.clone(),
                             Some(connection_id.clone()),
-                            ctx.gateway_secure,
+                            gateway_secure,
                         ) {
                             info!("Received Firebolt request {}", request.params_json);
                             let msg = FireboltGatewayCommand::HandleRpc { request };
@@ -339,12 +340,12 @@ impl FireboltWs {
                                 .get_session_for_connection_id(&connection_id)
                             {
                                 use ripple_sdk::api::apps::EffectiveTransport;
-                                let err = JsonRpcErrorType::owned::<()>(
+                                let err = ErrorObject::owned::<()>(
                                     ErrorCode::InvalidRequest.code(),
-                                    "firebolt_ws_error".to_string(),
-                                    None::<()>,
+                                    "Invalid Request",
+                                    None,
                                 );
-
+                                //ErrorResponse::new(ErrorCode::InvalidRequest.code(), Id::Null);
                                 let msg = serde_json::to_string(&err).unwrap();
                                 let api_msg =
                                     ApiMessage::new(ApiProtocol::JsonRpc, msg, req_id.clone());

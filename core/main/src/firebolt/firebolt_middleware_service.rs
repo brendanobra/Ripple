@@ -351,7 +351,6 @@ where
             match request.extensions.get::<FireboltSession>() {
                 Some(firebolt_session) => {
                     println!("session found: {:?}", firebolt_session);
-                    
 
                     let app_id = firebolt_session.app_id.clone().to_string();
                     let session_id = firebolt_session.session_id.clone().to_string();
@@ -377,13 +376,26 @@ where
                     }
                     let _ =
                         PermissionHandler::fetch_and_store(&platform_state, &app_id, false).await;
-                    
-                    let request_downstream = request.clone();
-                    
-                    let json = serde_json::to_string(&RequestSer::owned(request_downstream.id, request_downstream.method, request_downstream.params.map(|p| p.into_owned()))).unwrap();
 
-                    let request = RpcRequest::parse(json, app_id, session_id, request_id, Some(connection_id), false).unwrap();
-                    
+                    let request_downstream = request.clone();
+
+                    let json = serde_json::to_string(&RequestSer::owned(
+                        request_downstream.id,
+                        request_downstream.method,
+                        request_downstream.params.map(|p| p.into_owned()),
+                    ))
+                    .unwrap();
+
+                    let request = RpcRequest::parse(
+                        json,
+                        app_id,
+                        session_id,
+                        request_id,
+                        Some(connection_id),
+                        false,
+                    )
+                    .unwrap();
+
                     let msg = FireboltGatewayCommand::HandleRpc { request };
                     if let Err(e) = ripple_client.clone().send_gateway_command(msg) {
                         error!("failed to send request {:?}", e);

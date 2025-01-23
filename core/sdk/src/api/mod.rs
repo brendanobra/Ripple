@@ -25,7 +25,6 @@ pub mod context;
 pub mod device;
 pub mod manifest;
 pub mod protocol;
-pub mod pubsub;
 pub mod session;
 pub mod settings;
 pub mod status_update;
@@ -73,6 +72,7 @@ pub mod firebolt {
 
 pub mod observability {
     pub mod analytics;
+    pub mod log_signal;
     pub mod metrics_util;
     pub mod operational_metrics;
 }
