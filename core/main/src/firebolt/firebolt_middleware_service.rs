@@ -7,8 +7,8 @@ use futures::FutureExt;
 use http::request;
 use http_body::Frame;
 use jsonrpsee::core::client::ClientT;
-use jsonrpsee::rpc_params;
 use jsonrpsee::tokio::sync::{mpsc, oneshot};
+use jsonrpsee::{rpc_params, ResponsePayload};
 use ripple_sdk::api::gateway::rpc_gateway_api::{ApiMessage, ClientContext, RpcRequest};
 use ripple_sdk::utils::channel_utils::oneshot_send_and_log;
 use ripple_sdk::uuid::Uuid;
@@ -31,7 +31,7 @@ use jsonrpsee::server::middleware::rpc::{RpcServiceBuilder, RpcServiceT};
 use jsonrpsee::server::{HttpRequest, MethodResponse, RpcModule, Server, TowerServiceBuilder};
 use jsonrpsee::types::Request;
 use jsonrpsee_core::BoxError;
-use jsonrpsee_types::{ErrorCode, ErrorObject, RequestSer};
+use jsonrpsee_types::{ErrorCode, ErrorObject, Id, RequestSer};
 use ripple_sdk::log::{error, info};
 
 use tower::Layer;
@@ -335,6 +335,7 @@ where
         let platform_state = self.platform_state.clone();
         let default_app_id = self.default_app_id.clone();
         println!("UnauthenticatedFireboltLayer: method `{:?}`", request);
+
         async move {
             let ripple_client = platform_state.get_client();
             //let session_id = get_firebolt_session(&request);
@@ -366,13 +367,24 @@ where
                         Some(session_tx.clone()),
                         ripple_sdk::api::apps::EffectiveTransport::Websocket,
                     );
+                    println!(
+                        "Creating new connection_id={} app_id={} session_id={}",
+                        connection_id, app_id, session_id
+                    );
                     let msg = FireboltGatewayCommand::RegisterSession {
-                        session_id: firebolt_session.session_id.to_string(),
+                        session_id: connection_id.clone(),
                         session,
                     };
                     if let Err(e) = ripple_client.send_gateway_command(msg) {
                         error!("Error registering the connection {:?}", e);
-                        // return;
+                        return MethodResponse::error(
+                            jsonrpsee_types::Id::Number(403),
+                            ErrorObject::owned(
+                                ErrorCode::InternalError.code(),
+                                "could not register the sesion",
+                                None::<()>,
+                            ),
+                        );
                     }
                     let _ =
                         PermissionHandler::fetch_and_store(&platform_state, &app_id, false).await;
@@ -386,23 +398,48 @@ where
                     ))
                     .unwrap();
 
-                    let request = RpcRequest::parse(
+                    let rpc_request = RpcRequest::parse(
                         json,
                         app_id,
                         session_id,
-                        request_id,
+                        request_id.clone(),
                         Some(connection_id),
                         false,
                     )
                     .unwrap();
 
-                    let msg = FireboltGatewayCommand::HandleRpc { request };
+                    let msg = FireboltGatewayCommand::HandleRpc {
+                        request: rpc_request,
+                    };
                     if let Err(e) = ripple_client.clone().send_gateway_command(msg) {
                         error!("failed to send request {:?}", e);
                     }
+                    let api_message = session_rx.recv().await.unwrap();
+
+                    let response =
+                        match serde_json::from_str::<serde_json::Value>(&api_message.jsonrpc_msg) {
+                            Ok(r) => {
+                                let rp = ResponsePayload::success(r);
+                                MethodResponse::response(request.id(), rp, 1024 * 2)
+                            }
+                            Err(e) => {
+                                error!("failed to parse response {:?}", e);
+                                MethodResponse::error(
+                                    jsonrpsee_types::Id::Number(403),
+                                    ErrorObject::owned(
+                                        ErrorCode::InternalError.code(),
+                                        "failed to parse response",
+                                        None::<()>,
+                                    ),
+                                )
+                            }
+                        };
+                    service.call(request.clone()).await;
+                    return response;
                 }
                 None => {
                     error!("no app id found in session manager for session",);
+                    service.call(request.clone()).await;
                     return MethodResponse::error(
                         jsonrpsee_types::Id::Number(403),
                         ErrorObject::owned(
@@ -413,7 +450,6 @@ where
                     );
                 }
             }
-            service.call(request.clone()).await
         }
         .boxed()
     }

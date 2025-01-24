@@ -183,7 +183,11 @@ impl FireboltGateway {
                     .session_state
                     .has_session(&request.ctx)
                 {
-                    error!("No sender for request {:?} ", request);
+                    error!(
+                        "No sender for request {:?} in session state {:?}",
+                        &request.ctx.cid, self.state.platform_state.session_state
+                    );
+
                     return;
                 }
             }

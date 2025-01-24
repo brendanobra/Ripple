@@ -266,12 +266,6 @@ impl AppEvents {
 
     pub async fn send_event(state: &PlatformState, listener: &EventListener, data: &Value) {
         let protocol = listener.call_ctx.protocol.clone();
-        // let event = Response {
-        //     jsonrpc: Some(TwoPointZero),
-        //     payload: ResponsePayload::Success(data.clone()),
-        //     id: Id::Number(listener.call_ctx.call_id),
-        // };
-        //let event = ResponsePayload::Success(data.clone()).into_owned();
 
         // Events are pass through no stats
         let api_message = ApiMessage::new(
