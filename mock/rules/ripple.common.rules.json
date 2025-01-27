@@ -6,18 +6,24 @@
         }
     },
     "rules": {
+        "ripple.device_os_version": {
+            "alias": "static",
+            "transform": {
+                "response": "{\"modelNumber\": \"25Q1_SPRINT_20250122003212_U\"}"
+            }
+        },
         "device.type": {
-      "alias": "static",
-      "transform": {
-        "response": "\"TV\""
-      }
-    },
-    "localization.countryCode": {
-        "alias": "org.rdk.System.getTerritory",
-        "transform": {
-          "response": "if .result and .result.success then if .result.territory == \"CAN\" then \"CA\" else \"US\" end else \"US\" end"
-        }
-      },
+            "alias": "static",
+            "transform": {
+                "response": "\"TV\""
+            }
+        },
+        "localization.countryCode": {
+            "alias": "org.rdk.System.getTerritory",
+            "transform": {
+                "response": "if .result and .result.success then if .result.territory == \"CAN\" then \"CA\" else \"US\" end else \"US\" end"
+            }
+        },
         "localization.setCountryCode": {
             "alias": "org.rdk.System.setTerritory",
             "transform": {
