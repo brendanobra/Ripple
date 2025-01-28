@@ -4,11 +4,12 @@ use std::sync::Arc;
 
 use futures::future::BoxFuture;
 use futures::FutureExt;
-use http::request;
+use http::{method, request};
 use http_body::Frame;
 use jsonrpsee::core::client::ClientT;
 use jsonrpsee::tokio::sync::{mpsc, oneshot};
-use jsonrpsee::{rpc_params, ResponsePayload};
+use jsonrpsee::{rpc_params, Methods, ResponsePayload};
+use openrpc_validator::FireboltOpenRpc;
 use ripple_sdk::api::gateway::rpc_gateway_api::{ApiMessage, ClientContext, RpcRequest};
 use ripple_sdk::utils::channel_utils::oneshot_send_and_log;
 use ripple_sdk::uuid::Uuid;
@@ -16,6 +17,7 @@ use ripple_sdk::uuid::Uuid;
 use super::firebolt_gateway::FireboltGatewayCommand;
 use super::firebolt_ws::ClientIdentity;
 use crate::firebolt::firebolt_ws::ConnectionCallbackConfig;
+use crate::firebolt::handlers::account_rpc::{AccountImpl, AccountServer};
 use crate::firebolt::handlers::provider_registrar::ProviderRegistrar;
 use crate::state::platform_state;
 use crate::utils::rpc_utils::get_base_method;
@@ -318,7 +320,10 @@ where
         self.0.call(req)
     }
 }
-
+/*
+UnauthenticatedFireboltLayer:
+Tower layer to handle unauthenticated requests , using default_app_id (which is provided by configuration)
+*/
 pub struct UnauthenticatedFireboltLayer<S> {
     service: S,
     platform_state: PlatformState,
@@ -338,8 +343,6 @@ where
 
         async move {
             let ripple_client = platform_state.get_client();
-            //let session_id = get_firebolt_session(&request);
-            //let app_id = get_app_id(&request, &self.default_app_id);
             let app_state = platform_state.app_manager_state.clone();
             let (connect_tx, connect_rx) = oneshot::channel::<ClientIdentity>();
             let cfg = ConnectionCallbackConfig {
@@ -349,9 +352,22 @@ where
                 internal_app_id: default_app_id.clone(),
             };
             let (session_tx, mut session_rx) = mpsc::channel::<ApiMessage>(32);
+
+            /*
+            need to:
+            1) determine if rule or not
+            2) if rule, then call the broker
+            3) if not rule, then "let" the regular rpc method call happen
+            */
             match request.extensions.get::<FireboltSession>() {
                 Some(firebolt_session) => {
                     println!("session found: {:?}", firebolt_session);
+                    let method_name = request.method_name();
+                    if !platform_state.rule_engine().has_rule_with_name(method_name) {
+                        /*defer to next layer/auto impls */
+                        return service.call(request.clone()).await;
+                    }
+                    println!("method_name: {:?} is rule based", method_name);
 
                     let app_id = firebolt_session.app_id.clone().to_string();
                     let session_id = firebolt_session.session_id.clone().to_string();
@@ -551,11 +567,11 @@ where
 
                     let connection_id_c = connection_id.clone();
 
-                    let msg = FireboltGatewayCommand::RegisterSession {
+                    let firebolt_gateway_command = FireboltGatewayCommand::RegisterSession {
                         session_id: connection_id.clone(),
                         session,
                     };
-                    if let Err(e) = ripple_client.send_gateway_command(msg) {
+                    if let Err(e) = ripple_client.send_gateway_command(firebolt_gateway_command) {
                         error!("Error registering the connection {:?}", e);
                         return MethodResponse::error(
                             jsonrpsee_types::Id::Number(403),
@@ -595,6 +611,11 @@ pub async fn start(
     internal_app_id: Option<String>,
 ) -> anyhow::Result<SocketAddr> {
     let mut module = RpcModule::new(());
+    let mut methods = Methods::new();
+    ProviderRegistrar::register_methods(&platform_state, &mut methods);
+    // module
+    // module.register_methods(methods);
+    //module.register_method("firebolt.test", |_, _, _| "lo")?;
     let http_middleware =
         tower::ServiceBuilder::new().layer(FireboltSessionAuthenticatorLayer::new(
             internal_app_id.clone(),
@@ -603,10 +624,11 @@ pub async fn start(
         ));
 
     let addr = if secure {
+        let closed_platform_state = platform_state.clone();
         let rpc_middleware =
             RpcServiceBuilder::new().layer_fn(move |service| AuthenticatedFireboltLayer {
                 service,
-                platform_state: platform_state.clone(),
+                platform_state: closed_platform_state.clone(),
             });
 
         let server = jsonrpsee::server::Server::builder()
@@ -615,8 +637,13 @@ pub async fn start(
             .build(server_addr)
             .await?;
         let addr = server.local_addr()?;
+        use crate::firebolt::handlers::account_rpc::*;
+        let f = AccountImpl {
+            platform_state: platform_state.clone(),
+        }
+        .into_rpc();
 
-        let handle = server.start(module);
+        let handle = server.start(f);
         info!(
             "Listening on: {} secure={} with internal_app_id={:?}",
             server_addr, secure, internal_app_id
@@ -625,10 +652,11 @@ pub async fn start(
         addr
     } else {
         let default_app_id = internal_app_id.clone();
+        let closed_platform_state = platform_state.clone();
         let rpc_middleware =
             RpcServiceBuilder::new().layer_fn(move |service| UnauthenticatedFireboltLayer {
                 service,
-                platform_state: platform_state.clone(),
+                platform_state: closed_platform_state.clone(),
                 default_app_id: internal_app_id.clone(),
             });
         let server = jsonrpsee::server::Server::builder()
@@ -637,8 +665,14 @@ pub async fn start(
             .build(server_addr)
             .await?;
         let addr = server.local_addr()?;
+        use crate::firebolt::handlers::account_rpc::*;
+        let f = AccountImpl {
+            platform_state: platform_state.clone(),
+        }
+        .into_rpc();
 
-        let handle = server.start(module);
+        let handle = server.start(f);
+        //let handle = server.start(module);
         info!(
             "Listening on: {} secure={} with internal_app_id={:?}",
             server_addr, secure, default_app_id

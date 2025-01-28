@@ -42,6 +42,7 @@ pub enum RippleError {
     RuleError,
     ServiceNotReady,
     BrokerError(String),
+    RpcError(String),
 }
 impl From<RecvError> for RippleError {
     fn from(e: RecvError) -> Self {
@@ -73,6 +74,7 @@ impl std::fmt::Display for RippleError {
                 let msg = format!("BrokerError {}", msg);
                 write!(f, "{}", msg)
             }
+            RippleError::RpcError(r) => write!(f, "RpcError {}", r),
         }
     }
 }

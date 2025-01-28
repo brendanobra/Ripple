@@ -51,6 +51,7 @@ pub trait Account {
 pub struct AccountImpl {
     pub platform_state: PlatformState,
 }
+pub struct AccountServerImpl;
 
 #[async_trait]
 impl AccountServer for AccountImpl {

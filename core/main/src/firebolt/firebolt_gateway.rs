@@ -100,7 +100,8 @@ impl FireboltGateway {
         state.platform_state.router_state.update_methods(methods);
         FireboltGateway { state }
     }
-
+    /*describe what this method does
+     */
     pub async fn start(&self) {
         trace!("Starting Gateway Listener");
         let mut firebolt_gateway_rx = self

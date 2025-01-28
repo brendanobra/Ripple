@@ -110,6 +110,7 @@ pub struct PlatformState {
     pub ripple_cache: RippleCache,
     pub version: Option<String>,
     pub endpoint_state: EndpointBrokerState,
+    pub rule_engine: RuleEngine,
 }
 
 impl PlatformState {
@@ -146,9 +147,10 @@ impl PlatformState {
             endpoint_state: EndpointBrokerState::new(
                 metrics_state,
                 broker_sender,
-                rule_engine,
+                rule_engine.clone(),
                 client,
             ),
+            rule_engine: rule_engine,
         }
     }
 
@@ -249,6 +251,9 @@ impl PlatformState {
         self.get_client()
             .send_extn_request(rpc_request.to_owned())
             .await
+    }
+    pub fn rule_engine(&self) -> RuleEngine {
+        self.rule_engine.clone()
     }
 }
 
