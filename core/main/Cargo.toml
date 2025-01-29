@@ -70,15 +70,18 @@ anyhow = "1.0.95"
 #jsonrpsee-types = "0.24.7"
 #jsonrpsee-core = "0.24.7"
 #tokio-stream = "0.1.17"
-jsonrpsee = { version="0.24.7" , features = ["server", "macros"] }
-jsonrpsee-types = "0.24.7"
-jsonrpsee-core = "0.24.7"
+jsonrpsee = { version="0.24.8" , features = ["server", "macros"], default-features = false }
+jsonrpsee-types = "0.24.8"
+jsonrpsee-core = "0.24.8"
 tokio-stream = "0.1.17"
-tower = {version="=0.4.13"}
-tower-http = {version="=0.5.2"}
+tower = {version="=0.4.13", default-features = false}
+tower-layer = {version="=0.3.3", default-features = false}
+tower-service = {version="=0.3.3", default-features = false}
+#tower-http = {version="=0.5.2", default-features = false}
 http = "1"
 http-body = "1"
 http-body-util = "0.1.0"
+#cargo-bloat = "0.12.1"
 
 [build-dependencies]
 vergen = "1"

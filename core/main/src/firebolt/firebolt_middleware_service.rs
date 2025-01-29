@@ -1,22 +1,19 @@
 use std::net::SocketAddr;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::Arc;
 
 use futures::future::BoxFuture;
 use futures::FutureExt;
-use http::{method, request};
-use http_body::Frame;
-use jsonrpsee::core::client::ClientT;
 use jsonrpsee::tokio::sync::{mpsc, oneshot};
-use jsonrpsee::{rpc_params, Methods, ResponsePayload};
-use openrpc_validator::FireboltOpenRpc;
-use ripple_sdk::api::gateway::rpc_gateway_api::{ApiMessage, ClientContext, RpcRequest};
+use jsonrpsee::{Methods, ResponsePayload};
+use ripple_sdk::api::gateway::rpc_gateway_api::{
+    ApiMessage, CallContext, ClientContext, RpcRequest,
+};
 use ripple_sdk::utils::channel_utils::oneshot_send_and_log;
 use ripple_sdk::uuid::Uuid;
 use serde_json::Value;
 
 use super::firebolt_gateway::FireboltGatewayCommand;
 use super::firebolt_ws::ClientIdentity;
+use crate::firebolt::firebolt_gatekeeper::FireboltGatekeeper;
 use crate::firebolt::firebolt_ws::ConnectionCallbackConfig;
 use crate::firebolt::handlers::account_rpc::{AccountImpl, AccountServer};
 use crate::firebolt::handlers::audio_description_rpc::AudioDescriptionRPCProvider;
@@ -35,11 +32,11 @@ use futures_util::{Future, TryFutureExt};
 use jsonrpsee::server::middleware::rpc::{RpcServiceBuilder, RpcServiceT};
 use jsonrpsee::server::{HttpRequest, MethodResponse, RpcModule, Server, TowerServiceBuilder};
 use jsonrpsee::types::Request;
-use jsonrpsee_core::BoxError;
-use jsonrpsee_types::{ErrorCode, ErrorObject, Id, RequestSer};
+use jsonrpsee_core::{BoxError, JsonRawValue};
+use jsonrpsee_types::{ErrorCode, ErrorObject, Id, Params, RequestSer};
 use ripple_sdk::log::{error, info};
 
-use tower::Layer;
+use tower_layer::Layer;
 
 #[derive(Debug, Clone)]
 pub struct FireboltSessionValidator<S> {
@@ -204,15 +201,15 @@ fn get_firebolt_session<B>(
     }
 }
 
-impl<S, B> tower::Service<HttpRequest<B>> for FireboltSessionValidator<S>
+impl<S, B> tower_service::Service<HttpRequest<B>> for FireboltSessionValidator<S>
 where
-    S: tower::Service<HttpRequest, Response = jsonrpsee::server::HttpResponse>,
+    S: tower_service::Service<HttpRequest, Response = jsonrpsee::server::HttpResponse>,
     S::Response: 'static,
-    S::Error: Into<tower::BoxError> + 'static,
+    S::Error: Into<jsonrpsee_core::BoxError> + 'static,
     S::Future: Send + 'static,
     B: http_body::Body<Data = hyper::body::Bytes> + Send + 'static,
     B::Data: Send,
-    B::Error: Into<tower::BoxError>,
+    B::Error: Into<jsonrpsee_core::BoxError>,
 {
     type Response = S::Response;
     type Error = BoxError;
@@ -323,6 +320,19 @@ where
         self.0.call(req)
     }
 }
+fn enrich_request_params(params: &Params, call_context: &CallContext) -> Box<JsonRawValue> {
+    let params: serde_json::Map<String, Value> = params.parse().unwrap();
+
+    let ctx: Value = serde_json::to_value(&call_context.clone()).unwrap();
+    let p = serde_json::json!({
+        "ctx": ctx,
+        "params": params,
+        "request" : params,
+    });
+
+    println!("sending {} to next layer", p);
+    serde_json::value::to_raw_value(&p).unwrap()
+}
 /*
 UnauthenticatedFireboltLayer:
 Tower layer to handle unauthenticated requests , using default_app_id (which is provided by configuration)
@@ -417,27 +427,48 @@ where
                         let mut legacy_request = request.clone();
                         //legacy_request.method = std::borrow::Cow::Owned(method_name.to_lowercase());
 
-                        let params: serde_json::Map<String, Value> =
-                            request.params().parse().unwrap();
-                        let ctx: Value = serde_json::to_value(&rpc_request.ctx.clone()).unwrap();
-                        let p = serde_json::json!({
-                            "ctx": ctx,
-                            "params": params,
-                            "request" : params,
-                        });
+                        // let params: serde_json::Map<String, Value> =
+                        //     request.params().parse().unwrap();
+                        // let ctx: Value = serde_json::to_value(&rpc_request.ctx.clone()).unwrap();
+                        // let p = serde_json::json!({
+                        //     "ctx": ctx,
+                        //     "params": params,
+                        //     "request" : params,
+                        // });
 
-                        println!("sending {} to next layer", p);
-                        let p = serde_json::value::to_raw_value(&p).unwrap();
-                        legacy_request.params = Some(std::borrow::Cow::Owned(p));
+                        // println!("sending {} to next layer", p);
+                        // let p = serde_json::value::to_raw_value(&p).unwrap();
+                        legacy_request.params = Some(std::borrow::Cow::Owned(
+                            enrich_request_params(&legacy_request.params(), &rpc_request.ctx),
+                        ));
                         //return Self::get_method_response(method_name);
-                        let f = service.call(legacy_request).await;
+                        let g =
+                            FireboltGatekeeper::gate(platform_state.clone(), rpc_request.clone())
+                                .await;
+                        match g {
+                            Ok(_) => {
+                                println!("gatekeeper passed");
+                                return service.call(legacy_request).await;
+                            }
+                            Err(deny_reason) => {
+                                return MethodResponse::error(
+                                    jsonrpsee_types::Id::Number(403),
+                                    ErrorObject::owned(
+                                        ErrorCode::InvalidRequest.code(),
+                                        "Access Denied",
+                                        Some(deny_reason),
+                                    ),
+                                );
+                            }
+                        }
+                        // let f = service.call(legacy_request).await;
 
-                        println!(
-                            "response from next layer: {:?} for {:?} ",
-                            f,
-                            request.clone()
-                        );
-                        return f;
+                        // println!(
+                        //     "response from next layer: {:?} for {:?} ",
+                        //     f,
+                        //     request.clone()
+                        // );
+                        // return f;
                     }
                     println!("method_name: {:?} is rule based", method_name);
 
