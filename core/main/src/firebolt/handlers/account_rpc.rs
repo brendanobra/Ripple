@@ -127,6 +127,7 @@ fn rpc_request_setter(response: Result<ExtnMessage, RippleError>) -> bool {
 pub struct AccountRPCProvider;
 impl RippleRPCProvider<AccountImpl> for AccountRPCProvider {
     fn provide(platform_state: PlatformState) -> RpcModule<AccountImpl> {
-        (AccountImpl { platform_state }).into_rpc()
+        let f = (AccountImpl { platform_state }).into_rpc();
+        f
     }
 }

@@ -13,11 +13,14 @@ use openrpc_validator::FireboltOpenRpc;
 use ripple_sdk::api::gateway::rpc_gateway_api::{ApiMessage, ClientContext, RpcRequest};
 use ripple_sdk::utils::channel_utils::oneshot_send_and_log;
 use ripple_sdk::uuid::Uuid;
+use serde_json::Value;
 
 use super::firebolt_gateway::FireboltGatewayCommand;
 use super::firebolt_ws::ClientIdentity;
 use crate::firebolt::firebolt_ws::ConnectionCallbackConfig;
 use crate::firebolt::handlers::account_rpc::{AccountImpl, AccountServer};
+use crate::firebolt::handlers::audio_description_rpc::AudioDescriptionRPCProvider;
+use crate::firebolt::handlers::device_rpc::DeviceRPCProvider;
 use crate::firebolt::handlers::provider_registrar::ProviderRegistrar;
 use crate::state::platform_state;
 use crate::utils::rpc_utils::get_base_method;
@@ -329,6 +332,19 @@ pub struct UnauthenticatedFireboltLayer<S> {
     platform_state: PlatformState,
     default_app_id: Option<String>,
 }
+impl<S> UnauthenticatedFireboltLayer<S> {
+    pub fn get_method_response(method_name: &str, methods: Methods) -> MethodResponse {
+        MethodResponse::error(
+            jsonrpsee_types::Id::Number(403),
+            ErrorObject::owned(
+                ErrorCode::InternalError.code(),
+                format!("method {} not found", method_name),
+                None::<()>,
+            ),
+        )
+    }
+}
+
 impl<'a, S> RpcServiceT<'a> for UnauthenticatedFireboltLayer<S>
 where
     S: RpcServiceT<'a> + Send + Sync + Clone + 'static,
@@ -363,12 +379,6 @@ where
                 Some(firebolt_session) => {
                     println!("session found: {:?}", firebolt_session);
                     let method_name = request.method_name();
-                    if !platform_state.rule_engine().has_rule_with_name(method_name) {
-                        /*defer to next layer/auto impls */
-                        return service.call(request.clone()).await;
-                    }
-                    println!("method_name: {:?} is rule based", method_name);
-
                     let app_id = firebolt_session.app_id.clone().to_string();
                     let session_id = firebolt_session.session_id.clone().to_string();
                     let request_id = Uuid::new_v4().to_string();
@@ -383,6 +393,54 @@ where
                         Some(session_tx.clone()),
                         ripple_sdk::api::apps::EffectiveTransport::Websocket,
                     );
+                    let request_downstream = request.clone();
+
+                    let json = serde_json::to_string(&RequestSer::owned(
+                        request_downstream.id,
+                        request_downstream.method,
+                        request_downstream.params.map(|p| p.into_owned()),
+                    ))
+                    .unwrap();
+
+                    let rpc_request = RpcRequest::parse(
+                        json,
+                        app_id.clone(),
+                        session_id.clone(),
+                        request_id.clone(),
+                        Some(connection_id.clone()),
+                        false,
+                    )
+                    .unwrap();
+
+                    if !platform_state.rule_engine().has_rule_with_name(method_name) {
+                        /*defer to next layer/auto impls */
+                        let mut legacy_request = request.clone();
+                        //legacy_request.method = std::borrow::Cow::Owned(method_name.to_lowercase());
+
+                        let params: serde_json::Map<String, Value> =
+                            request.params().parse().unwrap();
+                        let ctx: Value = serde_json::to_value(&rpc_request.ctx.clone()).unwrap();
+                        let p = serde_json::json!({
+                            "ctx": ctx,
+                            "params": params,
+                            "request" : params,
+                        });
+
+                        println!("sending {} to next layer", p);
+                        let p = serde_json::value::to_raw_value(&p).unwrap();
+                        legacy_request.params = Some(std::borrow::Cow::Owned(p));
+                        //return Self::get_method_response(method_name);
+                        let f = service.call(legacy_request).await;
+
+                        println!(
+                            "response from next layer: {:?} for {:?} ",
+                            f,
+                            request.clone()
+                        );
+                        return f;
+                    }
+                    println!("method_name: {:?} is rule based", method_name);
+
                     println!(
                         "Creating new connection_id={} app_id={} session_id={}",
                         connection_id, app_id, session_id
@@ -404,25 +462,6 @@ where
                     }
                     let _ =
                         PermissionHandler::fetch_and_store(&platform_state, &app_id, false).await;
-
-                    let request_downstream = request.clone();
-
-                    let json = serde_json::to_string(&RequestSer::owned(
-                        request_downstream.id,
-                        request_downstream.method,
-                        request_downstream.params.map(|p| p.into_owned()),
-                    ))
-                    .unwrap();
-
-                    let rpc_request = RpcRequest::parse(
-                        json,
-                        app_id,
-                        session_id,
-                        request_id.clone(),
-                        Some(connection_id),
-                        false,
-                    )
-                    .unwrap();
 
                     let msg = FireboltGatewayCommand::HandleRpc {
                         request: rpc_request,
@@ -530,6 +569,7 @@ pub struct FireboltDispatchLayer<S> {
     service: S,
     platform_state: PlatformState,
 }
+
 impl<'a, S> RpcServiceT<'a> for FireboltDispatchLayer<S>
 where
     S: RpcServiceT<'a> + Send + Sync + Clone + 'static,
@@ -613,6 +653,7 @@ pub async fn start(
     let mut module = RpcModule::new(());
     let mut methods = Methods::new();
     ProviderRegistrar::register_methods(&platform_state, &mut methods);
+    use crate::firebolt::rpc::*;
     // module
     // module.register_methods(methods);
     //module.register_method("firebolt.test", |_, _, _| "lo")?;
@@ -637,13 +678,12 @@ pub async fn start(
             .build(server_addr)
             .await?;
         let addr = server.local_addr()?;
-        use crate::firebolt::handlers::account_rpc::*;
-        let f = AccountImpl {
-            platform_state: platform_state.clone(),
-        }
-        .into_rpc();
 
-        let handle = server.start(f);
+        use crate::firebolt::handlers::account_rpc::*;
+        let a = AccountRPCProvider::provide_with_alias(platform_state.clone());
+        println!("a: {:?}", a);
+
+        let handle = server.start(a);
         info!(
             "Listening on: {} secure={} with internal_app_id={:?}",
             server_addr, secure, internal_app_id
@@ -666,12 +706,25 @@ pub async fn start(
             .await?;
         let addr = server.local_addr()?;
         use crate::firebolt::handlers::account_rpc::*;
-        let f = AccountImpl {
-            platform_state: platform_state.clone(),
-        }
-        .into_rpc();
 
-        let handle = server.start(f);
+        //let mut a = AccountRPCProvider::provide_with_alias(platform_state.clone()
+        module.merge(AccountRPCProvider::provide_with_alias(
+            platform_state.clone(),
+        ))?;
+        module.merge(DeviceRPCProvider::provide_with_alias(
+            platform_state.clone(),
+        ))?;
+        module.merge(AudioDescriptionRPCProvider::provide_with_alias(
+            platform_state.clone(),
+        ))?;
+
+        RpcModule::new(());
+        //let a = Methods::new();
+        //println!("a: {:?}", a);
+        module.register_method("say_hello", |_, _, _| "lo")?;
+        module.register_method("account.sesh", |_, _, _| "whatup?")?;
+
+        let handle = server.start(module);
         //let handle = server.start(module);
         info!(
             "Listening on: {} secure={} with internal_app_id={:?}",

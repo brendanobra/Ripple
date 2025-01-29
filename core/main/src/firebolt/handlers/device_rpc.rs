@@ -152,7 +152,7 @@ pub async fn get_ll_mac_addr(state: PlatformState) -> RpcResult<String> {
 pub struct DeviceImpl {
     pub state: PlatformState,
 }
-
+pub struct DeviceServerImpl;
 impl DeviceImpl {
     async fn firmware_info(&self, _ctx: CallContext) -> RpcResult<FirmwareInfo> {
         match self
