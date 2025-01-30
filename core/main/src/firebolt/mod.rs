@@ -46,9 +46,9 @@ pub mod handlers {
 pub mod firebolt_gatekeeper;
 pub mod firebolt_gateway;
 pub mod firebolt_middleware_service;
-pub mod firebolt_ws;
+//pub mod firebolt_ws;
 pub mod rpc;
-pub mod rpc_router;
+//pub mod rpc_router;
 
 use ripple_sdk::utils::error::RippleError;
 use ripple_sdk::utils::rpc_utils::rpc_custom_error_result;

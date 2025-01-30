@@ -12,21 +12,15 @@ use ripple_sdk::uuid::Uuid;
 use serde_json::Value;
 
 use super::firebolt_gateway::FireboltGatewayCommand;
-use super::firebolt_ws::ClientIdentity;
+//use super::firebolt_ws::ClientIdentity;
 use crate::firebolt::firebolt_gatekeeper::FireboltGatekeeper;
-use crate::firebolt::firebolt_ws::ConnectionCallbackConfig;
-use crate::firebolt::handlers::account_rpc::{AccountImpl, AccountServer};
+//use crate::firebolt::firebolt_ws::ConnectionCallbackConfig;
+use crate::firebolt::handlers::account_rpc::AccountRPCProvider;
 use crate::firebolt::handlers::audio_description_rpc::AudioDescriptionRPCProvider;
 use crate::firebolt::handlers::device_rpc::DeviceRPCProvider;
 use crate::firebolt::handlers::provider_registrar::ProviderRegistrar;
-use crate::state::platform_state;
-use crate::utils::rpc_utils::get_base_method;
-use crate::{
-    service::apps::delegated_launcher_handler::AppManagerState,
-    state::{
-        cap::permitted_state::PermissionHandler, platform_state::PlatformState,
-        session_state::Session,
-    },
+use crate::state::{
+    cap::permitted_state::PermissionHandler, platform_state::PlatformState, session_state::Session,
 };
 use futures_util::{Future, TryFutureExt};
 use jsonrpsee::server::middleware::rpc::{RpcServiceBuilder, RpcServiceT};
@@ -306,20 +300,6 @@ use jsonrpsee_types::rpc
  7) send the client identity to the next step
 */
 
-#[derive(Clone)]
-pub struct Logger<S>(S);
-
-impl<'a, S> RpcServiceT<'a> for Logger<S>
-where
-    S: RpcServiceT<'a> + Send + Sync,
-{
-    type Future = S::Future;
-
-    fn call(&self, req: Request<'a>) -> Self::Future {
-        println!("logger middleware: method `{:?}`", req);
-        self.0.call(req)
-    }
-}
 fn enrich_request_params(params: &Params, call_context: &CallContext) -> Box<JsonRawValue> {
     let params: serde_json::Map<String, Value> = params.parse().unwrap();
 
@@ -330,7 +310,6 @@ fn enrich_request_params(params: &Params, call_context: &CallContext) -> Box<Jso
         "request" : params,
     });
 
-    println!("sending {} to next layer", p);
     serde_json::value::to_raw_value(&p).unwrap()
 }
 /*
@@ -341,18 +320,6 @@ pub struct UnauthenticatedFireboltLayer<S> {
     service: S,
     platform_state: PlatformState,
     default_app_id: Option<String>,
-}
-impl<S> UnauthenticatedFireboltLayer<S> {
-    pub fn get_method_response(method_name: &str, methods: Methods) -> MethodResponse {
-        MethodResponse::error(
-            jsonrpsee_types::Id::Number(403),
-            ErrorObject::owned(
-                ErrorCode::InternalError.code(),
-                format!("method {} not found", method_name),
-                None::<()>,
-            ),
-        )
-    }
 }
 
 impl<'a, S> RpcServiceT<'a> for UnauthenticatedFireboltLayer<S>
@@ -365,18 +332,18 @@ where
         let service = self.service.clone();
         let platform_state = self.platform_state.clone();
         let default_app_id = self.default_app_id.clone();
-        println!("UnauthenticatedFireboltLayer: method `{:?}`", request);
+        info!("UnauthenticatedFireboltLayer: method `{:?}`", request);
 
         async move {
             let ripple_client = platform_state.get_client();
             let app_state = platform_state.app_manager_state.clone();
-            let (connect_tx, connect_rx) = oneshot::channel::<ClientIdentity>();
-            let cfg = ConnectionCallbackConfig {
-                next: connect_tx,
-                app_state: app_state.clone(),
-                secure: false,
-                internal_app_id: default_app_id.clone(),
-            };
+            //let (connect_tx, _connect_rx) = oneshot::channel::<ClientIdentity>();
+            // let cfg = ConnectionCallbackConfig {
+            //     next: connect_tx,
+            //     app_state: app_state.clone(),
+            //     secure: false,
+            //     internal_app_id: default_app_id.clone(),
+            // };
             let (session_tx, mut session_rx) = mpsc::channel::<ApiMessage>(32);
 
             /*
@@ -387,17 +354,17 @@ where
             */
             match request.extensions.get::<FireboltSession>() {
                 Some(firebolt_session) => {
-                    println!("session found: {:?}", firebolt_session);
+                    info!("session found: {:?}", firebolt_session);
                     let method_name = request.method_name();
                     let app_id = firebolt_session.app_id.clone().to_string();
                     let session_id = firebolt_session.session_id.clone().to_string();
                     let request_id = Uuid::new_v4().to_string();
                     let connection_id = Uuid::new_v4().to_string();
-                    let cid = ClientIdentity {
-                        session_id: session_id.clone(),
-                        app_id: app_id.clone(),
-                    };
-                    oneshot_send_and_log(cfg.next, cid, "ResolveClientIdentity");
+                    // let cid = ClientIdentity {
+                    //     session_id: session_id.clone(),
+                    //     app_id: app_id.clone(),
+                    // };
+                    //oneshot_send_and_log(cfg.next, cid, "ResolveClientIdentity");
                     let session = Session::new(
                         app_id.clone(),
                         Some(session_tx.clone()),
@@ -425,29 +392,14 @@ where
                     if !platform_state.rule_engine().has_rule_with_name(method_name) {
                         /*defer to next layer/auto impls */
                         let mut legacy_request = request.clone();
-                        //legacy_request.method = std::borrow::Cow::Owned(method_name.to_lowercase());
-
-                        // let params: serde_json::Map<String, Value> =
-                        //     request.params().parse().unwrap();
-                        // let ctx: Value = serde_json::to_value(&rpc_request.ctx.clone()).unwrap();
-                        // let p = serde_json::json!({
-                        //     "ctx": ctx,
-                        //     "params": params,
-                        //     "request" : params,
-                        // });
-
-                        // println!("sending {} to next layer", p);
-                        // let p = serde_json::value::to_raw_value(&p).unwrap();
                         legacy_request.params = Some(std::borrow::Cow::Owned(
                             enrich_request_params(&legacy_request.params(), &rpc_request.ctx),
                         ));
-                        //return Self::get_method_response(method_name);
-                        let g =
-                            FireboltGatekeeper::gate(platform_state.clone(), rpc_request.clone())
-                                .await;
-                        match g {
+
+                        match FireboltGatekeeper::gate(platform_state.clone(), rpc_request.clone())
+                            .await
+                        {
                             Ok(_) => {
-                                println!("gatekeeper passed");
                                 return service.call(legacy_request).await;
                             }
                             Err(deny_reason) => {
@@ -461,21 +413,8 @@ where
                                 );
                             }
                         }
-                        // let f = service.call(legacy_request).await;
-
-                        // println!(
-                        //     "response from next layer: {:?} for {:?} ",
-                        //     f,
-                        //     request.clone()
-                        // );
-                        // return f;
                     }
-                    println!("method_name: {:?} is rule based", method_name);
 
-                    println!(
-                        "Creating new connection_id={} app_id={} session_id={}",
-                        connection_id, app_id, session_id
-                    );
                     let msg = FireboltGatewayCommand::RegisterSession {
                         session_id: connection_id.clone(),
                         session,
@@ -558,7 +497,7 @@ where
     type Future = BoxFuture<'a, MethodResponse>;
 
     fn call(&self, req: Request<'a>) -> Self::Future {
-        println!("logger middleware: method `{:?}`", req);
+        info!("logger middleware: method `{:?}`", req);
         let service = self.service.clone();
         let platform_state = self.platform_state.clone();
 
@@ -617,7 +556,7 @@ where
                 Some(firebolt_session) => {
                     let client_context: ClientContext = firebolt_session.into();
 
-                    let (session_tx, mut session_rx) = mpsc::channel::<ApiMessage>(32);
+                    let (session_tx, mut _session_rx) = mpsc::channel::<ApiMessage>(32);
                     let app_id = client_context.app_id.clone();
                     let session_id = client_context.session_id.clone();
                     let gateway_secure = firebolt_session.secure;
@@ -635,8 +574,6 @@ where
                         "Creating new connection_id={} app_id={} session_id={}, gateway_secure={}",
                         connection_id, app_id_c, session_id_c, gateway_secure
                     );
-
-                    let connection_id_c = connection_id.clone();
 
                     let firebolt_gateway_command = FireboltGatewayCommand::RegisterSession {
                         session_id: connection_id.clone(),
@@ -660,9 +597,6 @@ where
                     {
                         error!("Couldnt pre cache permissions");
                     }
-
-                    // let (mut sender, mut receiver) = ws_stream.split();
-
                     service.call(req.clone()).await
                 }
                 None => MethodResponse::error(
@@ -685,9 +619,7 @@ pub async fn start(
     let mut methods = Methods::new();
     ProviderRegistrar::register_methods(&platform_state, &mut methods);
     use crate::firebolt::rpc::*;
-    // module
-    // module.register_methods(methods);
-    //module.register_method("firebolt.test", |_, _, _| "lo")?;
+
     let http_middleware =
         tower::ServiceBuilder::new().layer(FireboltSessionAuthenticatorLayer::new(
             internal_app_id.clone(),
@@ -736,9 +668,6 @@ pub async fn start(
             .build(server_addr)
             .await?;
         let addr = server.local_addr()?;
-        use crate::firebolt::handlers::account_rpc::*;
-
-        //let mut a = AccountRPCProvider::provide_with_alias(platform_state.clone()
         module.merge(AccountRPCProvider::provide_with_alias(
             platform_state.clone(),
         ))?;
@@ -750,13 +679,8 @@ pub async fn start(
         ))?;
 
         RpcModule::new(());
-        //let a = Methods::new();
-        //println!("a: {:?}", a);
-        module.register_method("say_hello", |_, _, _| "lo")?;
-        module.register_method("account.sesh", |_, _, _| "whatup?")?;
 
         let handle = server.start(module);
-        //let handle = server.start(module);
         info!(
             "Listening on: {} secure={} with internal_app_id={:?}",
             server_addr, secure, default_app_id
@@ -764,29 +688,5 @@ pub async fn start(
         ripple_sdk::tokio::spawn(handle.stopped());
         addr
     };
-    /*
-    TODO: bolt up to registrar
-    */
-
-    /*
-    need to:
-    register methods
-    FireboltWs::start
-    FireboltWs::handle_connection
-        */
-    //module.register_method("firebolt_gateway", FireboltGatewayCommand::new(state.clone()));
-
-    // let addr = server.local_addr()?;
-
-    // let handle = server.start(module);
-
-    // // In this example we don't care about doing shutdown so let's it run forever.
-    // // You may use the `ServerHandle` to shut it down or manage it yourself.
-    // info!(
-
-    //     "Listening on: {} secure={} with internal_app_id={:?}",
-    //     server_addr, secure, internal_app_id
-    // );
-    // ripple_sdk::tokio::spawn(handle.stopped());
     Ok(addr)
 }
