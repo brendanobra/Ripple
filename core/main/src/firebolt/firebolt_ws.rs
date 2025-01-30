@@ -27,8 +27,7 @@ use crate::{
 };
 use futures::SinkExt;
 use futures::StreamExt;
-use jsonrpsee::types::error::ErrorCode;
-use jsonrpsee::types::error::ErrorObject;
+use jsonrpsee::types::{error::ErrorCode, ErrorResponse, Id};
 use ripple_sdk::{
     api::{
         gateway::rpc_gateway_api::{ApiMessage, ApiProtocol, ClientContext, RpcRequest},
@@ -41,24 +40,23 @@ use ripple_sdk::{
     },
     utils::channel_utils::oneshot_send_and_log,
     uuid::Uuid,
-    JsonRpcErrorType,
 };
 use ripple_sdk::{log::debug, tokio};
 use tokio_tungstenite::{
-    tungstenite::{self, handshake::server::ErrorResponse, Message},
+    tungstenite::{self, Message},
     WebSocketStream,
 };
 #[allow(dead_code)]
 pub struct FireboltWs {}
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 #[allow(dead_code)]
 pub struct ClientIdentity {
-    pub session_id: String,
-    pub app_id: String,
+    session_id: String,
+    app_id: String,
 }
 
-pub struct ConnectionCallbackConfig {
+struct ConnectionCallbackConfig {
     pub next: oneshot::Sender<ClientIdentity>,
     pub app_state: AppManagerState,
     pub secure: bool,
@@ -340,12 +338,8 @@ impl FireboltWs {
                                 .get_session_for_connection_id(&connection_id)
                             {
                                 use ripple_sdk::api::apps::EffectiveTransport;
-                                let err = ErrorObject::owned::<()>(
-                                    ErrorCode::InvalidRequest.code(),
-                                    "Invalid Request",
-                                    None,
-                                );
-                                //ErrorResponse::new(ErrorCode::InvalidRequest.code(), Id::Null);
+                                let err =
+                                    ErrorResponse::new(ErrorCode::InvalidRequest.into(), Id::Null);
                                 let msg = serde_json::to_string(&err).unwrap();
                                 let api_msg =
                                     ApiMessage::new(ApiProtocol::JsonRpc, msg, req_id.clone());

@@ -50,9 +50,17 @@ pub mod firebolt_middleware_service;
 pub mod rpc;
 //pub mod rpc_router;
 
+use core::todo;
+
+use ripple_sdk::api::gateway::rpc_gateway_api::RpcRequest;
+use ripple_sdk::api::observability::log_signal::LogSignal;
+use ripple_sdk::extn::extn_client_message::ExtnMessage;
 use ripple_sdk::utils::error::RippleError;
 use ripple_sdk::utils::rpc_utils::rpc_custom_error_result;
 use ripple_sdk::{utils::rpc_utils::rpc_custom_error, JsonRpcErrorType};
+
+use crate::state::platform_state::PlatformState;
+use crate::utils::router_utils::return_extn_response;
 fn no_value_returned_error<T>(module: &str, method: &str) -> Result<T, JsonRpcErrorType> {
     rpc_custom_error_result(format!("device.{} error: no value returned", method))
 }
@@ -62,4 +70,22 @@ fn invalid_device_response_error<T>(
     error: RippleError,
 ) -> Result<T, JsonRpcErrorType> {
     rpc_custom_error_result(format!("device.{} error: {}", method, error))
+}
+pub async fn route_extn_protocol(state: &PlatformState, req: RpcRequest, extn_msg: ExtnMessage) {
+    //let methods = state.router_state.get_methods();
+    //let resources = state.router_state.resources.clone();
+
+    let mut platform_state = state.clone();
+    LogSignal::new(
+        "rpc_router".to_string(),
+        "route_extn_protocol".into(),
+        req.clone(),
+    )
+    .emit_debug();
+    todo!("route_extn_protocol");
+    // ripple_sdk::tokio::spawn(async move {
+    //     if let Ok(msg) = resolve_route(&mut platform_state, methods, resources, req).await {
+    //         return_extn_response(msg, extn_msg);
+    //     }
+    // });
 }

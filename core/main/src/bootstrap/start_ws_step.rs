@@ -22,7 +22,7 @@ use ripple_sdk::{
 use crate::firebolt::firebolt_middleware_service;
 use crate::state::bootstrap_state::BootstrapState;
 
-use crate::firebolt::firebolt_ws::FireboltWs;
+//use crate::firebolt::firebolt_ws::FireboltWs;
 
 pub struct StartWsStep;
 
@@ -42,7 +42,7 @@ impl Bootstep<BootstrapState> for StartWsStep {
             let ws_addr = manifest.get_ws_gateway_host();
             let state_for_ws = state.platform_state.clone();
             match firebolt_middleware_service::start(
-                "127.0.0.1:3476",
+                ws_addr.as_str(),
                 state_for_ws.clone(),
                 false,
                 iai_c.clone(),
@@ -56,16 +56,16 @@ impl Bootstep<BootstrapState> for StartWsStep {
                     println!("FireboltWs::start() failed: {:?}", e);
                 }
             }
-            tokio::spawn(async move {
-                FireboltWs::start(ws_addr.as_str(), state_for_ws, true, iai.clone()).await;
-            });
+            // tokio::spawn(async move {
+            //     FireboltWs::start(ws_addr.as_str(), state_for_ws, true, iai.clone()).await;
+            // });
         }
 
         if internal_ws_enabled {
             let ws_addr = manifest.get_internal_gateway_host();
             let state_for_ws = state.platform_state;
             match firebolt_middleware_service::start(
-                "127.0.0.1:3475",
+                ws_addr.as_str(),
                 state_for_ws.clone(),
                 false,
                 iai_c.clone(),
@@ -79,9 +79,9 @@ impl Bootstep<BootstrapState> for StartWsStep {
                     println!("FireboltWs::start() failed: {:?}", e);
                 }
             }
-            tokio::spawn(async move {
-                FireboltWs::start(ws_addr.as_str(), state_for_ws, false, iai_c).await;
-            });
+            // tokio::spawn(async move {
+            //     FireboltWs::start(ws_addr.as_str(), state_for_ws, false, iai_c).await;
+            // });
         }
 
         Ok(())

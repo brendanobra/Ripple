@@ -17,8 +17,7 @@
 
 use std::collections::HashMap;
 
-use jsonrpsee::types::TwoPointZero;
-use jsonrpsee::Methods;
+use jsonrpsee::{types::TwoPointZero, Methods};
 use ripple_sdk::{
     api::{
         apps::EffectiveTransport,
@@ -40,7 +39,7 @@ use ripple_sdk::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    firebolt::firebolt_gatekeeper::FireboltGatekeeper,
+    firebolt::{firebolt_gatekeeper::FireboltGatekeeper, route_extn_protocol},
     service::{
         apps::{app_events::AppEvents, provider_broker::ProviderBroker},
         telemetry_builder::TelemetryBuilder,
@@ -52,7 +51,7 @@ use crate::{
     utils::router_utils::{capture_stage, get_rpc_header_with_status},
 };
 
-use super::rpc_router::RpcRouter;
+//use super::rpc_router::RpcRouter;
 pub struct FireboltGateway {
     state: BootstrapState,
 }
@@ -97,11 +96,10 @@ impl FireboltGateway {
         for method in methods.method_names() {
             info!("Adding RPC method {}", method);
         }
-        state.platform_state.router_state.update_methods(methods);
+        ///state.platform_state.router_state.update_methods(methods);
         FireboltGateway { state }
     }
-    /*describe what this method does
-     */
+
     pub async fn start(&self) {
         trace!("Starting Gateway Listener");
         let mut firebolt_gateway_rx = self
@@ -184,11 +182,7 @@ impl FireboltGateway {
                     .session_state
                     .has_session(&request.ctx)
                 {
-                    error!(
-                        "No sender for request {:?} in session state {:?}",
-                        &request.ctx.cid, self.state.platform_state.session_state
-                    );
-
+                    error!("No sender for request {:?} ", request);
                     return;
                 }
             }
@@ -273,12 +267,8 @@ impl FireboltGateway {
                                         request.clone(),
                                     )
                                     .emit_debug();
-                                    RpcRouter::route_extn_protocol(
-                                        &platform_state,
-                                        request.clone(),
-                                        extn_msg,
-                                    )
-                                    .await
+                                    route_extn_protocol(&platform_state, request.clone(), extn_msg)
+                                        .await
                                 } else {
                                     error!("missing invalid message not forwarding");
                                 }
@@ -296,13 +286,14 @@ impl FireboltGateway {
                                     )
                                     .emit_debug();
                                     // if the websocket disconnects before the session is recieved this leads to an error
-                                    RpcRouter::route(
-                                        platform_state.clone(),
-                                        request_c,
-                                        session,
-                                        metrics_timer.clone(),
-                                    )
-                                    .await;
+                                    /*TODO - this has been delegated up to jsonrpsee top layer */
+                                    // RpcRouter::route(
+                                    //     platform_state.clone(),
+                                    //     request_c,
+                                    //     session,
+                                    //     metrics_timer.clone(),
+                                    // )
+                                    // .await;
                                 } else {
                                     error!("session is missing request is not forwarded for request {:?}", request_c.ctx);
                                 }

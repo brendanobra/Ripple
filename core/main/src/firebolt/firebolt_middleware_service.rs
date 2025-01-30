@@ -12,6 +12,7 @@ use ripple_sdk::uuid::Uuid;
 use serde_json::Value;
 
 use super::firebolt_gateway::FireboltGatewayCommand;
+use crate::bootstrap::start_fbgateway_step::register_methods;
 //use super::firebolt_ws::ClientIdentity;
 use crate::firebolt::firebolt_gatekeeper::FireboltGatekeeper;
 //use crate::firebolt::firebolt_ws::ConnectionCallbackConfig;
@@ -28,7 +29,7 @@ use jsonrpsee::server::{HttpRequest, MethodResponse, RpcModule, Server, TowerSer
 use jsonrpsee::types::Request;
 use jsonrpsee_core::{BoxError, JsonRawValue};
 use jsonrpsee_types::{ErrorCode, ErrorObject, Id, Params, RequestSer};
-use ripple_sdk::log::{error, info};
+use ripple_sdk::log::{debug, error, info};
 
 use tower_layer::Layer;
 
@@ -312,17 +313,13 @@ fn enrich_request_params(params: &Params, call_context: &CallContext) -> Box<Jso
 
     serde_json::value::to_raw_value(&p).unwrap()
 }
-/*
-UnauthenticatedFireboltLayer:
-Tower layer to handle unauthenticated requests , using default_app_id (which is provided by configuration)
-*/
-pub struct UnauthenticatedFireboltLayer<S> {
+
+pub struct FireboltDispatchLayer<S> {
     service: S,
     platform_state: PlatformState,
-    default_app_id: Option<String>,
 }
 
-impl<'a, S> RpcServiceT<'a> for UnauthenticatedFireboltLayer<S>
+impl<'a, S> RpcServiceT<'a> for FireboltDispatchLayer<S>
 where
     S: RpcServiceT<'a> + Send + Sync + Clone + 'static,
 {
@@ -331,12 +328,12 @@ where
     fn call(&self, request: Request<'a>) -> Self::Future {
         let service = self.service.clone();
         let platform_state = self.platform_state.clone();
-        let default_app_id = self.default_app_id.clone();
-        info!("UnauthenticatedFireboltLayer: method `{:?}`", request);
+
+        info!("FireboltDispatchLayer: method `{:?}`", request);
 
         async move {
             let ripple_client = platform_state.get_client();
-            let app_state = platform_state.app_manager_state.clone();
+            //let app_state = platform_state.app_manager_state.clone();
             //let (connect_tx, _connect_rx) = oneshot::channel::<ClientIdentity>();
             // let cfg = ConnectionCallbackConfig {
             //     next: connect_tx,
@@ -430,16 +427,50 @@ where
                             ),
                         );
                     }
-                    let _ =
-                        PermissionHandler::fetch_and_store(&platform_state, &app_id, false).await;
 
-                    let msg = FireboltGatewayCommand::HandleRpc {
-                        request: rpc_request,
+                    match PermissionHandler::fetch_and_store(&platform_state, &app_id, false).await
+                    {
+                        /*
+                        Do we need to do anything here?
+                        previous impl does not seem to care....
+                        */
+                        Ok(permission_response) => {
+                            debug!("permissions fetched and stored: {:?}", permission_response);
+                        }
+                        Err(e) => {
+                            error!("Couldnt pre cache permissions {:?}", e);
+                        }
                     };
-                    if let Err(e) = ripple_client.clone().send_gateway_command(msg) {
+
+                    if let Err(e) = ripple_client.clone().send_gateway_command(
+                        FireboltGatewayCommand::HandleRpc {
+                            request: rpc_request,
+                        },
+                    ) {
                         error!("failed to send request {:?}", e);
+                        return MethodResponse::error(
+                            jsonrpsee_types::Id::Number(403),
+                            ErrorObject::owned(
+                                ErrorCode::InternalError.code(),
+                                "failed to send southbound request",
+                                None::<()>,
+                            ),
+                        );
                     }
-                    let api_message = session_rx.recv().await.unwrap();
+                    let api_message: ApiMessage = match session_rx.recv().await {
+                        Some(m) => m,
+                        None => {
+                            error!("no response from gateway");
+                            return MethodResponse::error(
+                                jsonrpsee_types::Id::Number(403),
+                                ErrorObject::owned(
+                                    ErrorCode::InternalError.code(),
+                                    "no response from gateway",
+                                    None::<()>,
+                                ),
+                            );
+                        }
+                    };
 
                     let response =
                         match serde_json::from_str::<serde_json::Value>(&api_message.jsonrpc_msg) {
@@ -480,213 +511,36 @@ where
     }
 }
 
-#[derive(Clone)]
-pub struct FireboltAuthLayer<S> {
-    service: S,
-    platform_state: PlatformState,
-}
-pub struct AuthenticatedFireboltLayer<S> {
-    service: S,
-    platform_state: PlatformState,
-}
-
-impl<'a, S> RpcServiceT<'a> for AuthenticatedFireboltLayer<S>
-where
-    S: RpcServiceT<'a> + Send + Sync + Clone + 'static,
-{
-    type Future = BoxFuture<'a, MethodResponse>;
-
-    fn call(&self, req: Request<'a>) -> Self::Future {
-        info!("logger middleware: method `{:?}`", req);
-        let service = self.service.clone();
-        let platform_state = self.platform_state.clone();
-
-        async move {
-            match req.extensions.get::<FireboltSession>() {
-                Some(firebolt_session) => {
-                    match platform_state
-                        .app_manager_state
-                        .get_app_id_from_session_id(&firebolt_session.session_id.to_string())
-                    {
-                        Some(_) => service.call(req.clone()).await,
-                        None => {
-                            error!(
-                                "no app id found in session manager for session id: {:?}",
-                                firebolt_session
-                            );
-                            MethodResponse::error(
-                                jsonrpsee_types::Id::Number(403),
-                                ErrorObject::owned(
-                                    ErrorCode::InternalError.code(),
-                                    "invalid session",
-                                    None::<()>,
-                                ),
-                            )
-                        }
-                    }
-                }
-                None => MethodResponse::error(
-                    jsonrpsee_types::Id::Number(403),
-                    ErrorObject::owned(ErrorCode::InternalError.code(), "no session", None::<()>),
-                ),
-            }
-        }
-        .boxed()
-    }
-}
-
-pub struct FireboltDispatchLayer<S> {
-    service: S,
-    platform_state: PlatformState,
-}
-
-impl<'a, S> RpcServiceT<'a> for FireboltDispatchLayer<S>
-where
-    S: RpcServiceT<'a> + Send + Sync + Clone + 'static,
-{
-    type Future = BoxFuture<'a, MethodResponse>;
-
-    fn call(&self, req: Request<'a>) -> Self::Future {
-        let service = self.service.clone();
-        let platform_state = self.platform_state.clone();
-        let ripple_client = platform_state.get_client();
-
-        async move {
-            match req.extensions.get::<FireboltSession>() {
-                Some(firebolt_session) => {
-                    let client_context: ClientContext = firebolt_session.into();
-
-                    let (session_tx, mut _session_rx) = mpsc::channel::<ApiMessage>(32);
-                    let app_id = client_context.app_id.clone();
-                    let session_id = client_context.session_id.clone();
-                    let gateway_secure = firebolt_session.secure;
-                    let session = Session::new(
-                        client_context.app_id.clone(),
-                        Some(session_tx.clone()),
-                        ripple_sdk::api::apps::EffectiveTransport::Websocket,
-                    );
-
-                    let app_id_c = app_id.clone();
-                    let session_id_c = session_id.clone();
-
-                    let connection_id = Uuid::new_v4().to_string();
-                    info!(
-                        "Creating new connection_id={} app_id={} session_id={}, gateway_secure={}",
-                        connection_id, app_id_c, session_id_c, gateway_secure
-                    );
-
-                    let firebolt_gateway_command = FireboltGatewayCommand::RegisterSession {
-                        session_id: connection_id.clone(),
-                        session,
-                    };
-                    if let Err(e) = ripple_client.send_gateway_command(firebolt_gateway_command) {
-                        error!("Error registering the connection {:?}", e);
-                        return MethodResponse::error(
-                            jsonrpsee_types::Id::Number(403),
-                            ErrorObject::owned(
-                                ErrorCode::InternalError.code(),
-                                "no session",
-                                None::<()>,
-                            ),
-                        );
-                    }
-                    if !gateway_secure
-                        && PermissionHandler::fetch_and_store(&platform_state, &app_id, false)
-                            .await
-                            .is_err()
-                    {
-                        error!("Couldnt pre cache permissions");
-                    }
-                    service.call(req.clone()).await
-                }
-                None => MethodResponse::error(
-                    jsonrpsee_types::Id::Number(403),
-                    ErrorObject::owned(ErrorCode::InternalError.code(), "no session", None::<()>),
-                ),
-            }
-        }
-        .boxed()
-    }
-}
-
 pub async fn start(
     server_addr: &str,
     platform_state: PlatformState,
     secure: bool,
     internal_app_id: Option<String>,
 ) -> anyhow::Result<SocketAddr> {
-    let mut module = RpcModule::new(());
-    let mut methods = Methods::new();
-    ProviderRegistrar::register_methods(&platform_state, &mut methods);
-    use crate::firebolt::rpc::*;
-
+    
     let http_middleware =
         tower::ServiceBuilder::new().layer(FireboltSessionAuthenticatorLayer::new(
             internal_app_id.clone(),
             secure,
             platform_state.clone(),
         ));
+    let closed_platform_state = platform_state.clone();
+    let rpc_middleware = RpcServiceBuilder::new().layer_fn(move |service| FireboltDispatchLayer {
+        service,
+        platform_state: closed_platform_state.clone(),
+    });
+    let server = jsonrpsee::server::Server::builder()
+        .set_http_middleware(http_middleware)
+        .set_rpc_middleware(rpc_middleware)
+        .build(server_addr)
+        .await?;
+    let addr = server.local_addr()?;
 
-    let addr = if secure {
-        let closed_platform_state = platform_state.clone();
-        let rpc_middleware =
-            RpcServiceBuilder::new().layer_fn(move |service| AuthenticatedFireboltLayer {
-                service,
-                platform_state: closed_platform_state.clone(),
-            });
-
-        let server = jsonrpsee::server::Server::builder()
-            .set_http_middleware(http_middleware)
-            .set_rpc_middleware(rpc_middleware)
-            .build(server_addr)
-            .await?;
-        let addr = server.local_addr()?;
-
-        use crate::firebolt::handlers::account_rpc::*;
-        let a = AccountRPCProvider::provide_with_alias(platform_state.clone());
-        println!("a: {:?}", a);
-
-        let handle = server.start(a);
-        info!(
-            "Listening on: {} secure={} with internal_app_id={:?}",
-            server_addr, secure, internal_app_id
-        );
-        ripple_sdk::tokio::spawn(handle.stopped());
-        addr
-    } else {
-        let default_app_id = internal_app_id.clone();
-        let closed_platform_state = platform_state.clone();
-        let rpc_middleware =
-            RpcServiceBuilder::new().layer_fn(move |service| UnauthenticatedFireboltLayer {
-                service,
-                platform_state: closed_platform_state.clone(),
-                default_app_id: internal_app_id.clone(),
-            });
-        let server = jsonrpsee::server::Server::builder()
-            .set_http_middleware(http_middleware)
-            .set_rpc_middleware(rpc_middleware)
-            .build(server_addr)
-            .await?;
-        let addr = server.local_addr()?;
-        module.merge(AccountRPCProvider::provide_with_alias(
-            platform_state.clone(),
-        ))?;
-        module.merge(DeviceRPCProvider::provide_with_alias(
-            platform_state.clone(),
-        ))?;
-        module.merge(AudioDescriptionRPCProvider::provide_with_alias(
-            platform_state.clone(),
-        ))?;
-
-        RpcModule::new(());
-
-        let handle = server.start(module);
-        info!(
-            "Listening on: {} secure={} with internal_app_id={:?}",
-            server_addr, secure, default_app_id
-        );
-        ripple_sdk::tokio::spawn(handle.stopped());
-        addr
-    };
+    let handle = server.start( register_methods(Methods::new(), platform_state.clone()));
+    info!(
+        "Listening on: {} secure={} with internal_app_id={:?}",
+        server_addr, secure, internal_app_id
+    );
+    ripple_sdk::tokio::spawn(handle.stopped());
     Ok(addr)
 }
