@@ -20,7 +20,6 @@ use std::{
     sync::{Arc, RwLock},
 };
 
-use jsonrpsee::{tracing::debug, types::error::CallError};
 use ripple_sdk::{
     api::{
         context::RippleContextUpdateRequest,
@@ -34,8 +33,8 @@ use ripple_sdk::{
     },
     chrono::{DateTime, Utc},
     extn::extn_client_message::ExtnResponse,
-    log::{error, warn},
-    utils::error::RippleError,
+    log::{debug, error, warn},
+    utils::{error::RippleError, rpc_utils::rpc_error_with_code},
 };
 
 use rand::Rng;
@@ -264,12 +263,13 @@ impl MetricsState {
             BrokerUtils::process_internal_main_request(state, "localization.language", None)
                 .await
                 .and_then(|val| {
-                    from_value::<String>(val).map_err(|_| {
-                        jsonrpsee::core::Error::Call(CallError::Custom {
-                            code: -32100,
-                            message: "Failed to parse language".into(),
-                            data: None,
-                        })
+                    from_value::<String>(val).map_err(|e| {
+                        //rpc_error_with_code("Failed to parse language", -32100)
+                        ripple_sdk::JsonRpcErrorType::owned(
+                            -32100,
+                            &format!("{}. error={}", "Failed to parse language", e),
+                            None::<&str>,
+                        )
                     })
                 })
                 .unwrap_or_else(|_| Self::unset("language"));
@@ -303,19 +303,6 @@ impl MetricsState {
             Some(Self::unset("device.name")),
         )
         .unwrap_or(Self::unset("device.name"));
-
-        /* Removing the call to get timezone from Thunder as this is not used in ontology.
-        let mut timezone: Option<String> = None;
-        if let Ok(resp) = state
-            .get_client()
-            .send_extn_request(DeviceInfoRequest::GetTimezoneWithOffset)
-            .await
-        {
-            if let Some(ExtnResponse::TimezoneWithOffset(tz, offset)) = resp.payload.extract() {
-                timezone = Some(format!("{} {}", tz, offset));
-            }
-        }
-        */
 
         let mut firmware = String::default();
         if let Ok(resp) = state

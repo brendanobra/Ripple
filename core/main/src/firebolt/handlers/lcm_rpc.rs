@@ -211,9 +211,9 @@ impl LifecycleManagementServer for LifecycleManagementImpl {
                 },
                 Err(err) => {
                     if AppError::NoIntentError == err {
-                        return Err(rpc_session_no_intent_err(
+                        return rpc_session_no_intent_err(
                             "An intent must be provided for new app running sessions",
-                        ));
+                        );
                     } else {
                         error!("Unable to register session")
                     }

@@ -525,6 +525,15 @@ pub enum PrivacySettingsStorageType {
     Cloud,
     Sync,
 }
+impl std::fmt::Display for PrivacySettingsStorageType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            PrivacySettingsStorageType::Local => write!(f, "local"),
+            PrivacySettingsStorageType::Cloud => write!(f, "cloud"),
+            PrivacySettingsStorageType::Sync => write!(f, "sync"),
+        }
+    }
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(test, derive(PartialEq))]

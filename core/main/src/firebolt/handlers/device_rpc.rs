@@ -18,7 +18,10 @@
 use std::{collections::HashMap, env};
 
 use crate::{
-    firebolt::rpc::RippleRPCProvider,
+    firebolt::{
+        invalid_device_response_error, no_value_returned_error,
+        rpc::{self, RippleRPCProvider},
+    },
     service::apps::app_events::AppEvents,
     state::platform_state::PlatformState,
     utils::rpc_utils::{rpc_add_event_listener, rpc_err},
@@ -46,7 +49,11 @@ use ripple_sdk::{
     },
     extn::extn_client_message::{ExtnMessage, ExtnResponse},
     log::error,
-    utils::error::RippleError,
+    utils::{
+        error::RippleError,
+        rpc_utils::{rpc_custom_error, rpc_custom_error_result},
+    },
+    JsonRpcErrorType,
 };
 use serde_json::json;
 
@@ -135,13 +142,9 @@ pub async fn get_ll_mac_addr(state: PlatformState) -> RpcResult<String> {
     match resp {
         Ok(response) => match response.payload.extract() {
             Some(ExtnResponse::String(value)) => Ok(filter_mac(value)),
-            _ => Err(jsonrpsee::core::Error::Custom(String::from(
-                "device.info.mac_address error",
-            ))),
+            _ => no_value_returned("mac_address"),
         },
-        Err(_e) => Err(jsonrpsee::core::Error::Custom(String::from(
-            "device.info.mac_address error",
-        ))),
+        Err(e) => invalid_device_response("mac_address", e),
     }
 }
 
@@ -149,7 +152,7 @@ pub async fn get_ll_mac_addr(state: PlatformState) -> RpcResult<String> {
 pub struct DeviceImpl {
     pub state: PlatformState,
 }
-
+pub struct DeviceServerImpl;
 impl DeviceImpl {
     async fn firmware_info(&self, _ctx: CallContext) -> RpcResult<FirmwareInfo> {
         match self
@@ -159,15 +162,17 @@ impl DeviceImpl {
         {
             Ok(response) => match response.payload.extract() {
                 Some(DeviceResponse::FirmwareInfo(value)) => Ok(value),
-                _ => Err(jsonrpsee::core::Error::Custom(String::from(
-                    "device.hdcp error",
-                ))),
+                _ => return no_value_returned("hdcp"),
             },
-            Err(_e) => Err(jsonrpsee::core::Error::Custom(String::from(
-                "device.hdcp error",
-            ))),
+            Err(e) => invalid_device_response("hdcp", e),
         }
     }
+}
+fn no_value_returned<T>(method: &str) -> Result<T, JsonRpcErrorType> {
+    no_value_returned_error("device", method)
+}
+fn invalid_device_response<T>(method: &str, error: RippleError) -> Result<T, JsonRpcErrorType> {
+    invalid_device_response_error("device", method, error)
 }
 
 #[async_trait]
@@ -250,13 +255,9 @@ impl DeviceServer for DeviceImpl {
         {
             Ok(response) => match response.payload.extract() {
                 Some(DeviceResponse::HdcpSupportResponse(value)) => Ok(value),
-                _ => Err(jsonrpsee::core::Error::Custom(String::from(
-                    "device.hdcp error",
-                ))),
+                _ => no_value_returned("hdcp"),
             },
-            Err(_e) => Err(jsonrpsee::core::Error::Custom(String::from(
-                "device.hdcp error",
-            ))),
+            Err(e) => invalid_device_response("hdcp", e),
         }
     }
 
@@ -310,13 +311,9 @@ impl DeviceServer for DeviceImpl {
                 Some(DeviceResponse::AudioProfileResponse(audio)) => {
                     return Ok(audio);
                 }
-                _ => Err(jsonrpsee::core::Error::Custom(String::from(
-                    "device.audio error",
-                ))),
+                _ => no_value_returned("audio"),
             },
-            Err(_e) => Err(jsonrpsee::core::Error::Custom(String::from(
-                "device.audio error",
-            ))),
+            Err(e) => invalid_device_response("audio", e),
         }
     }
 
@@ -428,9 +425,7 @@ impl DeviceServer for DeviceImpl {
         if let Some(session) = self.state.session_state.get_account_session() {
             Ok(session.id)
         } else {
-            Err(jsonrpsee::core::Error::Custom(String::from(
-                "Account session is not available",
-            )))
+            rpc_custom_error_result("Account session is not available")
         }
     }
 }

@@ -15,12 +15,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-use jsonrpsee::{
-    core::{Error, RpcResult},
-    proc_macros::rpc,
-    types::error::CallError,
-    RpcModule,
-};
+use jsonrpsee::{core::RpcResult, proc_macros::rpc, RpcModule};
 use ripple_sdk::{
     api::{
         apps::{AppManagerResponse, AppMethod, AppRequest, AppResponse},
@@ -37,6 +32,7 @@ use ripple_sdk::{
     chrono::{DateTime, Utc},
     log::debug,
     tokio::sync::oneshot,
+    utils::rpc_utils::{rpc_custom_error, rpc_custom_error_result, rpc_error_with_code_result},
 };
 
 use crate::{
@@ -267,7 +263,7 @@ impl UserGrantsServer for UserGrantsImpl {
             .cap_state
             .generic
             .check_supported(&fb_perms)
-            .map_err(|err| Error::Custom(format!("{:?} not supported", err.caps)))?;
+            .map_err(|err| rpc_custom_error::<String>(format!("{:?} not supported", err.caps)))?;
         let grant_entries = GrantState::check_with_roles(
             &self.platform_state,
             &ctx.clone().into(),
@@ -283,11 +279,7 @@ impl UserGrantsServer for UserGrantsImpl {
         debug!("Check with roles result: {:?}", grant_entries);
         if let Err(grant_entries_err) = grant_entries {
             if DenyReason::AppNotInActiveState == grant_entries_err.reason {
-                return Err(jsonrpsee::core::Error::Call(CallError::Custom {
-                    code: CAPABILITY_NOT_PERMITTED,
-                    message: "Capability cannot be used when app is not in foreground state due to requiring a user grant".to_owned(),
-                    data: None,
-                }));
+                return rpc_error_with_code_result( "Capability cannot be used when app is not in foreground state due to requiring a user grant", CAPABILITY_NOT_PERMITTED);
             }
         }
         self.usergrants_app(

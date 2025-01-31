@@ -15,7 +15,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-use jsonrpsee::core::server::rpc_module::Methods;
+use jsonrpsee::Methods;
 use ripple_sdk::{
     async_channel::Receiver,
     export_extn_metadata, export_jsonrpc_extn_builder,

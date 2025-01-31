@@ -31,7 +31,11 @@ use ripple_sdk::{
         gateway::rpc_gateway_api::CallContext,
     },
     extn::extn_client_message::ExtnResponse,
-    utils::error::RippleError,
+    utils::{
+        error::RippleError,
+        rpc_utils::{rpc_custom_error, rpc_custom_error_result},
+    },
+    JsonRpcErrorType,
 };
 
 use crate::{firebolt::rpc::RippleRPCProvider, state::platform_state::PlatformState};
@@ -46,8 +50,8 @@ macro_rules! return_if_app_id_missing {
     };
 }
 
-fn get_err_msg(err: RippleError) -> jsonrpsee::core::Error {
-    jsonrpsee::core::Error::Custom(format!(
+fn get_err_msg<T>(err: RippleError) -> Result<T, JsonRpcErrorType> {
+    rpc_custom_error_result(format!(
         "Error getting value {}",
         match err {
             RippleError::ExtnError => "(Server Error)",
@@ -120,13 +124,13 @@ impl SecureStorageImpl {
                     if let Some(ExtnResponse::SecureStorage(_r)) = response.payload.extract() {
                         Ok(())
                     } else {
-                        Err(get_err_msg(RippleError::ExtnError))
+                        get_err_msg(RippleError::ExtnError)
                     }
                 }
-                Err(e) => Err(get_err_msg(e)),
+                Err(e) => get_err_msg(e),
             }
         } else {
-            Err(get_err_msg(RippleError::ApiAuthenticationFailed))
+            get_err_msg(RippleError::ApiAuthenticationFailed)
         }
     }
 
@@ -142,13 +146,13 @@ impl SecureStorageImpl {
                     if let Some(ExtnResponse::SecureStorage(_r)) = response.payload.extract() {
                         Ok(())
                     } else {
-                        Err(get_err_msg(RippleError::ExtnError))
+                        get_err_msg(RippleError::ExtnError)
                     }
                 }
-                Err(e) => Err(get_err_msg(e)),
+                Err(e) => get_err_msg(e),
             }
         } else {
-            Err(get_err_msg(RippleError::ApiAuthenticationFailed))
+            get_err_msg(RippleError::ApiAuthenticationFailed)
         }
     }
     async fn clear(&self, request: SecureStorageClearRequest) -> RpcResult<()> {
@@ -163,13 +167,13 @@ impl SecureStorageImpl {
                     if let Some(ExtnResponse::SecureStorage(_r)) = response.payload.extract() {
                         Ok(())
                     } else {
-                        Err(get_err_msg(RippleError::ExtnError))
+                        get_err_msg(RippleError::ExtnError)
                     }
                 }
-                Err(e) => Err(get_err_msg(e)),
+                Err(e) => get_err_msg(e),
             }
         } else {
-            Err(get_err_msg(RippleError::ApiAuthenticationFailed))
+            get_err_msg(RippleError::ApiAuthenticationFailed)
         }
     }
 }
@@ -194,13 +198,13 @@ impl SecureStorageServer for SecureStorageImpl {
                     {
                         Ok(v.value)
                     } else {
-                        Err(get_err_msg(RippleError::ExtnError))
+                        get_err_msg(RippleError::ExtnError)
                     }
                 }
-                Err(e) => Err(get_err_msg(e)),
+                Err(e) => get_err_msg(e),
             }
         } else {
-            Err(get_err_msg(RippleError::ApiAuthenticationFailed))
+            get_err_msg(RippleError::ApiAuthenticationFailed)
         }
     }
 

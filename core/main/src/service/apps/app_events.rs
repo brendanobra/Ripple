@@ -19,6 +19,7 @@ use jsonrpsee::{
     core::async_trait,
     types::{Id, Response, TwoPointZero},
 };
+use jsonrpsee_types::ResponsePayload;
 use ripple_sdk::{
     api::{
         apps::{AppEventRequest, EffectiveTransport},
@@ -30,6 +31,7 @@ use ripple_sdk::{
     serde_json::{json, Value},
     tokio::sync::mpsc,
     utils::channel_utils::mpsc_send_and_log,
+    JsonRpcErrorType,
 };
 
 use std::{
@@ -59,8 +61,8 @@ pub trait AppEventDecorator: Send + Sync {
     fn dec_clone(&self) -> Box<dyn AppEventDecorator + Send + Sync>;
 }
 
-impl From<jsonrpsee::core::error::Error> for AppEventDecorationError {
-    fn from(_: jsonrpsee::core::error::Error) -> Self {
+impl From<JsonRpcErrorType> for AppEventDecorationError {
+    fn from(_: JsonRpcErrorType) -> Self {
         AppEventDecorationError {}
     }
 }
@@ -264,16 +266,11 @@ impl AppEvents {
 
     pub async fn send_event(state: &PlatformState, listener: &EventListener, data: &Value) {
         let protocol = listener.call_ctx.protocol.clone();
-        let event = Response {
-            jsonrpc: TwoPointZero,
-            result: data,
-            id: Id::Number(listener.call_ctx.call_id),
-        };
 
         // Events are pass through no stats
         let api_message = ApiMessage::new(
             protocol,
-            json!(event).to_string(),
+            json!({"jsonrpc" : TwoPointZero,"data": data.to_string(), "id" : listener.call_ctx.call_id }).to_string(),
             listener.call_ctx.request_id.clone(),
         );
 

@@ -15,29 +15,35 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-use jsonrpsee::core::{Error, RpcResult};
+use jsonrpsee::core::RpcResult;
 use ripple_sdk::{
     api::device::device_peristence::StorageData,
     extn::extn_client_message::ExtnResponse,
     serde_json::{self, Value},
-    utils::error::RippleError,
+    utils::{
+        error::RippleError,
+        rpc_utils::{rpc_custom_error, rpc_custom_error_result},
+    },
+    JsonRpcErrorType,
 };
 
-fn storage_error() -> jsonrpsee::core::Error {
-    Error::Custom(String::from("error parsing response"))
+fn storage_error<T>() -> Result<T, JsonRpcErrorType> {
+    rpc_custom_error_result("error parsing response")
 }
 
-fn get_storage_data(resp: Result<ExtnResponse, RippleError>) -> Result<Option<StorageData>, Error> {
+fn get_storage_data(
+    resp: Result<ExtnResponse, RippleError>,
+) -> Result<Option<StorageData>, JsonRpcErrorType> {
     match resp {
         Ok(response) => match response {
             ExtnResponse::StorageData(storage_data) => Ok(Some(storage_data)),
             _ => Ok(None),
         },
-        Err(_) => Err(storage_error()),
+        Err(_) => storage_error(),
     }
 }
 
-fn get_value(resp: Result<ExtnResponse, RippleError>) -> Result<Value, Error> {
+fn get_value(resp: Result<ExtnResponse, RippleError>) -> Result<Value, JsonRpcErrorType> {
     let has_storage_data = get_storage_data(resp.clone())?;
 
     if let Some(storage_data) = has_storage_data {
@@ -50,7 +56,7 @@ fn get_value(resp: Result<ExtnResponse, RippleError>) -> Result<Value, Error> {
             Ok(value) => Ok(value),
             Err(_) => Ok(Value::String(str_val)), // An actual string was stored, return it as a Value.
         },
-        _ => Err(storage_error()),
+        _ => storage_error(),
     }
 }
 
@@ -61,7 +67,7 @@ pub fn storage_to_string_rpc_result(resp: Result<ExtnResponse, RippleError>) -> 
         return Ok(s.to_string());
     }
 
-    Err(storage_error())
+    storage_error()
 }
 
 pub fn storage_to_bool_rpc_result(resp: Result<ExtnResponse, RippleError>) -> RpcResult<bool> {
@@ -74,7 +80,7 @@ pub fn storage_to_bool_rpc_result(resp: Result<ExtnResponse, RippleError>) -> Rp
         return Ok(s == "true");
     }
 
-    Err(storage_error())
+    storage_error()
 }
 
 pub fn storage_to_u32_rpc_result(resp: Result<ExtnResponse, RippleError>) -> RpcResult<u32> {
@@ -83,10 +89,10 @@ pub fn storage_to_u32_rpc_result(resp: Result<ExtnResponse, RippleError>) -> Rpc
         return Ok(n as u32);
     }
     if let Some(s) = value.as_str() {
-        return s.parse::<u32>().map_or(Err(storage_error()), Ok);
+        return s.parse::<u32>().map_or(storage_error(), Ok);
     }
 
-    Err(storage_error())
+    storage_error()
 }
 
 pub fn storage_to_f32_rpc_result(resp: Result<ExtnResponse, RippleError>) -> RpcResult<f32> {
@@ -96,18 +102,16 @@ pub fn storage_to_f32_rpc_result(resp: Result<ExtnResponse, RippleError>) -> Rpc
         return Ok(n as f32);
     }
     if let Some(s) = value.as_str() {
-        return s
-            .parse::<f64>()
-            .map_or(Err(storage_error()), |v| Ok(v as f32));
+        return s.parse::<f64>().map_or(storage_error(), |v| Ok(v as f32));
     }
 
-    Err(storage_error())
+    storage_error()
 }
 
 pub fn storage_to_void_rpc_result(resp: Result<ExtnResponse, RippleError>) -> RpcResult<()> {
     match resp {
         Ok(_) => Ok(()),
-        Err(_) => Err(storage_error()),
+        Err(_) => storage_error(),
     }
 }
 
@@ -117,6 +121,6 @@ pub fn storage_to_vec_string_rpc_result(
     let value = get_value(resp)?;
     match serde_json::from_value(value) {
         Ok(v) => Ok(v),
-        Err(_) => Err(storage_error()),
+        Err(_) => storage_error(),
     }
 }

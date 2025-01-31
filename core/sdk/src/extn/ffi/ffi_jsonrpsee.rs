@@ -17,9 +17,10 @@
 
 use crate::{api::apps::AppError, extn::client::extn_sender::ExtnSender};
 use async_channel::Receiver as CReceiver;
-use jsonrpsee::core::server::rpc_module::Methods;
+//use jsonrpsee::{core::server::rpc_module::Methods, types::{ErrorCode, ErrorObject}};
 use libloading::{Library, Symbol};
 use log::{debug, error};
+use serde_json::value::RawValue;
 
 use super::ffi_message::CExtnMessage;
 
@@ -40,7 +41,7 @@ macro_rules! export_jsonrpc_extn_builder {
 #[derive(Debug)]
 pub struct JsonRpseeExtnBuilder {
     pub get_extended_capabilities: fn() -> Option<String>,
-    pub build: fn(client: ExtnSender, receiver: CReceiver<CExtnMessage>) -> Methods,
+    pub build: fn(client: ExtnSender, receiver: CReceiver<CExtnMessage>) -> jsonrpsee::Methods,
     pub service: String,
 }
 
@@ -60,8 +61,12 @@ pub unsafe fn load_jsonrpsee_methods(lib: &Library) -> Option<Box<JsonRpseeExtnB
     None
 }
 
-impl From<AppError> for jsonrpsee::core::Error {
+impl<'a> From<AppError> for jsonrpsee::types::ErrorObject<'a> {
     fn from(err: AppError) -> Self {
-        jsonrpsee::core::Error::Custom(format!("Internal failure: {:?}", err))
+        jsonrpsee::types::ErrorObject::borrowed(
+            jsonrpsee::types::ErrorCode::InternalError.code(),
+            "foo",
+            None,
+        )
     }
 }

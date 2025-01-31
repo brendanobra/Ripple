@@ -99,7 +99,7 @@ pub struct AccountToken {
     pub expires: u64,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct DeviceVersionResponse {
     pub api: FireboltSemanticVersion,
     pub firmware: FireboltSemanticVersion,

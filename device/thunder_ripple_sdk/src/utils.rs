@@ -17,10 +17,11 @@
 
 use std::collections::HashMap;
 
-use jsonrpsee::core::Error;
+use jsonrpsee_core::ClientError;
 use ripple_sdk::{
     api::device::{device_operator::DeviceResponseMessage, device_request::AudioProfile},
     serde_json::Value,
+    JsonRpcErrorType,
 };
 use serde::Deserialize;
 
@@ -101,11 +102,9 @@ pub struct ThunderErrorResponse {
     pub error: Value,
 }
 
-pub fn get_error_value(error: &Error) -> Value {
-    if let jsonrpsee::core::Error::Request(s) = error {
-        if let Ok(v) = ripple_sdk::serde_json::from_str::<ThunderErrorResponse>(s) {
-            return v.error;
-        }
+pub fn get_error_value(error: &ClientError) -> Value {
+    if let Ok(v) = ripple_sdk::serde_json::from_str::<ThunderErrorResponse>(&error.to_string()) {
+        return v.error;
     }
     Value::Null
 }

@@ -37,11 +37,11 @@ contract_tests = [
 ]
 
 [dependencies]
-base64.workspace = true
 ripple_tdk = { path = "../../core/tdk" }
 ripple_sdk.workspace = true
 regex.workspace = true
-jsonrpsee = { workspace = true, features = ["macros", "ws-client"] }
+jsonrpsee = { version="0.24.7" , features = ["server", "macros"] }
+jsonrpsee-core = {version="0.24.7"}
 serde.workspace = true
 url.workspace = true
 
@@ -56,6 +56,8 @@ csv = "1.1"  # Allowing minor updates
 home = { version = "=0.5.5", optional = true }
 tree_magic_mini = { version = "=3.0.3", optional = true }
 rstest = { version = "0.18.2", optional = true, default-features = false }
+jsonrpsee-ws-client = "0.24.7"
+base64.workspace = true
 
 [dev-dependencies]
 tokio-tungstenite = { workspace = true, features = ["native-tls"] }

@@ -39,12 +39,51 @@ use crate::{
         rpc::RippleRPCProvider,
     },
     service::telemetry_builder::TelemetryBuilder,
-    state::{bootstrap_state::BootstrapState, platform_state::PlatformState},
+    state::{
+        bootstrap_state::BootstrapState,
+        platform_state::{self, PlatformState},
+    },
 };
-use jsonrpsee::core::{async_trait, server::rpc_module::Methods};
+use jsonrpsee::core::async_trait;
+use jsonrpsee::Methods;
 use ripple_sdk::log::{debug, info};
 use ripple_sdk::{framework::bootstrap::Bootstep, utils::error::RippleError};
 pub struct FireboltGatewayStep;
+pub fn register_methods(methods: Methods, state: PlatformState) -> Methods {
+    let mut extended_methods = Methods::new();
+    //let _ = extended_method.merge(RippleRPCProvider::provide());
+    let _ = extended_methods.merge(DeviceRPCProvider::provide_with_alias(state.clone()));
+    let _ = extended_methods.merge(WifiRPCProvider::provide_with_alias(state.clone()));
+    let _ = extended_methods.merge(LifecycleRippleProvider::provide_with_alias(state.clone()));
+    let _ = extended_methods.merge(CapRPCProvider::provide_with_alias(state.clone()));
+    let _ = extended_methods.merge(KeyboardRPCProvider::provide_with_alias(state.clone()));
+    let _ = extended_methods.merge(ClosedcaptionsRPCProvider::provide_with_alias(state.clone()));
+    let _ = extended_methods.merge(VoiceguidanceRPCProvider::provide_with_alias(state.clone()));
+    let _ = extended_methods.merge(LocalizationRPCProvider::provide_with_alias(state.clone()));
+    let _ = extended_methods.merge(AccessoryRippleProvider::provide_with_alias(state.clone()));
+    let _ = extended_methods.merge(PrivacyProvider::provide_with_alias(state.clone()));
+    let _ = extended_methods.merge(ProfileRPCProvider::provide_with_alias(state.clone()));
+    let _ = extended_methods.merge(SecondScreenRPCProvider::provide_with_alias(state.clone()));
+    let _ = extended_methods.merge(UserGrantsRPCProvider::provide_with_alias(state.clone()));
+    let _ = extended_methods.merge(ParametersRPCProvider::provide_with_alias(state.clone()));
+    let _ = extended_methods.merge(SecureStorageRPCProvider::provide_with_alias(state.clone()));
+    let _ = extended_methods.merge(AdvertisingRPCProvider::provide_with_alias(state.clone()));
+    let _ = extended_methods.merge(MetricsRPCProvider::provide_with_alias(state.clone()));
+    let _ = extended_methods.merge(DiscoveryRPCProvider::provide_with_alias(state.clone()));
+    let _ = extended_methods.merge(AuthRPCProvider::provide_with_alias(state.clone()));
+    let _ = extended_methods.merge(AccountRPCProvider::provide_with_alias(state.clone()));
+    let _ = extended_methods.merge(MetricsManagementProvider::provide_with_alias(state.clone()));
+    let _ = extended_methods.merge(AudioDescriptionRPCProvider::provide_with_alias(
+        state.clone(),
+    ));
+
+    // LCM Api(s) not required for internal launcher
+    if !state.has_internal_launcher() {
+        let _ = extended_methods.merge(LifecycleManagementProvider::provide_with_alias(state));
+    }
+    let _ = extended_methods.merge(methods);
+    extended_methods
+}
 
 impl FireboltGatewayStep {
     async fn init_handlers(&self, state: PlatformState, extn_methods: Methods) -> Methods {
@@ -53,38 +92,8 @@ impl FireboltGatewayStep {
         // TODO: Ultimately this may be able to register all providers below, for now just does
         // those included by build_provider_relation_sets().
         ProviderRegistrar::register_methods(&state, &mut methods);
-
-        let _ = methods.merge(DeviceRPCProvider::provide_with_alias(state.clone()));
-        let _ = methods.merge(WifiRPCProvider::provide_with_alias(state.clone()));
-        let _ = methods.merge(LifecycleRippleProvider::provide_with_alias(state.clone()));
-        let _ = methods.merge(CapRPCProvider::provide_with_alias(state.clone()));
-        let _ = methods.merge(KeyboardRPCProvider::provide_with_alias(state.clone()));
-        let _ = methods.merge(ClosedcaptionsRPCProvider::provide_with_alias(state.clone()));
-        let _ = methods.merge(VoiceguidanceRPCProvider::provide_with_alias(state.clone()));
-        let _ = methods.merge(LocalizationRPCProvider::provide_with_alias(state.clone()));
-        let _ = methods.merge(AccessoryRippleProvider::provide_with_alias(state.clone()));
-        let _ = methods.merge(PrivacyProvider::provide_with_alias(state.clone()));
-        let _ = methods.merge(ProfileRPCProvider::provide_with_alias(state.clone()));
-        let _ = methods.merge(SecondScreenRPCProvider::provide_with_alias(state.clone()));
-        let _ = methods.merge(UserGrantsRPCProvider::provide_with_alias(state.clone()));
-        let _ = methods.merge(ParametersRPCProvider::provide_with_alias(state.clone()));
-        let _ = methods.merge(SecureStorageRPCProvider::provide_with_alias(state.clone()));
-        let _ = methods.merge(AdvertisingRPCProvider::provide_with_alias(state.clone()));
-        let _ = methods.merge(MetricsRPCProvider::provide_with_alias(state.clone()));
-        let _ = methods.merge(DiscoveryRPCProvider::provide_with_alias(state.clone()));
-        let _ = methods.merge(AuthRPCProvider::provide_with_alias(state.clone()));
-        let _ = methods.merge(AccountRPCProvider::provide_with_alias(state.clone()));
-        let _ = methods.merge(MetricsManagementProvider::provide_with_alias(state.clone()));
-        let _ = methods.merge(AudioDescriptionRPCProvider::provide_with_alias(
-            state.clone(),
-        ));
-
-        // LCM Api(s) not required for internal launcher
-        if !state.has_internal_launcher() {
-            let _ = methods.merge(LifecycleManagementProvider::provide_with_alias(state));
-        }
         let _ = methods.merge(extn_methods);
-        methods
+        register_methods(methods, state)
     }
 }
 

@@ -15,19 +15,20 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-use jsonrpsee::{
-    core::{Error, RpcResult},
-    types::error::CallError,
-};
+use jsonrpsee::core::RpcResult;
+
 use ripple_sdk::{
     api::{
         firebolt::fb_general::{ListenRequest, ListenerResponse},
         gateway::rpc_gateway_api::CallContext,
     },
     tokio::sync::oneshot,
+    utils::rpc_utils::{rpc_custom_error, rpc_custom_error_result, rpc_error_with_code_result},
+    JsonRpcErrorType,
 };
 
 use crate::{
+    firebolt::firebolt_gateway::JsonRpcError,
     service::apps::app_events::{AppEventDecorator, AppEvents},
     state::platform_state::PlatformState,
 };
@@ -43,10 +44,7 @@ pub const SESSION_NO_INTENT_ERROR_CODE: i32 = -40000;
 pub async fn rpc_await_oneshot<T>(rx: oneshot::Receiver<T>) -> RpcResult<T> {
     match rx.await {
         Ok(v) => Ok(v),
-        Err(e) => Err(jsonrpsee::core::error::Error::Custom(format!(
-            "Internal failure: {:?}",
-            e
-        ))),
+        Err(e) => rpc_custom_error_result(format!("Internal failure: {:?}", e)),
     }
 }
 
@@ -83,26 +81,14 @@ pub async fn rpc_add_event_listener_with_decorator(
     })
 }
 
-pub fn rpc_downstream_service_err(msg: &str) -> jsonrpsee::core::error::Error {
-    Error::Call(CallError::Custom {
-        code: DOWNSTREAM_SERVICE_UNAVAILABLE_ERROR_CODE,
-        message: msg.to_owned(),
-        data: None,
-    })
+pub fn rpc_downstream_service_err<T>(msg: &str) -> Result<T, JsonRpcErrorType> {
+    rpc_error_with_code_result(msg.to_string(), DOWNSTREAM_SERVICE_UNAVAILABLE_ERROR_CODE)
 }
-pub fn rpc_session_no_intent_err(msg: &str) -> jsonrpsee::core::error::Error {
-    Error::Call(CallError::Custom {
-        code: SESSION_NO_INTENT_ERROR_CODE,
-        message: msg.to_owned(),
-        data: None,
-    })
+pub fn rpc_session_no_intent_err<T>(msg: &str) -> Result<T, JsonRpcErrorType> {
+    rpc_error_with_code_result(msg.to_string(), SESSION_NO_INTENT_ERROR_CODE)
 }
-pub fn rpc_navigate_reserved_app_err(msg: &str) -> jsonrpsee::core::error::Error {
-    Error::Call(CallError::Custom {
-        code: FIRE_BOLT_DEEPLINK_ERROR_CODE,
-        message: msg.to_owned(),
-        data: None,
-    })
+pub fn rpc_navigate_reserved_app_err<T>(msg: &str) -> Result<T, JsonRpcErrorType> {
+    rpc_error_with_code_result(msg.to_string(), FIRE_BOLT_DEEPLINK_ERROR_CODE)
 }
 
 pub fn get_base_method(method: &str) -> String {

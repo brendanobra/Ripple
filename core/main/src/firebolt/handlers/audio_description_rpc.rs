@@ -95,6 +95,7 @@ pub trait AudioDescription {
 pub struct AudioDescriptionImpl {
     pub platform_state: PlatformState,
 }
+pub struct AudioDescriptionServerImpl;
 
 #[async_trait]
 impl AudioDescriptionServer for AudioDescriptionImpl {

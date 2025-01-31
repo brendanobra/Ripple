@@ -15,9 +15,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+use jsonrpsee::types::ErrorCode;
 use serde::{Deserialize, Serialize};
+use tokio::sync::oneshot::error::RecvError;
 
-use crate::api::firebolt::fb_capabilities::DenyReason;
+use crate::{api::firebolt::fb_capabilities::DenyReason, JsonRpcErrorType};
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 pub enum RippleError {
@@ -40,8 +42,13 @@ pub enum RippleError {
     RuleError,
     ServiceNotReady,
     BrokerError(String),
+    RpcError(String),
 }
-
+impl From<RecvError> for RippleError {
+    fn from(e: RecvError) -> Self {
+        RippleError::NoResponse
+    }
+}
 impl std::fmt::Display for RippleError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -67,22 +74,30 @@ impl std::fmt::Display for RippleError {
                 let msg = format!("BrokerError {}", msg);
                 write!(f, "{}", msg)
             }
+            RippleError::RpcError(r) => write!(f, "RpcError {}", r),
         }
     }
 }
 
 #[cfg(feature = "rpc")]
-impl From<RippleError> for jsonrpsee::core::Error {
+impl From<RippleError> for JsonRpcErrorType {
     fn from(value: RippleError) -> Self {
-        jsonrpsee::core::Error::Custom(format!("{}", value))
+        let (error_code, msg) = match value {
+            RippleError::MissingInput
+            | RippleError::InvalidInput
+            | RippleError::InvalidOutput
+            | RippleError::SenderMissing => (ErrorCode::InvalidParams, format!("{}", value)),
+            _ => (ErrorCode::InternalError, format!("{}", value)),
+        };
+        JsonRpcErrorType::owned(error_code.code(), &value.to_string(), None::<String>)
     }
 }
 
 #[cfg(all(test, feature = "rpc"))]
 mod tests {
     use super::*;
-    fn custom_error_match(expected: &str, error: jsonrpsee::core::Error) {
-        if let jsonrpsee::core::Error::Custom(e) = error {
+    fn custom_error_match(expected: &str, error: JsonRpcErrorType) {
+        if let JsonRpcErrorType(e) = error {
             assert_eq!(expected, e);
         } else {
             unreachable!("{}", " non error passed");

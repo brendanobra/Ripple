@@ -31,6 +31,7 @@ use ripple_sdk::{
         gateway::rpc_gateway_api::CallContext,
     },
     extn::extn_client_message::ExtnResponse,
+    utils::rpc_utils::rpc_custom_error_result,
 };
 
 use crate::{firebolt::rpc::RippleRPCProvider, state::platform_state::PlatformState};
@@ -77,9 +78,7 @@ impl ProfileServer for ProfileImpl {
                 return Ok(v.granted.map_or(false, |inner| inner));
             }
         }
-        Err(jsonrpsee::core::Error::Custom(String::from(
-            "approve_content_rating error response TBD",
-        )))
+        rpc_custom_error_result("approve_content_rating error")
     }
 
     async fn approve_purchase(&self, ctx: CallContext) -> RpcResult<bool> {
@@ -103,9 +102,7 @@ impl ProfileServer for ProfileImpl {
                 return Ok(v.granted.map_or(false, |inner| inner));
             }
         }
-        Err(jsonrpsee::core::Error::Custom(String::from(
-            "approve_purchase error response TBD",
-        )))
+        rpc_custom_error_result("approve_purchase error")
     }
 
     async fn profile_flags(&self, _ctx: CallContext) -> RpcResult<HashMap<String, String>> {

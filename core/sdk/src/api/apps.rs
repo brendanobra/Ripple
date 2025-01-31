@@ -215,6 +215,11 @@ pub enum AppError {
     AppNotReady,
     NoIntentError,
 }
+impl std::fmt::Display for AppError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+        write!(f, "{:?}", self)
+    }
+}
 
 #[derive(Debug, Clone)]
 pub enum AppMethod {

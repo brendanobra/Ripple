@@ -19,9 +19,10 @@ use ripple_sdk::{
     async_trait::async_trait, framework::bootstrap::Bootstep, tokio, utils::error::RippleError,
 };
 
+use crate::firebolt::firebolt_middleware_service;
 use crate::state::bootstrap_state::BootstrapState;
 
-use crate::firebolt::firebolt_ws::FireboltWs;
+//use crate::firebolt::firebolt_ws::FireboltWs;
 
 pub struct StartWsStep;
 
@@ -40,17 +41,47 @@ impl Bootstep<BootstrapState> for StartWsStep {
         if ws_enabled {
             let ws_addr = manifest.get_ws_gateway_host();
             let state_for_ws = state.platform_state.clone();
-            tokio::spawn(async move {
-                FireboltWs::start(ws_addr.as_str(), state_for_ws, true, iai.clone()).await;
-            });
+            match firebolt_middleware_service::start(
+                ws_addr.as_str(),
+                state_for_ws.clone(),
+                false,
+                iai_c.clone(),
+            )
+            .await
+            {
+                Ok(_) => {
+                    println!("FireboltWs::start() completed successfully");
+                }
+                Err(e) => {
+                    println!("FireboltWs::start() failed: {:?}", e);
+                }
+            }
+            // tokio::spawn(async move {
+            //     FireboltWs::start(ws_addr.as_str(), state_for_ws, true, iai.clone()).await;
+            // });
         }
 
         if internal_ws_enabled {
             let ws_addr = manifest.get_internal_gateway_host();
             let state_for_ws = state.platform_state;
-            tokio::spawn(async move {
-                FireboltWs::start(ws_addr.as_str(), state_for_ws, false, iai_c).await;
-            });
+            match firebolt_middleware_service::start(
+                ws_addr.as_str(),
+                state_for_ws.clone(),
+                false,
+                iai_c.clone(),
+            )
+            .await
+            {
+                Ok(_) => {
+                    println!("FireboltWs::start() completed successfully");
+                }
+                Err(e) => {
+                    println!("FireboltWs::start() failed: {:?}", e);
+                }
+            }
+            // tokio::spawn(async move {
+            //     FireboltWs::start(ws_addr.as_str(), state_for_ws, false, iai_c).await;
+            // });
         }
 
         Ok(())

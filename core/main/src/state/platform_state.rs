@@ -39,7 +39,7 @@ use std::collections::HashMap;
 
 use crate::{
     broker::{endpoint_broker::EndpointBrokerState, rules_engine::RuleEngine},
-    firebolt::rpc_router::RouterState,
+    //firebolt::rpc_router::RouterState,
     service::{
         apps::{
             app_events::AppEventsState, delegated_launcher_handler::AppManagerState,
@@ -103,13 +103,14 @@ pub struct PlatformState {
     pub provider_broker_state: ProviderBrokerState,
     pub app_manager_state: AppManagerState,
     pub open_rpc_state: OpenRpcState,
-    pub router_state: RouterState,
+    //pub router_state: RouterState,
     pub data_governance: DataGovernanceState,
     pub metrics: MetricsState,
     pub device_session_id: DeviceSessionIdentifier,
     pub ripple_cache: RippleCache,
     pub version: Option<String>,
     pub endpoint_state: EndpointBrokerState,
+    pub rule_engine: RuleEngine,
 }
 
 impl PlatformState {
@@ -137,7 +138,7 @@ impl PlatformState {
             provider_broker_state: ProviderBrokerState::default(),
             app_manager_state: AppManagerState::new(&manifest.configuration.saved_dir),
             open_rpc_state: OpenRpcState::new(Some(exclusory), extn_sdks, provider_registations),
-            router_state: RouterState::new(),
+            //router_state: RouterState::new(),
             data_governance: DataGovernanceState::default(),
             metrics: metrics_state.clone(),
             device_session_id: DeviceSessionIdentifier::default(),
@@ -146,9 +147,10 @@ impl PlatformState {
             endpoint_state: EndpointBrokerState::new(
                 metrics_state,
                 broker_sender,
-                rule_engine,
+                rule_engine.clone(),
                 client,
             ),
+            rule_engine: rule_engine,
         }
     }
 
@@ -249,6 +251,9 @@ impl PlatformState {
         self.get_client()
             .send_extn_request(rpc_request.to_owned())
             .await
+    }
+    pub fn rule_engine(&self) -> RuleEngine {
+        self.rule_engine.clone()
     }
 }
 

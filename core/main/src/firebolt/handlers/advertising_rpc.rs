@@ -23,7 +23,7 @@ use crate::{
 };
 use base64::{engine::general_purpose::STANDARD as base64, Engine};
 use jsonrpsee::{
-    core::{async_trait, Error, RpcResult},
+    core::{async_trait, RpcResult},
     proc_macros::rpc,
     RpcModule,
 };
@@ -40,6 +40,7 @@ use ripple_sdk::{
         storage_property::StorageProperty,
     },
     log::{debug, error},
+    utils::rpc_utils::{rpc_custom_error, rpc_custom_error_result, rpc_error_with_code},
 };
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -54,7 +55,7 @@ const ADVERTISING_APP_BUNDLE_ID_SUFFIX: &str = "Comcast";
 //{"xifa":"00000000-0000-0000-0000-000000000000","xifaType":"sessionId","lmt":"0"}
 const IFA_ZERO_BASE64: &str = "eyJ4aWZhIjoiMDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAwIiwieGlmYVR5cGUiOiJzZXNzaW9uSWQiLCJsbXQiOiIwIn0K";
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AdvertisingId {
     pub ifa: String,
     pub ifa_type: String,
@@ -73,7 +74,7 @@ impl Serialize for AdvertisingId {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AdvertisingPolicy {
     pub skip_restriction: String,
@@ -194,7 +195,7 @@ impl AdvertisingServer for AdvertisingImpl {
                 self.state
                     .session_state
                     .get_account_session()
-                    .ok_or_else(|| Error::Custom(String::from("no session available")))?,
+                    .ok_or_else(|| rpc_custom_error::<()>("no session available"))?,
             ))
             .await
             .map(|_ok| ())
@@ -243,14 +244,9 @@ impl AdvertisingServer for AdvertisingImpl {
                     return Ok(ad_id);
                 }
             }
-
-            Err(jsonrpsee::core::Error::Custom(String::from(
-                "Failed to extract ad init object from response",
-            )))
+            rpc_custom_error_result("Failed to extract ad init object from response")
         } else {
-            Err(jsonrpsee::core::Error::Custom(String::from(
-                "Account session is not available",
-            )))
+            rpc_custom_error_result("Account session is not available")
         }
     }
 
@@ -305,7 +301,7 @@ impl AdvertisingServer for AdvertisingImpl {
             durable_app_id: durable_app_id.clone(),
             dist_session: session
                 .clone()
-                .ok_or_else(|| Error::Custom(String::from("no session available")))?,
+                .ok_or_else(|| rpc_custom_error::<()>("no session available"))?,
             environment: environment.to_string(),
             scope: get_scope_option_map(&None),
         });
@@ -394,10 +390,12 @@ impl AdvertisingServer for AdvertisingImpl {
 
                 match serde_json::from_str(b_string.as_str()) {
                     Ok(js) => Ok(js),
-                    Err(_e) => Err(Error::Custom(String::from("Invalid JSON"))),
+                    Err(_e) => rpc_custom_error_result("Invalid JSON in device attributes"),
                 }
             }
-            Err(_e) => Err(Error::Custom(String::from("Found invalid UTF-8"))),
+            Err(e) => {
+                rpc_custom_error_result(format!("Invalid UTF-8 parsing device attributes: {}", e))
+            }
         }
     }
 
@@ -472,6 +470,6 @@ mod tests {
             None,
         );
 
-        assert!(ad_module.raw_json_request(&request).await.is_ok());
+        assert!(ad_module.raw_json_request(&request, 1).await.is_ok());
     }
 }
