@@ -258,12 +258,10 @@ mod tests {
             .unwrap()
             .block_on(boot_for_unit_test(mock_data.clone()));
         let r = result.unwrap();
-        println!("url={}", r.0);
 
         let result = tokio::runtime::Runtime::new()
             .unwrap()
             .block_on(boot_for_unit_test(mock_data));
         let r = result.unwrap();
-        println!("url={}", r.0);
     }
 }

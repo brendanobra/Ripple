@@ -37,15 +37,15 @@ use crate::mock::{
     mock_web_socket_server::{MockWebSocketServer, WsServerParameters},
 };
 fn get_available_port() -> Option<u16> {
-    (3000..10000).find(|port| port_is_available(*port))
-}
-
-fn port_is_available(port: u16) -> bool {
-    match TcpListener::bind(("127.0.0.1", port)) {
-        Ok(_) => true,
-        Err(_) => false,
+    match TcpListener::bind(("127.0.0.1", 0)) {
+        Ok(listener) => {
+            let port = listener.local_addr().unwrap().port();
+            Some(port)
+        }
+        Err(_) => None,
     }
 }
+
 pub fn load_mock_data_v2_from_file(path: &PathBuf) -> Result<MockData, MockDeviceError> {
     let file = File::open(path).map_err(|e| {
         error!("Failed to open mock data file {e:?}");
@@ -258,12 +258,10 @@ mod tests {
             .unwrap()
             .block_on(boot_for_unit_test(mock_data.clone()));
         let r = result.unwrap();
-        println!("url={}", r.0);
 
         let result = tokio::runtime::Runtime::new()
             .unwrap()
             .block_on(boot_for_unit_test(mock_data));
         let r = result.unwrap();
-        println!("url={}", r.0);
     }
 }
