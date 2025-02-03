@@ -15,7 +15,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-use crate::log::{debug, error};
+use crate::log::debug;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::{collections::HashMap, fmt::Display};
@@ -94,7 +94,7 @@ impl ParamResponse {
                     self.get_notification_id()
                 };
 
-                error!("Getting notif id {:?}", notif_id);
+                debug!("Getting notif id {:?}", notif_id);
                 for event in events {
                     sink_responses.push(ResponseSink {
                         delay: event.delay.unwrap_or(0),

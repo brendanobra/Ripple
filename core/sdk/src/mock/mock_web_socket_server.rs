@@ -171,7 +171,13 @@ impl StatsCollector {
         };
         use std::fs::File;
         use std::io::{BufWriter, Write};
-        let file = File::create(self.stats_file.clone()).unwrap();
+        let file = match File::create(self.stats_file.clone()) {
+            Ok(f) => f,
+            Err(e) => {
+                error!("Failed to create stats file: {:?}", e);
+                return;
+            }
+        };
         let mut writer = BufWriter::new(file);
         let _ = serde_json::to_writer(&mut writer, &stats);
         let _ = writer.flush();
