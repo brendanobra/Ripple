@@ -21,9 +21,7 @@ use std::{
     time::Duration,
 };
 
-use http::{HeaderMap, StatusCode};
-use jsonrpsee::tracing::info;
-use ripple_sdk::{
+use crate::{
     api::gateway::rpc_gateway_api::JsonRpcApiRequest,
     futures::{stream::SplitSink, SinkExt, StreamExt},
     log::{debug, error, warn},
@@ -33,6 +31,8 @@ use ripple_sdk::{
         sync::Mutex,
     },
 };
+use http::{HeaderMap, StatusCode};
+use jsonrpsee::tracing::info;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use tokio_tungstenite::{
@@ -41,7 +41,7 @@ use tokio_tungstenite::{
     WebSocketStream,
 };
 
-use crate::{
+use crate::mock::{
     errors::MockServerWebSocketError,
     mock_config::MockConfig,
     mock_data::{MockData, MockDataError, ParamResponse, ResponseSink},
@@ -74,22 +74,22 @@ impl WsServerParameters {
             port: None,
         }
     }
-    pub fn path(&mut self, path: &str) -> &mut Self {
+    pub fn with_path(&mut self, path: &str) -> &mut Self {
         self.path = Some(path.into());
 
         self
     }
-    pub fn headers(&mut self, headers: HeaderMap) -> &mut Self {
+    pub fn with_headers(&mut self, headers: HeaderMap) -> &mut Self {
         self.headers = Some(headers);
 
         self
     }
-    pub fn query_params(&mut self, query_params: HashMap<String, String>) -> &mut Self {
+    pub fn with_query_params(&mut self, query_params: HashMap<String, String>) -> &mut Self {
         self.query_params = Some(query_params);
 
         self
     }
-    pub fn port(&mut self, port: u16) -> &mut Self {
+    pub fn with_port(&mut self, port: u16) -> &mut Self {
         self.port = Some(port);
 
         self
@@ -117,11 +117,11 @@ pub struct MockWebSocketServer {
     /*
     track thunder methods called and their count per method
     */
-    stats_channel: ripple_sdk::tokio::sync::mpsc::Sender<String>,
+    stats_channel: crate::tokio::sync::mpsc::Sender<String>,
 }
 pub struct StatsCollector {
     thunder_histogram: Arc<RwLock<HashMap<String, u32>>>,
-    messages: ripple_sdk::tokio::sync::mpsc::Receiver<String>,
+    messages: crate::tokio::sync::mpsc::Receiver<String>,
     stats_file: String,
 }
 #[derive(Debug, Serialize, Deserialize)]
@@ -135,10 +135,7 @@ struct ApiStats {
     total: u32,
 }
 impl StatsCollector {
-    pub fn new(
-        messages: ripple_sdk::tokio::sync::mpsc::Receiver<String>,
-        stats_file: String,
-    ) -> Self {
+    pub fn new(messages: crate::tokio::sync::mpsc::Receiver<String>, stats_file: String) -> Self {
         info!(
             "starting mock StatsCollector with stats file: {}",
             stats_file
@@ -174,7 +171,13 @@ impl StatsCollector {
         };
         use std::fs::File;
         use std::io::{BufWriter, Write};
-        let file = File::create(self.stats_file.clone()).unwrap();
+        let file = match File::create(self.stats_file.clone()) {
+            Ok(f) => f,
+            Err(e) => {
+                error!("Failed to create stats file: {:?}", e);
+                return;
+            }
+        };
         let mut writer = BufWriter::new(file);
         let _ = serde_json::to_writer(&mut writer, &stats);
         let _ = writer.flush();
@@ -524,6 +527,7 @@ impl MockWebSocketServer {
 
 #[cfg(test)]
 mod tests {
+
     use ripple_sdk::tokio::time::{self, error::Elapsed, Duration};
 
     use super::*;
@@ -577,17 +581,17 @@ mod tests {
 
     #[test]
     fn test_ws_server_parameters_props() {
-        let mut params = WsServerParameters::new();
         let headers: HeaderMap = {
             let hm = HashMap::from([("Sec-WebSocket-Protocol".to_owned(), "jsonrpc".to_owned())]);
             (&hm).try_into().expect("valid headers")
         };
         let qp = HashMap::from([("appId".to_owned(), "test".to_owned())]);
-        params
-            .headers(headers.clone())
-            .port(16789)
-            .path("/some/path")
-            .query_params(qp.clone());
+        let mut params = WsServerParameters::new();
+        let params = params
+            .with_headers(headers.clone())
+            .with_port(16789)
+            .with_path("/some/path")
+            .with_query_params(qp.clone());
 
         assert_eq!(params.headers, Some(headers));
         assert_eq!(params.port, Some(16789));

@@ -15,15 +15,15 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-use ripple_sdk::log::{debug, error};
+use crate::log::debug;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::{collections::HashMap, fmt::Display};
 
 use crate::{
-    errors::{LoadMockDataError, MockDeviceError},
-    mock_server::{MessagePayload, PayloadType, PayloadTypeError},
-    mock_web_socket_server::ThunderRegisterParams,
+    mock::errors::{LoadMockDataError, MockDeviceError},
+    mock::mock_server::{MessagePayload, PayloadType, PayloadTypeError},
+    mock::mock_web_socket_server::ThunderRegisterParams,
 };
 
 pub type MockData = HashMap<String, Vec<ParamResponse>>;
@@ -94,7 +94,7 @@ impl ParamResponse {
                     self.get_notification_id()
                 };
 
-                error!("Getting notif id {:?}", notif_id);
+                debug!("Getting notif id {:?}", notif_id);
                 for event in events {
                     sink_responses.push(ResponseSink {
                         delay: event.delay.unwrap_or(0),

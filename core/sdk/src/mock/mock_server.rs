@@ -20,7 +20,7 @@ use std::fmt::Display;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::mock_data::MockData;
+use crate::mock::mock_data::MockData;
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub enum PayloadTypeError {

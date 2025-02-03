@@ -15,7 +15,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+use crate::{
+    mock_device_controller::{MockDeviceController, MockDeviceControllerServer},
+    mock_device_processor::MockDeviceProcessor,
+};
 use jsonrpsee::core::server::rpc_module::Methods;
+use ripple_sdk::mock::utils::start_ws_server;
 use ripple_sdk::{
     api::status_update::ExtnStatus,
     async_channel::Receiver as CReceiver,
@@ -35,12 +40,6 @@ use ripple_sdk::{
     semver::Version,
     tokio::{self, runtime::Runtime},
     utils::{error::RippleError, logger::init_logger},
-};
-
-use crate::{
-    mock_device_controller::{MockDeviceController, MockDeviceControllerServer},
-    mock_device_processor::MockDeviceProcessor,
-    utils::boot_ws_server,
 };
 
 pub const EXTN_NAME: &str = "mock_device";
@@ -80,7 +79,7 @@ fn start_launcher(sender: ExtnSender, receiver: CReceiver<CExtnMessage>) {
     runtime.block_on(async move {
         let client_c = client.clone();
         tokio::spawn(async move {
-            match boot_ws_server(client.clone()).await {
+            match start_ws_server(client.clone()).await {
                 Ok(server) => {
                     client.add_request_processor(MockDeviceProcessor::new(client.clone(), server))
                 }
