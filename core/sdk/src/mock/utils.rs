@@ -23,26 +23,23 @@ use crate::{
     utils::error::RippleError,
 };
 use serde_json::Value;
-use std::collections::HashMap;
 use std::net::TcpListener;
 use std::{fs::File, io::BufReader, path::PathBuf, sync::Arc};
 use url::{Host, Url};
 
-use crate::mock::errors::MockServerWebSocketError;
-use crate::mock::mock_data::ParamResponse;
 use crate::mock::{
     errors::{BootFailedError, LoadMockDataError, MockDeviceError},
     mock_config::MockConfig,
     mock_data::MockData,
     mock_web_socket_server::{MockWebSocketServer, WsServerParameters},
 };
-fn get_available_port() -> Option<u16> {
+pub fn get_available_port() -> Result<u16, MockDeviceError> {
     match TcpListener::bind(("127.0.0.1", 0)) {
         Ok(listener) => {
             let port = listener.local_addr().unwrap().port();
-            Some(port)
+            Ok(port)
         }
-        Err(_) => None,
+        Err(e) => Err(MockDeviceError::NoAvailablePort(format!("{}", e))),
     }
 }
 
@@ -63,7 +60,7 @@ pub fn load_mock_data_v2_from_file(path: &PathBuf) -> Result<MockData, MockDevic
 pub async fn boot_for_unit_test(
     mock_data_v2: MockData,
 ) -> Result<(Url, Arc<MockWebSocketServer>), MockDeviceError> {
-    let port = get_available_port().ok_or(MockDeviceError::NoAvailablePort)?;
+    let port = get_available_port()?;
     let hostname = "localhost";
     let uri = "jsonrpc";
     let gateway_url = Url::parse(&format!("ws://{}:{}/{}", hostname, port, uri)).map_err(|e| {
@@ -125,13 +122,13 @@ pub async fn start_ws_server(
     let mut ws_server_params = WsServerParameters::new();
     let mock_data_v2 = load_mock_data_v2(client.clone()).await?;
 
-    Ok(boot_ws_server(
+    boot_ws_server(
         mock_config,
         gateway_url,
         mock_data_v2,
         &mut ws_server_params,
     )
-    .await?)
+    .await
 }
 
 async fn platform_gateway_url(client: &mut ExtnClient) -> Result<Url, MockDeviceError> {
@@ -257,11 +254,11 @@ mod tests {
         let result = tokio::runtime::Runtime::new()
             .unwrap()
             .block_on(boot_for_unit_test(mock_data.clone()));
-        let r = result.unwrap();
+        assert!(result.is_ok());
 
         let result = tokio::runtime::Runtime::new()
             .unwrap()
             .block_on(boot_for_unit_test(mock_data));
-        let r = result.unwrap();
+        assert!(result.is_ok());
     }
 }

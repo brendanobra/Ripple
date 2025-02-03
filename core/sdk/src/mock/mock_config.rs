@@ -15,7 +15,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-use crate::serde_yaml::with;
 use serde::Deserialize;
 
 #[derive(Debug, Clone, Deserialize)]

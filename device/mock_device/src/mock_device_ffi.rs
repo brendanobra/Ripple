@@ -20,7 +20,7 @@ use crate::{
     mock_device_processor::MockDeviceProcessor,
 };
 use jsonrpsee::core::server::rpc_module::Methods;
-use ripple_sdk::mock::utils::{boot_ws_server, start_ws_server};
+use ripple_sdk::mock::utils::start_ws_server;
 use ripple_sdk::{
     api::status_update::ExtnStatus,
     async_channel::Receiver as CReceiver,

@@ -521,7 +521,7 @@ impl MockWebSocketServer {
 
 #[cfg(test)]
 mod tests {
-    use jsonrpsee::types::params;
+
     use ripple_sdk::tokio::time::{self, error::Elapsed, Duration};
 
     use super::*;

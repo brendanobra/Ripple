@@ -15,10 +15,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-use std::{
-    fmt::{format, Display},
-    path::PathBuf,
-};
+use std::{fmt::Display, path::PathBuf};
 
 use crate::mock::mock_data::MockDataError;
 
@@ -43,7 +40,7 @@ impl Display for MockServerWebSocketError {
 pub enum MockDeviceError {
     BootFailed(BootFailedError),
     LoadMockDataFailed(LoadMockDataError),
-    NoAvailablePort,
+    NoAvailablePort(String),
     BadUrlScheme(String),
 }
 
@@ -58,16 +55,10 @@ impl Display for MockDeviceError {
             Self::LoadMockDataFailed(reason) => {
                 format!("Failed to load mock data from file. Reason: {reason}")
             }
-            MockDeviceError::BootFailed(boot_failed_error) => {
-                format!("Failed to boot the mock device. Error: {boot_failed_error}")
+            Self::NoAvailablePort(e) => {
+                format!("No port available to start the WebSocket server.: {e}")
             }
-            MockDeviceError::LoadMockDataFailed(load_mock_data_error) => {
-                format!("Failed to load mock data. Error: {load_mock_data_error}")
-            }
-            MockDeviceError::NoAvailablePort => {
-                format!("No port available to start the WebSocket server.")
-            }
-            MockDeviceError::BadUrlScheme(url) => {
+            Self::BadUrlScheme(url) => {
                 format!("The scheme in the URL is invalid. It must be `ws`. URL: {url}")
             }
         };
