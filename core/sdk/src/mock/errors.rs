@@ -17,7 +17,7 @@
 
 use std::{fmt::Display, path::PathBuf};
 
-use crate::mock_data::MockDataError;
+use crate::mock::mock_data::MockDataError;
 
 #[derive(Debug, Clone)]
 pub enum MockServerWebSocketError {
@@ -40,7 +40,8 @@ impl Display for MockServerWebSocketError {
 pub enum MockDeviceError {
     BootFailed(BootFailedError),
     LoadMockDataFailed(LoadMockDataError),
-    NoAvailablePort,
+    NoAvailablePort(String),
+    BadUrlScheme(String),
 }
 
 impl std::error::Error for MockDeviceError {}
@@ -54,9 +55,12 @@ impl Display for MockDeviceError {
             Self::LoadMockDataFailed(reason) => {
                 format!("Failed to load mock data from file. Reason: {reason}")
             }
-            MockDeviceError::BootFailed(boot_failed_error) => todo!(),
-            MockDeviceError::LoadMockDataFailed(load_mock_data_error) => todo!(),
-            MockDeviceError::NoAvailablePort => todo!(),
+            Self::NoAvailablePort(e) => {
+                format!("No port available to start the WebSocket server.: {e}")
+            }
+            Self::BadUrlScheme(url) => {
+                format!("The scheme in the URL is invalid. It must be `ws`. URL: {url}")
+            }
         };
 
         f.write_str(msg.as_str())
