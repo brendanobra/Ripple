@@ -22,9 +22,14 @@ use std::{thread, time};
 
 use crate::ripple_sdk::{self};
 use crate::{
-    client::thunder_plugin::ThunderPlugin,
+    client::{
+        device_operator::{
+            DeviceCallRequest, DeviceChannelParams, DeviceOperator, DeviceResponseMessage,
+            DeviceSubscribeRequest,
+        },
+        thunder_plugin::ThunderPlugin,
+    },
     ripple_sdk::{
-        api::device::device_operator::{DeviceCallRequest, DeviceChannelParams, DeviceOperator},
         async_trait::async_trait,
         extn::{
             client::extn_client::ExtnClient,
@@ -41,7 +46,6 @@ use crate::{
 use base64::{engine::general_purpose::STANDARD as base64, Engine};
 use ripple_sdk::api::app_catalog::{AppCatalogRequest, AppOperationComplete, AppsUpdate};
 use ripple_sdk::api::device::device_apps::DeviceAppMetadata;
-use ripple_sdk::api::device::device_operator::{DeviceResponseMessage, DeviceSubscribeRequest};
 use ripple_sdk::api::firebolt::fb_capabilities::FireboltPermissions;
 use ripple_sdk::api::firebolt::fb_metrics::{Timer, TimerType};
 use ripple_sdk::api::observability::metrics_util::{
@@ -461,7 +465,8 @@ impl ThunderPackageManagerRequestProcessor {
                 },
                 sub_tx,
             )
-            .await;
+            .await
+            .ok();
         Self::ack(state.thunder_state.get_client(), req)
             .await
             .is_ok()
@@ -1132,6 +1137,10 @@ pub mod tests {
             id: Uuid::new_v4(),
             plugin_manager_tx: None,
             subscriptions: None,
+            thunder_async_callbacks: None,
+            thunder_async_subscriptions: None,
+            thunder_async_client: None,
+            use_thunder_async: false,
         };
         let mut sessions: HashMap<String, Operation> = HashMap::new();
         sessions.insert("asdf".to_string(), operation.clone());
@@ -1165,6 +1174,10 @@ pub mod tests {
             id: Uuid::new_v4(),
             plugin_manager_tx: None,
             subscriptions: None,
+            thunder_async_callbacks: None,
+            thunder_async_subscriptions: None,
+            thunder_async_client: None,
+            use_thunder_async: false,
         };
         let mut sessions: HashMap<String, Operation> = HashMap::new();
         sessions.insert("asdf".to_string(), operation.clone());
