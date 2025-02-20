@@ -20,14 +20,13 @@ use std::collections::HashMap;
 use jsonrpsee::{core::server::rpc_module::Methods, types::TwoPointZero};
 use ripple_sdk::{
     api::{
-        apps::EffectiveTransport,
         firebolt::{
             fb_capabilities::JSON_RPC_STANDARD_ERROR_INVALID_PARAMS,
             fb_openrpc::FireboltOpenRpcMethod,
         },
         gateway::{
             rpc_error::RpcError,
-            rpc_gateway_api::{ApiMessage, ApiProtocol, RpcRequest},
+            rpc_gateway_api::{ApiMessage, ApiProtocol, JsonRpcApiResponse, RpcRequest},
         },
         observability::{log_signal::LogSignal, metrics_util::ApiStats},
     },
@@ -88,6 +87,9 @@ pub enum FireboltGatewayCommand {
     HandleRpcForExtn {
         msg: ExtnMessage,
     },
+    HandleResponse {
+        response: JsonRpcApiResponse,
+    },
     StopServer,
 }
 
@@ -139,6 +141,9 @@ impl FireboltGateway {
                         error!("Not a valid RPC Request {:?}", msg);
                     }
                 }
+                HandleResponse { response } => {
+                    self.handle_response(response);
+                }
                 StopServer => {
                     error!("Stopping server");
                     break;
@@ -147,7 +152,14 @@ impl FireboltGateway {
         }
     }
 
-    pub async fn handle(&self, request: RpcRequest, extn_msg: Option<ExtnMessage>) {
+    pub fn handle_response(&self, response: JsonRpcApiResponse) {
+        self.state
+            .platform_state
+            .endpoint_state
+            .handle_broker_response(response);
+    }
+
+    pub async fn handle(&self, request: RpcRequest, mut extn_msg: Option<ExtnMessage>) {
         trace!(
             "firebolt_gateway Received Firebolt request {} {} {}",
             request.ctx.request_id,
@@ -163,6 +175,7 @@ impl FireboltGateway {
             request.clone(),
         )
         .emit_debug();
+        let mut extn_cb = None;
         match request.ctx.protocol {
             ApiProtocol::Extn => {
                 extn_request = true;
@@ -171,8 +184,20 @@ impl FireboltGateway {
                 if !request.is_subscription()
                     && (callback_c.is_none() || callback_c.unwrap().callback.is_none())
                 {
-                    error!("No callback for request {:?} ", request);
-                    return;
+                    trace!("No callback for request {:?} ", request);
+                    if let Some(extn_message) = extn_msg.clone() {
+                        let extn_id = extn_message.requestor;
+                        extn_cb = self
+                            .state
+                            .platform_state
+                            .get_client()
+                            .get_extn_client()
+                            .get_extn_sender_with_extn_id(&extn_id.to_string());
+                    }
+                    if extn_cb.is_none() {
+                        error!("No sender for request {:?} ", request);
+                        return;
+                    }
                 }
             }
             _ => {
@@ -243,7 +268,7 @@ impl FireboltGateway {
 
             let result = if extn_request {
                 // extn protocol means its an internal Ripple request skip permissions.
-                Ok(())
+                Ok(Vec::new())
             } else {
                 FireboltGatekeeper::gate(platform_state.clone(), request_c.clone()).await
             };
@@ -251,11 +276,36 @@ impl FireboltGateway {
             capture_stage(&platform_state.metrics, &request_c, "permission");
 
             match result {
-                Ok(_) => {
+                Ok(p) => {
+                    if let Some(overridden_method) = platform_state
+                        .get_manifest()
+                        .has_rpc_override_method(&request_c.method)
+                    {
+                        request_c.method = overridden_method;
+                    }
+
+                    if extn_cb.is_some() {
+                        if let Some(mut msg) = extn_msg.clone() {
+                            msg.callback = extn_cb;
+                            let _ = extn_msg.insert(msg);
+                        }
+                    }
+
+                    let session = if matches!(&request.ctx.protocol, ApiProtocol::JsonRpc) {
+                        platform_state
+                            .clone()
+                            .session_state
+                            .get_session(&request_c.ctx)
+                    } else {
+                        None
+                    };
+
                     if !platform_state.endpoint_state.handle_brokerage(
                         request_c.clone(),
                         extn_msg.clone(),
                         None,
+                        p,
+                        session.clone(),
                     ) {
                         // Route
                         match request.clone().ctx.protocol {
@@ -278,17 +328,14 @@ impl FireboltGateway {
                                 }
                             }
                             _ => {
-                                if let Some(session) = platform_state
-                                    .clone()
-                                    .session_state
-                                    .get_session(&request_c.ctx)
-                                {
+                                if let Some(session) = session {
                                     LogSignal::new(
                                         "firebolt_gateway".into(),
                                         "routing".into(),
                                         request.clone(),
                                     )
                                     .emit_debug();
+
                                     // if the websocket disconnects before the session is recieved this leads to an error
                                     RpcRouter::route(
                                         platform_state.clone(),
@@ -460,23 +507,11 @@ async fn send_json_rpc_error(
                 get_rpc_header_with_status(request, status_code),
             );
 
-            match session.get_transport() {
-                EffectiveTransport::Websocket => {
-                    if let Err(e) = session.send_json_rpc(api_message).await {
-                        error!(
-                            "send_json_rpc_error: Error sending websocket message: e={:?}",
-                            e
-                        )
-                    }
-                }
-                EffectiveTransport::Bridge(id) => {
-                    if let Err(e) = platform_state.send_to_bridge(id, api_message).await {
-                        error!(
-                            "send_json_rpc_error: Error sending bridge message: e={:?}",
-                            e
-                        )
-                    }
-                }
+            if let Err(e) = session.send_json_rpc(api_message).await {
+                error!(
+                    "send_json_rpc_error: Error sending websocket message: e={:?}",
+                    e
+                )
             }
         } else {
             error!("send_json_rpc_error: Could not serialize error message");

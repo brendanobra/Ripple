@@ -15,16 +15,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-use jsonrpsee::{
-    core::{Error, RpcResult},
-    types::error::CallError,
-};
+use jsonrpsee::core::RpcResult;
 use ripple_sdk::{
     api::{
         firebolt::fb_general::{ListenRequest, ListenerResponse},
         gateway::rpc_gateway_api::CallContext,
     },
     tokio::sync::oneshot,
+    utils::rpc_utils::rpc_error_with_code,
 };
 
 use crate::{
@@ -84,38 +82,16 @@ pub async fn rpc_add_event_listener_with_decorator(
 }
 
 pub fn rpc_downstream_service_err(msg: &str) -> jsonrpsee::core::error::Error {
-    Error::Call(CallError::Custom {
-        code: DOWNSTREAM_SERVICE_UNAVAILABLE_ERROR_CODE,
-        message: msg.to_owned(),
-        data: None,
-    })
+    rpc_error_with_code::<String>(msg.to_owned(), DOWNSTREAM_SERVICE_UNAVAILABLE_ERROR_CODE)
 }
 pub fn rpc_session_no_intent_err(msg: &str) -> jsonrpsee::core::error::Error {
-    Error::Call(CallError::Custom {
-        code: SESSION_NO_INTENT_ERROR_CODE,
-        message: msg.to_owned(),
-        data: None,
-    })
+    rpc_error_with_code::<String>(msg.to_owned(), SESSION_NO_INTENT_ERROR_CODE)
 }
 pub fn rpc_navigate_reserved_app_err(msg: &str) -> jsonrpsee::core::error::Error {
-    Error::Call(CallError::Custom {
-        code: FIRE_BOLT_DEEPLINK_ERROR_CODE,
-        message: msg.to_owned(),
-        data: None,
-    })
+    rpc_error_with_code::<String>(msg.to_owned(), FIRE_BOLT_DEEPLINK_ERROR_CODE)
 }
 
 pub fn get_base_method(method: &str) -> String {
     let method_vec: Vec<&str> = method.split('.').collect();
     method_vec.first().unwrap().to_string().to_lowercase()
-}
-
-pub fn extract_tcp_port(url: &str) -> String {
-    let url_split: Vec<&str> = url.split("://").collect();
-    if let Some(domain) = url_split.get(1) {
-        let domain_split: Vec<&str> = domain.split('/').collect();
-        domain_split.first().unwrap().to_string()
-    } else {
-        url.to_owned()
-    }
 }

@@ -15,8 +15,48 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-use jsonrpsee::core::Error;
+use jsonrpsee::types::{error::CallError, ErrorObject};
 
-pub fn rpc_err(msg: impl Into<String>) -> Error {
-    Error::Custom(msg.into())
+use crate::JsonRpcErrorType;
+
+pub fn rpc_err(msg: impl Into<String>) -> JsonRpcErrorType {
+    JsonRpcErrorType::Custom(msg.into())
+}
+pub fn rpc_error_with_code<T>(msg: impl Into<String>, code: i32) -> JsonRpcErrorType {
+    JsonRpcErrorType::Call(CallError::Custom(ErrorObject::owned::<()>(
+        code,
+        msg.into(),
+        None,
+    )))
+}
+
+pub fn rpc_error_with_code_result<T>(
+    msg: impl Into<String>,
+    code: i32,
+) -> Result<T, JsonRpcErrorType> {
+    let msg_str = msg.into();
+    Err(rpc_error_with_code::<T>(msg_str, code))
+}
+/*
+Legacy function - used to minimally disrupt existing code
+*/
+pub fn rpc_custom_error_result<T>(msg: impl Into<String>) -> Result<T, JsonRpcErrorType> {
+    Err::<T, _>(rpc_custom_error::<T>(msg))
+}
+pub fn rpc_custom_error<T>(msg: impl Into<String>) -> JsonRpcErrorType {
+    JsonRpcErrorType::Custom(msg.into())
+}
+
+pub fn extract_tcp_port(url: &str) -> Result<String, JsonRpcErrorType> {
+    let url_split: Vec<&str> = url.split("://").collect();
+    if let Some(domain) = url_split.get(1) {
+        let domain_split: Vec<&str> = domain.split('/').collect();
+        if let Some(first_part) = domain_split.first() {
+            Ok(first_part.to_string())
+        } else {
+            rpc_custom_error_result("Invalid domain format")
+        }
+    } else {
+        rpc_custom_error_result("Invalid URL format")
+    }
 }

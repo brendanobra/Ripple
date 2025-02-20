@@ -152,13 +152,10 @@ impl GrantState {
         platform_state: &PlatformState,
     ) -> HashMap<String, HashSet<GrantEntry>> {
         let mut grant_entries_to_remove: HashMap<String, HashSet<GrantEntry>> = HashMap::new();
-        let grant_policies_map = if let Some(grant_policies) =
-            platform_state.get_device_manifest().get_grant_policies()
-        {
-            grant_policies
-        } else {
-            HashMap::default()
-        };
+        let grant_policies_map = platform_state
+            .get_device_manifest()
+            .get_grant_policies()
+            .unwrap_or_default();
         let grant_entries = platform_state
             .cap_state
             .grant_state
@@ -184,13 +181,10 @@ impl GrantState {
     }
 
     fn fetch_device_grant_entry_to_remove(platform_state: &PlatformState) -> HashSet<GrantEntry> {
-        let grant_policies_map = if let Some(grant_policies) =
-            platform_state.get_device_manifest().get_grant_policies()
-        {
-            grant_policies
-        } else {
-            HashMap::default()
-        };
+        let grant_policies_map = platform_state
+            .get_device_manifest()
+            .get_grant_policies()
+            .unwrap_or_default();
         let grant_entries = platform_state
             .cap_state
             .grant_state
@@ -1979,7 +1973,6 @@ mod tests {
         };
         use ripple_sdk::{
             api::{
-                apps::EffectiveTransport,
                 device::device_user_grants_data::GrantRequirements,
                 firebolt::{
                     fb_general::ListenRequest,
@@ -2008,8 +2001,7 @@ mod tests {
                 ack_response: ChallengeResponse,
             ) {
                 let (tx, mut rx) = tokio::sync::mpsc::channel(32);
-                let sample_app_session =
-                    Session::new("app_id".to_owned(), Some(tx), EffectiveTransport::Websocket);
+                let sample_app_session = Session::new("app_id".to_owned(), Some(tx));
                 let state_c = state.clone();
                 let ctx_c = ctx.clone();
                 state

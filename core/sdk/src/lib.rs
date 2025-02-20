@@ -18,6 +18,7 @@
 pub mod api;
 pub mod extn;
 pub mod framework;
+pub mod processor;
 pub mod utils;
 
 // Externalize the reusable crates to avoid version
@@ -39,3 +40,6 @@ pub extern crate uuid;
 pub trait Mockable {
     fn mock() -> Self;
 }
+
+pub type JsonRpcErrorType = jsonrpsee::core::error::Error;
+pub type JsonRpcErrorCode = jsonrpsee::types::error::ErrorCode;

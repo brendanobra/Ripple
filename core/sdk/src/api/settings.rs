@@ -37,10 +37,10 @@ pub enum SettingKey {
     LegacyMiniGuide,
 }
 
-impl ToString for SettingKey {
-    fn to_string(&self) -> String {
+impl std::fmt::Display for SettingKey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = serde_json::to_string(self).unwrap();
-        s[1..s.len() - 1].into()
+        write!(f, "{}", &s[1..s.len() - 1])
     }
 }
 
@@ -188,6 +188,7 @@ mod tests {
                 method: "some method".to_string(),
                 cid: Some("test_cid".to_string()),
                 gateway_secure: true,
+                context: Vec::new(),
             },
             vec![SettingKey::VoiceGuidanceEnabled, SettingKey::ClosedCaptions],
             alias_map,
@@ -214,6 +215,7 @@ mod tests {
                 method: "some method".to_string(),
                 cid: Some("test_cid".to_string()),
                 gateway_secure: true,
+                context: Vec::new(),
             },
             keys: vec![SettingKey::VoiceGuidanceEnabled, SettingKey::ClosedCaptions],
             alias_map: Some(HashMap::new()),

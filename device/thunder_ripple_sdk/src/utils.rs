@@ -15,13 +15,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-use std::collections::HashMap;
-
-use jsonrpsee::core::Error;
-use ripple_sdk::{
-    api::device::{device_operator::DeviceResponseMessage, device_request::AudioProfile},
-    serde_json::Value,
+use std::{
+    collections::HashMap,
+    sync::atomic::{AtomicU64, Ordering},
 };
+
+use crate::client::device_operator::DeviceResponseMessage;
+use jsonrpsee::core::Error;
+use ripple_sdk::{api::device::device_request::AudioProfile, serde_json::Value};
 use serde::Deserialize;
 
 pub fn get_audio_profile_from_value(value: Value) -> HashMap<AudioProfile, bool> {
@@ -101,11 +102,16 @@ pub struct ThunderErrorResponse {
     pub error: Value,
 }
 
-pub fn get_error_value(error: &Error) -> Value {
-    if let jsonrpsee::core::Error::Request(s) = error {
-        if let Ok(v) = ripple_sdk::serde_json::from_str::<ThunderErrorResponse>(s) {
-            return v.error;
-        }
+pub fn get_error_value(jsonrpsee_error: &Error) -> Value {
+    match ripple_sdk::serde_json::to_value(jsonrpsee_error.to_string()) {
+        Ok(value) => value,
+        Err(_) => Value::String("Unknown error".to_string()),
     }
-    Value::Null
+}
+
+static ATOMIC_ID: AtomicU64 = AtomicU64::new(0);
+
+pub fn get_next_id() -> u64 {
+    ATOMIC_ID.fetch_add(1, Ordering::Relaxed);
+    ATOMIC_ID.load(Ordering::Relaxed)
 }

@@ -15,7 +15,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-use std::net::SocketAddr;
+use std::{
+    net::SocketAddr,
+    sync::{Arc, RwLock},
+};
 
 use super::firebolt_gateway::FireboltGatewayCommand;
 use crate::{
@@ -27,10 +30,12 @@ use crate::{
 };
 use futures::SinkExt;
 use futures::StreamExt;
-use jsonrpsee::types::{error::ErrorCode, ErrorResponse, Id};
+use jsonrpsee::types::{error::INVALID_REQUEST_CODE, ErrorObject, ErrorResponse, Id};
 use ripple_sdk::{
     api::{
-        gateway::rpc_gateway_api::{ApiMessage, ApiProtocol, ClientContext, RpcRequest},
+        gateway::rpc_gateway_api::{
+            ApiMessage, ApiProtocol, ClientContext, JsonRpcApiResponse, RpcRequest, RPC_V2,
+        },
         observability::log_signal::LogSignal,
     },
     log::{error, info, trace},
@@ -54,6 +59,7 @@ pub struct FireboltWs {}
 pub struct ClientIdentity {
     session_id: String,
     app_id: String,
+    rpc_v2: bool,
 }
 
 struct ConnectionCallbackConfig {
@@ -67,7 +73,13 @@ pub struct ConnectionCallback(ConnectionCallbackConfig);
 /**
  * Gets a query parameter from the request at the given key.
  * If required=true, then return an error if the param is missing
+ *
+ *
+ * clippy: the `Err`-variant is at least 136 bytes
+ * It is not possible to reduce the size of the error message without boxing, and upsetting
+ * consumers
  */
+#[allow(clippy::result_large_err)]
 fn get_query(
     req: &tungstenite::handshake::server::Request,
     key: &'static str,
@@ -134,9 +146,18 @@ impl tungstenite::handshake::server::Callback for ConnectionCallback {
                 }
             }
         };
+
+        // If RPCv2 is set as a query param then Ripple will use logic more complicit with the RPCv2 spec.
+        // Non-complicit behavior is still available for compatibility with older firebolt clients.
+        let rpc_v2 = match get_query(request, "RPCv2", false)? {
+            Some(e) => e == "true",
+            None => false,
+        };
+
         let cid = ClientIdentity {
             session_id: session_id.clone(),
             app_id,
+            rpc_v2,
         };
         oneshot_send_and_log(cfg.next, cid, "ResolveClientIdentity");
         /*
@@ -217,11 +238,7 @@ impl FireboltWs {
             app_id: app_id.clone(),
             gateway_secure,
         };
-        let session = Session::new(
-            identity.app_id.clone(),
-            Some(session_tx.clone()),
-            ripple_sdk::api::apps::EffectiveTransport::Websocket,
-        );
+        let session = Session::new(identity.app_id.clone(), Some(session_tx.clone()));
         let app_id_c = app_id.clone();
         let session_id_c = identity.session_id.clone();
 
@@ -253,6 +270,12 @@ impl FireboltWs {
             error!("Couldnt pre cache permissions");
         }
 
+        let mut context = vec![];
+        if identity.rpc_v2 {
+            context.push(RPC_V2.to_string());
+        }
+
+        let rpc_context: Arc<RwLock<Vec<String>>> = Arc::new(RwLock::new(context));
         let (mut sender, mut receiver) = ws_stream.split();
         let mut platform_state = state.clone();
         let context_clone = ctx.clone();
@@ -319,6 +342,7 @@ impl FireboltWs {
                     if msg.is_text() && !msg.is_empty() {
                         let req_text = String::from(msg.to_text().unwrap());
                         let req_id = Uuid::new_v4().to_string();
+                        let context = { rpc_context.read().unwrap().clone() };
                         if let Ok(request) = RpcRequest::parse(
                             req_text.clone(),
                             app_id_c.clone(),
@@ -326,9 +350,15 @@ impl FireboltWs {
                             req_id.clone(),
                             Some(connection_id.clone()),
                             gateway_secure,
+                            context,
                         ) {
                             info!("Received Firebolt request {}", request.params_json);
                             let msg = FireboltGatewayCommand::HandleRpc { request };
+                            if let Err(e) = client.clone().send_gateway_command(msg) {
+                                error!("failed to send request {:?}", e);
+                            }
+                        } else if let Some(response) = JsonRpcApiResponse::get_response(&req_text) {
+                            let msg = FireboltGatewayCommand::HandleResponse { response };
                             if let Err(e) = client.clone().send_gateway_command(msg) {
                                 error!("failed to send request {:?}", e);
                             }
@@ -337,21 +367,19 @@ impl FireboltWs {
                                 .session_state
                                 .get_session_for_connection_id(&connection_id)
                             {
-                                use ripple_sdk::api::apps::EffectiveTransport;
-                                let err =
-                                    ErrorResponse::new(ErrorCode::InvalidRequest.into(), Id::Null);
+                                let err = ErrorResponse::owned(
+                                    ErrorObject::owned::<()>(
+                                        INVALID_REQUEST_CODE,
+                                        "invalid request".to_owned(),
+                                        None,
+                                    ),
+                                    Id::Null,
+                                );
+
                                 let msg = serde_json::to_string(&err).unwrap();
                                 let api_msg =
                                     ApiMessage::new(ApiProtocol::JsonRpc, msg, req_id.clone());
-                                // No Stats here its an invalid RPC request
-                                match session.get_transport() {
-                                    EffectiveTransport::Bridge(id) => {
-                                        let _ = state.send_to_bridge(id, api_msg).await;
-                                    }
-                                    EffectiveTransport::Websocket => {
-                                        let _ = session.send_json_rpc(api_msg).await;
-                                    }
-                                }
+                                let _ = session.send_json_rpc(api_msg).await;
                             }
                             error!("invalid message {}", req_text)
                         }
