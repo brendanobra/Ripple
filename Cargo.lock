@@ -2895,6 +2895,7 @@ dependencies = [
  "futures",
  "futures-channel",
  "jsonrpsee",
+ "lazy_static",
  "libloading",
  "log",
  "regex",
