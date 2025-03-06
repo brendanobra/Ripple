@@ -34,10 +34,13 @@ use ripple_sdk::{
     utils::error::RippleError,
     uuid::Uuid,
 };
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
 
 use crate::{
-    broker::{endpoint_broker::EndpointBrokerState, rules_engine::RuleEngine},
+    broker::{
+        endpoint_broker::{BrokerRequest, EndpointBrokerState},
+        rules_engine::{RuleEngine, RuleTransformType},
+    },
     firebolt::rpc_router::RouterState,
     service::{
         apps::{
@@ -50,8 +53,12 @@ use crate::{
 };
 
 use super::{
-    cap::cap_state::CapState, metrics_state::MetricsState, openrpc_state::OpenRpcState,
-    ripple_cache::RippleCache, session_state::SessionState,
+    cap::cap_state::CapState,
+    metrics_state::MetricsState,
+    openrpc_state::OpenRpcState,
+    ripple_cache::RippleCache,
+    session_state::{Session, SessionState},
+    types::{ContractualRpcRequest, MetricsProvider, PlatformRpcProvider, PlatformStateProvider},
 };
 use parking_lot::RwLock;
 
@@ -238,6 +245,145 @@ impl PlatformState {
         self.get_client()
             .send_extn_request(rpc_request.to_owned())
             .await
+    }
+}
+pub struct PlatformStateSingleton;
+impl PlatformStateProvider for PlatformStateSingleton {
+    fn get_session_for_connection_id(&self, cid: &str) -> Result<Session, RippleError> {
+        todo!()
+    }
+
+    fn update_unsubscribe_request(&self, id: u64) -> Result<bool, RippleError> {
+        todo!()
+    }
+
+    fn get_extn_message(&self, id: u64, is_event: bool) -> Result<ExtnMessage, RippleError> {
+        todo!()
+    }
+
+    fn get_request(&self, id: u64) -> Result<BrokerRequest, RippleError> {
+        todo!()
+    }
+
+    fn get_transform_data(&self, rule_type: RuleTransformType) -> Option<String> {
+        todo!()
+    }
+
+    fn has_internal_launcher(&self) -> bool {
+        todo!()
+    }
+
+    fn get_launcher_capability(&self) -> Option<ExtnId> {
+        todo!()
+    }
+
+    fn get_distributor_capability(&self) -> Option<ExtnId> {
+        todo!()
+    }
+
+    fn get_manifest(&self) -> ExtnManifest {
+        todo!()
+    }
+
+    fn get_rpc_aliases(&self) -> HashMap<String, Vec<String>> {
+        todo!()
+    }
+
+    fn get_device_manifest(&self) -> DeviceManifest {
+        todo!()
+    }
+
+    fn get_client(&self) -> RippleClient {
+        todo!()
+    }
+
+    fn supports_cloud_sync(&self) -> bool {
+        todo!()
+    }
+
+    fn supports_encoding(&self) -> bool {
+        todo!()
+    }
+
+    fn supports_distributor_session(&self) -> bool {
+        todo!()
+    }
+
+    fn supports_session(&self) -> bool {
+        todo!()
+    }
+
+    fn supports_device_tokens(&self) -> bool {
+        todo!()
+    }
+
+    fn supports_app_catalog(&self) -> bool {
+        todo!()
+    }
+
+    fn supports_rfc(&self) -> bool {
+        todo!()
+    }
+
+    fn metrics(&self) -> Arc<RwLock<dyn MetricsProvider>> {
+        todo!()
+    }
+
+    fn cache(&self) -> crate::state::ripple_cache::RippleCache {
+        todo!()
+    }
+
+    fn extn_client(&self) -> ripple_sdk::extn::client::extn_client::ExtnClient {
+        todo!()
+    }
+
+    #[must_use]
+    #[allow(
+        elided_named_lifetimes,
+        clippy::type_complexity,
+        clippy::type_repetition_in_bounds
+    )]
+    fn internal_rpc_request<'life0, 'life1, 'async_trait>(
+        &'life0 self,
+        rpc_request: &'life1 RpcRequest,
+    ) -> ::core::pin::Pin<
+        Box<
+            dyn ::core::future::Future<Output = Result<ExtnMessage, RippleError>>
+                + ::core::marker::Send
+                + 'async_trait,
+        >,
+    >
+    where
+        'life0: 'async_trait,
+        'life1: 'async_trait,
+        Self: 'async_trait,
+    {
+        todo!()
+    }
+
+    #[doc = ""]
+    #[doc = " Also war on dots"]
+    #[must_use]
+    #[allow(
+        elided_named_lifetimes,
+        clippy::type_complexity,
+        clippy::type_repetition_in_bounds
+    )]
+    fn make_extn_request<'life0, 'async_trait>(
+        &'life0 self,
+        rpc_request: ContractualRpcRequest,
+    ) -> ::core::pin::Pin<
+        Box<
+            dyn ::core::future::Future<Output = Result<ExtnMessage, RippleError>>
+                + ::core::marker::Send
+                + 'async_trait,
+        >,
+    >
+    where
+        'life0: 'async_trait,
+        Self: 'async_trait,
+    {
+        todo!()
     }
 }
 
