@@ -53,7 +53,6 @@ use super::{
     cap::cap_state::CapState, metrics_state::MetricsState, openrpc_state::OpenRpcState,
     ripple_cache::RippleCache, session_state::SessionState,
 };
-use parking_lot::RwLock;
 
 /// Platform state encapsulates the internal state of the Ripple Main application.
 ///
