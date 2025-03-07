@@ -16,9 +16,11 @@
 //
 
 use crate::state::platform_state::PlatformState;
+use crate::state::types::PlatformStateProvider;
 use futures::stream::{SplitSink, SplitStream};
 use futures_util::StreamExt;
 use jsonrpsee::core::RpcResult;
+use parking_lot::RwLock;
 use ripple_sdk::{
     api::gateway::rpc_gateway_api::{JsonRpcApiError, RpcRequest},
     log::{error, info},
@@ -26,7 +28,7 @@ use ripple_sdk::{
     utils::rpc_utils::extract_tcp_port,
 };
 use serde_json::Value;
-use std::time::Duration;
+use std::{sync::Arc, time::Duration};
 use tokio_tungstenite::{client_async, tungstenite::Message, WebSocketStream};
 
 pub struct BrokerUtils;
@@ -74,6 +76,31 @@ impl BrokerUtils {
 
     pub async fn process_internal_main_request<'a>(
         state: &mut PlatformState,
+        method: &'a str,
+        params: Option<Value>,
+    ) -> RpcResult<Value> {
+        let rpc_request = RpcRequest::internal(method).with_params(params);
+        state
+            .metrics
+            .add_api_stats(&rpc_request.ctx.request_id, method);
+
+        match state.internal_rpc_request(&rpc_request).await {
+            Ok(res) => match res.as_value() {
+                Some(v) => Ok(v),
+                None => Err(JsonRpcApiError::default()
+                    .with_code(-32100)
+                    .with_message(format!("failed to get {} : {:?}", method, res))
+                    .into()),
+            },
+            Err(e) => Err(JsonRpcApiError::default()
+                .with_code(-32100)
+                .with_message(format!("failed to get {} : {}", method, e))
+                .into()),
+        }
+    }
+    pub async fn new_process_internal_main_request<'a>(
+        state: &mut PlatformState,
+        singleton_platform_state: Arc<RwLock<dyn PlatformStateProvider>>,
         method: &'a str,
         params: Option<Value>,
     ) -> RpcResult<Value> {

@@ -59,9 +59,9 @@ pub trait PlatformStateProvider: Send + Sync {
     */
     fn get_session_for_connection_id(&self, cid: &str) -> Result<Session, RippleError>;
     fn update_unsubscribe_request(&self, id: u64) -> Result<bool, RippleError>;
-    fn get_extn_message(&self, id: u64, is_event: bool) -> Result<ExtnMessage, RippleError>;
+    //fn get_extn_message(&self, id: u64, is_event: bool) -> Result<ExtnMessage, RippleError>;
     fn get_request(&self, id: u64) -> Result<BrokerRequest, RippleError>;
-    fn get_transform_data(&self, rule_type: RuleTransformType) -> Option<String>;
+    //fn get_transform_data(&self, rule_type: RuleTransformType) -> Option<String>;
 
     fn has_internal_launcher(&self) -> bool;
 
@@ -113,9 +113,6 @@ pub trait PlatformStateProvider: Send + Sync {
         rpc_request: ContractualRpcRequest,
     ) -> Result<ExtnMessage, RippleError>;
 }
-// pub trait NotPlatformStateProvider: PlatformStateHolder + Send + Sync {
-
-// }
 #[automock]
 #[async_trait]
 pub trait PlatformRpcProvider {
@@ -137,66 +134,3 @@ pub struct ContractualRpcRequest {
     pub contract: RippleContract,
     pub request: ExtnPayload,
 }
-
-pub trait RipplePlatform: PlatformStateProvider + MetricsProvider + PlatformRpcProvider {}
-// mock! {
-//     pub ingRipplePlatform{}
-//     #[async_trait]
-//     impl PlatformStateProvider for ingRipplePlatform{
-//         fn get_session_for_connection_id(&self, cid: &str) -> Result<Session, RippleError>;
-//         fn update_unsubscribe_request(&self, id: u64) -> Result<bool, RippleError>;
-//         fn get_extn_message(&self, id: u64, is_event: bool) -> Result<ExtnMessage, RippleError>;
-//         fn get_request(&self, id: u64) -> Result<BrokerRequest, RippleError>;
-//         fn get_transform_data(&self, rule_type: RuleTransformType) -> Option<String>;
-
-//         fn has_internal_launcher(&self) -> bool;
-
-//         fn get_launcher_capability(&self) -> Option<ExtnId>;
-
-//         fn get_distributor_capability(&self) -> Option<ExtnId>;
-
-//         fn get_manifest(&self) -> ExtnManifest;
-
-//         fn get_rpc_aliases(&self) -> HashMap<String, Vec<String>>;
-
-//         fn get_device_manifest(&self) -> DeviceManifest;
-
-//         fn get_client(&self) -> RippleClient;
-//          //async fn respond(&self, msg: ExtnMessage) -> Result<(), RippleError>;
-
-//         fn supports_cloud_sync(&self) -> bool;
-
-//         fn supports_encoding(&self) -> bool;
-
-//         fn supports_distributor_session(&self) -> bool;
-
-//         fn supports_session(&self) -> bool;
-
-//         fn supports_device_tokens(&self) -> bool;
-
-//         fn supports_app_catalog(&self) -> bool;
-
-//         fn supports_rfc(&self) -> bool;
-
-//     }
-//     #[async_trait]
-//     impl MetricsProvider for ingRipplePlatform{
-//         fn remove_api_stats(&mut self, request_id: &str);
-//         fn get_api_stats(&self, request_id: &str) -> Option<ApiStats>;
-//         fn update_api_stats_ref(&mut self, request_id: &str, stats_ref: Option<String>);
-//         fn update_api_stage(&mut self, request_id: &str, stage: &str) -> i64;
-//         fn add_api_stats(&mut self, request_id: &str, api: &str) -> ();
-//     }
-//     #[async_trait]
-//     impl PlatformRpcProvider for ingRipplePlatform{
-//         async fn internal_rpc_request(
-//             &self,
-//             rpc_request: &RpcRequest,
-//         ) -> Result<ExtnMessage, RippleError>;
-//         async fn make_extn_request(
-//             &self,
-//             rpc_request: ContractualRpcRequest,
-//         ) -> Result<ExtnMessage, RippleError>;
-//     }
-//     impl RipplePlatform for ingRipplePlatform{}
-// }

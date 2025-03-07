@@ -45,7 +45,7 @@ use crate::{
     broker::broker_utils::BrokerUtils, processor::storage::storage_manager::StorageManager,
 };
 
-use super::platform_state::PlatformState;
+use super::{platform_state::PlatformState, types::MetricsProvider};
 
 include!(concat!(env!("OUT_DIR"), "/version.rs"));
 
@@ -548,5 +548,26 @@ impl MetricsState {
     pub fn get_api_stats(&self, request_id: &str) -> Option<ApiStats> {
         let api_stats_map = self.api_stats_map.read();
         api_stats_map.get(request_id).cloned()
+    }
+}
+impl MetricsProvider for MetricsState {
+    fn remove_api_stats(&self, request_id: &str) {
+        todo!()
+    }
+
+    fn get_api_stats(&self, request_id: &str) -> Option<ApiStats> {
+        todo!()
+    }
+
+    fn update_api_stats_ref(&self, request_id: &str, stats_ref: Option<String>) {
+        todo!()
+    }
+
+    fn update_api_stage(&self, request_id: &str, stage: &str) -> i64 {
+        todo!()
+    }
+
+    fn add_api_stats(&self, request_id: &str, api: &str) -> () {
+        todo!()
     }
 }
