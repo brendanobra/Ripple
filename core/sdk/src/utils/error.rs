@@ -41,6 +41,7 @@ pub enum RippleError {
     ServiceNotReady,
     BrokerError(String),
     TimeoutError,
+    NoSession,
 }
 
 impl std::fmt::Display for RippleError {
@@ -69,6 +70,7 @@ impl std::fmt::Display for RippleError {
                 write!(f, "{}", msg)
             }
             RippleError::TimeoutError => write!(f, "Timeout"),
+            RippleError::NoSession => write!(f, "NoSession"),
         }
     }
 }

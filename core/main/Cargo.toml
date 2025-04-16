@@ -70,6 +70,8 @@ jaq-std = { version = "1.5.1", default-features = false }
 
 openrpc_validator = { path = "../../openrpc_validator" }
 proc-macro2.workspace = true
+parking_lot = "0.12.3"
+mockall = "0.13.1"
 
 [build-dependencies]
 vergen = "1"

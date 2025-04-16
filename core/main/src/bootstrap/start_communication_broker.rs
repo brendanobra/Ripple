@@ -15,13 +15,17 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+use parking_lot::RwLock;
 use ripple_sdk::{
     async_trait::async_trait, framework::bootstrap::Bootstep, utils::error::RippleError,
 };
+use std::sync::Arc;
 
 use crate::broker::endpoint_broker::BrokerOutputForwarder;
 use crate::processor::rpc_gateway_processor::RpcGatewayProcessor;
 use crate::state::bootstrap_state::BootstrapState;
+use crate::state::platform_state::PlatformStateSingleton;
+use crate::state::types::PlatformStateProvider;
 
 pub struct StartCommunicationBroker;
 
@@ -33,6 +37,15 @@ impl Bootstep<BootstrapState> for StartCommunicationBroker {
 
     async fn setup(&self, state: BootstrapState) -> Result<(), RippleError> {
         let ps = state.platform_state.clone();
+
+        let arc: Arc<RwLock<dyn PlatformStateProvider>> =
+            Arc::new(RwLock::new(PlatformStateSingleton::new(
+                ps.get_manifest(),
+                ps.get_device_manifest(),
+                ps.get_client(),
+                vec![],
+                None,
+            )));
         // When endpoint broker starts up enable RPC processor there might be internal services which might need
         // brokering data
         state
@@ -42,7 +55,7 @@ impl Bootstep<BootstrapState> for StartCommunicationBroker {
 
         // Start the Broker Reciever
         if let Ok(rx) = state.channels_state.get_broker_receiver() {
-            BrokerOutputForwarder::start_forwarder(ps.clone(), rx)
+            BrokerOutputForwarder::start_forwarder(ps.clone(), arc.clone(), rx)
         }
         // Setup the endpoints from the manifests
         let mut endpoint_state = ps.clone().endpoint_state;
@@ -61,9 +74,17 @@ impl Bootstep<BootstrapState> for StartOtherBrokers {
 
     async fn setup(&self, state: BootstrapState) -> Result<(), RippleError> {
         let ps = state.platform_state.clone();
+        let arc: Arc<RwLock<dyn PlatformStateProvider>> =
+            Arc::new(RwLock::new(PlatformStateSingleton::new(
+                ps.get_manifest(),
+                ps.get_device_manifest(),
+                ps.get_client(),
+                vec![],
+                None,
+            )));
         // Start the Broker Reciever
         if let Ok(rx) = state.channels_state.get_broker_receiver() {
-            BrokerOutputForwarder::start_forwarder(ps.clone(), rx)
+            BrokerOutputForwarder::start_forwarder(ps.clone(), arc.clone(), rx)
         }
         // Setup the endpoints from the manifests
         let mut endpoint_state = ps.clone().endpoint_state;

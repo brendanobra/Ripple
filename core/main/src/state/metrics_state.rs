@@ -17,7 +17,7 @@
 
 use std::{
     collections::{HashMap, HashSet},
-    sync::{Arc, RwLock},
+    sync::Arc,
 };
 
 use jsonrpsee::tracing::debug;
@@ -45,7 +45,7 @@ use crate::{
     broker::broker_utils::BrokerUtils, processor::storage::storage_manager::StorageManager,
 };
 
-use super::platform_state::PlatformState;
+use super::{platform_state::PlatformState, types::MetricsProvider};
 
 include!(concat!(env!("OUT_DIR"), "/version.rs"));
 
@@ -62,6 +62,8 @@ const PERSISTENT_STORAGE_ACCOUNT_DEVICE_MANUFACTURER: &str = "deviceManufacturer
 
 const API_STATS_MAP_SIZE_WARNING: usize = 10;
 
+use parking_lot::RwLock;
+
 #[derive(Debug, Clone, Default)]
 pub struct MetricsState {
     pub start_time: DateTime<Utc>,
@@ -73,7 +75,7 @@ pub struct MetricsState {
 impl MetricsState {
     fn send_context_update_request(platform_state: &PlatformState) {
         let extn_client = platform_state.get_client().get_extn_client();
-        let metrics_context = platform_state.metrics.context.read().unwrap().clone();
+        let metrics_context = platform_state.metrics.context.read().clone();
 
         if let Err(e) = extn_client
             .request_transient(RippleContextUpdateRequest::MetricsContext(metrics_context))
@@ -86,7 +88,7 @@ impl MetricsState {
     }
 
     pub fn get_context(&self) -> MetricsContext {
-        self.context.read().unwrap().clone()
+        self.context.read().clone()
     }
 
     fn get_option_string(s: String) -> Option<String> {
@@ -161,7 +163,7 @@ impl MetricsState {
             StorageProperty::AllowProductAnalytics,
         );
 
-        self.context.write().unwrap().data_governance_tags = if !governance_tags.is_empty() {
+        self.context.write().data_governance_tags = if !governance_tags.is_empty() {
             Some(governance_tags)
         } else {
             None
@@ -387,7 +389,7 @@ impl MetricsState {
 
         {
             // Time to set them
-            let mut context = state.metrics.context.write().unwrap();
+            let mut context = state.metrics.context.write();
 
             context.enabled = metrics_enabled;
 
@@ -462,7 +464,7 @@ impl MetricsState {
 
     pub async fn update_account_session(state: &PlatformState) {
         {
-            let mut context = state.metrics.context.write().unwrap();
+            let mut context = state.metrics.context.write();
             let account_session = state.session_state.get_account_session();
             if let Some(session) = account_session {
                 context.account_id = Some(session.account_id);
@@ -478,7 +480,7 @@ impl MetricsState {
     }
 
     pub fn operational_telemetry_listener(&self, target: &str, listen: bool) {
-        let mut listeners = self.operational_telemetry_listeners.write().unwrap();
+        let mut listeners = self.operational_telemetry_listeners.write();
         if listen {
             listeners.insert(target.to_string());
         } else {
@@ -489,7 +491,6 @@ impl MetricsState {
     pub fn get_listeners(&self) -> Vec<String> {
         self.operational_telemetry_listeners
             .read()
-            .unwrap()
             .iter()
             .map(|x| x.to_owned())
             .collect()
@@ -498,14 +499,14 @@ impl MetricsState {
     pub fn update_session_id(&self, platform_state: PlatformState, value: Option<String>) {
         let value = value.unwrap_or_default();
         {
-            let mut context = self.context.write().unwrap();
+            let mut context = self.context.write();
             context.device_session_id = value;
         }
         Self::send_context_update_request(&platform_state);
     }
 
     pub fn add_api_stats(&mut self, request_id: &str, api: &str) {
-        let mut api_stats_map = self.api_stats_map.write().unwrap();
+        let mut api_stats_map = self.api_stats_map.write();
         api_stats_map.insert(request_id.to_string(), ApiStats::new(api.into()));
 
         let size = api_stats_map.len();
@@ -515,12 +516,12 @@ impl MetricsState {
     }
 
     pub fn remove_api_stats(&mut self, request_id: &str) {
-        let mut api_stats_map = self.api_stats_map.write().unwrap();
+        let mut api_stats_map = self.api_stats_map.write();
         api_stats_map.remove(request_id);
     }
 
     pub fn update_api_stats_ref(&mut self, request_id: &str, stats_ref: Option<String>) {
-        let mut api_stats_map = self.api_stats_map.write().unwrap();
+        let mut api_stats_map = self.api_stats_map.write();
         if let Some(stats) = api_stats_map.get_mut(request_id) {
             stats.stats_ref = stats_ref;
         } else {
@@ -532,7 +533,7 @@ impl MetricsState {
     }
 
     pub fn update_api_stage(&mut self, request_id: &str, stage: &str) -> i64 {
-        let mut api_stats_map = self.api_stats_map.write().unwrap();
+        let mut api_stats_map = self.api_stats_map.write();
         if let Some(stats) = api_stats_map.get_mut(request_id) {
             stats.stats.update_stage(stage)
         } else {
@@ -545,7 +546,28 @@ impl MetricsState {
     }
 
     pub fn get_api_stats(&self, request_id: &str) -> Option<ApiStats> {
-        let api_stats_map = self.api_stats_map.read().unwrap();
+        let api_stats_map = self.api_stats_map.read();
         api_stats_map.get(request_id).cloned()
+    }
+}
+impl MetricsProvider for MetricsState {
+    fn remove_api_stats(&self, request_id: &str) {
+        todo!()
+    }
+
+    fn get_api_stats(&self, request_id: &str) -> Option<ApiStats> {
+        todo!()
+    }
+
+    fn update_api_stats_ref(&self, request_id: &str, stats_ref: Option<String>) {
+        todo!()
+    }
+
+    fn update_api_stage(&self, request_id: &str, stage: &str) -> i64 {
+        todo!()
+    }
+
+    fn add_api_stats(&self, request_id: &str, api: &str) -> () {
+        todo!()
     }
 }

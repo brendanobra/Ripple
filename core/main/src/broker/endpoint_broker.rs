@@ -15,6 +15,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+use parking_lot::RwLock;
 use ripple_sdk::{
     api::{
         firebolt::fb_capabilities::{
@@ -41,7 +42,7 @@ use std::{
     collections::HashMap,
     sync::{
         atomic::{AtomicU64, Ordering},
-        Arc, RwLock,
+        Arc,
     },
 };
 
@@ -49,7 +50,12 @@ use crate::{
     broker::broker_utils::BrokerUtils,
     firebolt::firebolt_gateway::{FireboltGatewayCommand, JsonRpcError},
     service::extn::ripple_client::RippleClient,
-    state::{metrics_state::MetricsState, platform_state::PlatformState, session_state::Session},
+    state::{
+        metrics_state::MetricsState,
+        platform_state::PlatformState,
+        session_state::Session,
+        types::{PlatformRpcProvider, PlatformStateProvider},
+    },
     utils::router_utils::{
         add_telemetry_status_code, capture_stage, get_rpc_header, return_extn_response,
     },
@@ -436,21 +442,21 @@ impl EndpointBrokerState {
         });
     }
 
-    fn get_request(&self, id: u64) -> Result<BrokerRequest, RippleError> {
-        let result = { self.request_map.read().unwrap().get(&id).cloned() };
+    pub fn get_request(&self, id: u64) -> Result<BrokerRequest, RippleError> {
+        let result = { self.request_map.read().get(&id).cloned() };
         if result.is_none() {
             return Err(RippleError::InvalidInput);
         }
 
         let result = result.unwrap();
         if !result.rpc.is_subscription() {
-            let _ = self.request_map.write().unwrap().remove(&id);
+            let _ = self.request_map.write().remove(&id);
         }
         Ok(result)
     }
 
-    fn update_unsubscribe_request(&self, id: u64) {
-        let mut result = self.request_map.write().unwrap();
+    pub fn update_unsubscribe_request(&self, id: u64) {
+        let mut result = self.request_map.write();
         if let Some(mut value) = result.remove(&id) {
             value.subscription_processed = Some(true);
             let _ = result.insert(id, value);
@@ -459,14 +465,14 @@ impl EndpointBrokerState {
 
     fn get_extn_message(&self, id: u64, is_event: bool) -> Result<ExtnMessage, RippleError> {
         if is_event {
-            let v = { self.extension_request_map.read().unwrap().get(&id).cloned() };
+            let v = { self.extension_request_map.read().get(&id).cloned() };
             if let Some(v1) = v {
                 Ok(v1)
             } else {
                 Err(RippleError::NotAvailable)
             }
         } else {
-            let result = { self.extension_request_map.write().unwrap().remove(&id) };
+            let result = { self.extension_request_map.write().remove(&id) };
             match result {
                 Some(v) => Ok(v),
                 None => Err(RippleError::NotAvailable),
@@ -490,7 +496,7 @@ impl EndpointBrokerState {
         let id = Self::get_next_id();
         let mut rpc_request_c = rpc_request.clone();
         {
-            let mut request_map = self.request_map.write().unwrap();
+            let mut request_map = self.request_map.write();
             let _ = request_map.insert(
                 id,
                 BrokerRequest {
@@ -504,7 +510,7 @@ impl EndpointBrokerState {
         }
 
         if extn_message.is_some() {
-            let mut extn_map = self.extension_request_map.write().unwrap();
+            let mut extn_map = self.extension_request_map.write();
             let _ = extn_map.insert(id, extn_message.unwrap());
         }
 
@@ -547,14 +553,14 @@ impl EndpointBrokerState {
     }
 
     fn add_endpoint(&mut self, key: String, endpoint: BrokerSender) {
-        let mut endpoint_map = self.endpoint_map.write().unwrap();
+        let mut endpoint_map = self.endpoint_map.write();
         endpoint_map.insert(key, endpoint);
     }
     pub fn get_endpoints(&self) -> HashMap<String, BrokerSender> {
-        self.endpoint_map.read().unwrap().clone()
+        self.endpoint_map.read().clone()
     }
     pub fn get_other_endpoints(&self, me: &str) -> HashMap<String, BrokerSender> {
-        let f = self.endpoint_map.read().unwrap().clone();
+        let f = self.endpoint_map.read().clone();
         let mut result = HashMap::new();
         for (k, v) in f.iter() {
             if k.as_str() != me {
@@ -597,7 +603,7 @@ impl EndpointBrokerState {
         self.add_endpoint(key, broker);
 
         if let Some(cleaner) = cleaner {
-            let mut cleaner_list = self.cleaner_list.write().unwrap();
+            let mut cleaner_list = self.cleaner_list.write();
             cleaner_list.push(cleaner);
         }
     }
@@ -692,7 +698,7 @@ impl EndpointBrokerState {
     }
 
     fn get_sender(&self, hash: &str) -> Option<BrokerSender> {
-        self.endpoint_map.read().unwrap().get(hash).cloned()
+        self.endpoint_map.read().get(hash).cloned()
     }
 
     /// Main handler method whcih checks for brokerage and then sends the request for
@@ -849,7 +855,7 @@ impl EndpointBrokerState {
 
     // Method to cleanup all subscription on App termination
     pub async fn cleanup_for_app(&self, app_id: &str) {
-        let cleaners = { self.cleaner_list.read().unwrap().clone() };
+        let cleaners = { self.cleaner_list.read().clone() };
         for cleaner in cleaners {
             cleaner.cleanup_session(app_id).await
         }
@@ -984,7 +990,11 @@ pub trait EndpointBroker {
 pub struct BrokerOutputForwarder;
 
 impl BrokerOutputForwarder {
-    pub fn start_forwarder(mut platform_state: PlatformState, mut rx: Receiver<BrokerOutput>) {
+    pub fn start_forwarder(
+        mut platform_state: PlatformState,
+        singleton_platform_state: Arc<RwLock<dyn PlatformStateProvider>>,
+        mut rx: Receiver<BrokerOutput>,
+    ) {
         // set up the event utility
         let event_utility = Arc::new(EventManagementUtility::new());
         event_utility.register_custom_functions();
@@ -993,6 +1003,9 @@ impl BrokerOutputForwarder {
         tokio::spawn(async move {
             while let Some(output) = rx.recv().await {
                 let output_c = output.clone();
+                let p = singleton_platform_state.read();
+                drop(p);
+
                 let mut response = output.data.clone();
                 let mut is_event = false;
                 // First validate the id check if it could be an event
@@ -1004,7 +1017,8 @@ impl BrokerOutputForwarder {
                 };
 
                 if let Some(id) = id {
-                    if let Ok(broker_request) = platform_state.endpoint_state.get_request(id) {
+                    let broker_request = { singleton_platform_state.read().get_request(id) };
+                    if let Ok(broker_request) = broker_request {
                         LogSignal::new(
                             "start_forwarder".to_string(),
                             "broker request found".to_string(),
@@ -1037,12 +1051,15 @@ impl BrokerOutputForwarder {
                             if is_event {
                                 if let Some(method) = broker_request.rule.event_handler.clone() {
                                     let platform_state_c = platform_state.clone();
+                                    let arc = singleton_platform_state.clone();
+                                    assert!(arc.read().has_internal_launcher());
                                     let rpc_request_c = rpc_request.clone();
                                     let response_c = response.clone();
                                     let broker_request_c = broker_request.clone();
 
                                     tokio::spawn(Self::handle_event(
                                         platform_state_c,
+                                        arc,
                                         method,
                                         broker_request_c,
                                         rpc_request_c,
@@ -1290,6 +1307,7 @@ impl BrokerOutputForwarder {
 
     async fn handle_event(
         platform_state: PlatformState,
+        singleton_platform_state: Arc<RwLock<dyn PlatformStateProvider>>,
         method: String,
         _broker_request: BrokerRequest,
         rpc_request: RpcRequest,
@@ -1299,7 +1317,7 @@ impl BrokerOutputForwarder {
         let request_id = rpc_request.ctx.call_id;
         let protocol = rpc_request.ctx.protocol.clone();
         let mut platform_state_c = platform_state.clone();
-
+        let mine = singleton_platform_state.clone();
         // FIXME: As we transition to full RPCv2 support we need to be able to post-process the results from an event
         // handler as defined by Rule::event_handler, however as currently implemented event_handler logic short-circuits
         // rule transform logic. Need to refactor to support this, disabing below for now.
@@ -1330,9 +1348,13 @@ impl BrokerOutputForwarder {
         // } else {
         //     error!("handle_event: error processing internal main request");
         // }
-        if let Ok(res) =
-            BrokerUtils::process_internal_main_request(&mut platform_state_c, method.as_str(), None)
-                .await
+        if let Ok(res) = BrokerUtils::new_process_internal_main_request(
+            &mut platform_state_c,
+            singleton_platform_state.clone(),
+            method.as_str(),
+            None,
+        )
+        .await
         {
             response.result = Some(res.clone());
         }
